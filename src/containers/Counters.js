@@ -1,23 +1,30 @@
+import React from 'react'
+import { PropTypes } from 'prop-types'
 import { connect } from 'react-redux'
+import { StyleSheet, View, Text } from 'react-native'
 
 import Counters from '../components/Counters'
 import * as actionCreators from '../redux/modules/counters'
 
-const createActionDispatchers = actionCreators => dispatch =>
-  Object.keys(actionCreators).reduce((actionDispatchers, name) => {
-    var actionCreator = actionCreators[name]
-    if (typeof actionCreator == 'function') {
-      actionDispatchers[name] = (...args) => dispatch(actionCreator(...args))
-    }
-    return actionDispatchers
-  }, {})
+@connect(state => ({
+  counters: state.counters,
+}))
 
-const mapStateToProps = state => ({
-  countersState: state.counters, // gives our component access to state through props.countersState
-})
-const mapDispatchToProps = createActionDispatchers(actionCreators)
+export default class Counterz extends React.Component {
+  render() {
+    const { counters, dispatch } = this.props
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Counters)
+    return (
+      <View>
+        <Text>Counterz</Text>
+        <Counters
+          countersState={ counters }
+          newCounter={(...args) => dispatch(actionCreators.newCounter(...args))}
+          decrement={(...args) => dispatch(actionCreators.decrement(...args))}
+          increment={(...args) => dispatch(actionCreators.increment(...args))}
+          incrementWithDelay={(...args) => dispatch(actionCreators.incrementWithDelay(...args))}
+        />
+      </View>
+    )
+  }
+}
