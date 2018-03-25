@@ -6,7 +6,7 @@ import {
   View,
   Text,
   ImageBackground,
-  TouchableOpacity,
+  Slider,
 } from 'react-native'
 
 import { fetchDay } from '../redux/modules/radarImages'
@@ -73,22 +73,14 @@ export default class Radar extends React.Component {
               alignItems: 'flex-end'
             }}
           >
-            {currentImage > 0 &&
-              <TouchableOpacity
-                style={this.style.button}
-                onPress={() => this.setState({currentImage: currentImage - 1})}
-              >
-                <Text style={{color: '#ffffff', fontSize: 20}}> - </Text>
-              </TouchableOpacity>
-            }
-
-            {currentImage < radar.files.length - 1 &&
-              <TouchableOpacity
-                style={this.style.button}
-                onPress={() => this.setState({currentImage: currentImage + 1})}
-              >
-                <Text style={{color: '#ffffff', fontSize: 20}}> + </Text>
-              </TouchableOpacity>
+            {currentImage >= 0 && currentImage < radar.files.length &&
+              <Slider
+                style={{flex: 1, margin: 30, height: 30}}
+                step={1}
+                maximumValue={radar.files.length - 1}
+                onValueChange={(v) => this.setState({currentImage: v})}
+                value={this.state.currentImage}
+              />
             }
           </ImageBackground>
         }
