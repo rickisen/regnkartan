@@ -1,10 +1,8 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux'
 import thunk from 'redux-thunk'
-import counters from './modules/counters'
 import radar from './modules/radarImages'
 
 const reducer = combineReducers({
-  counters,
   radar,
 })
 
