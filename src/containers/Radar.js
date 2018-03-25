@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
   ImageBackground,
   Slider,
 } from 'react-native'
@@ -16,21 +17,15 @@ import { fetchDay } from '../redux/modules/radarImages'
 }))
 
 export default class Radar extends React.Component {
-  style = StyleSheet.create({
+  styles = StyleSheet.create({
     container: {
       flex: 1,
     },
-    imageHolder: {
+    uiContainer: {
       flex: 1,
+      justifyContent: 'flex-end',
+      alignItems: 'center'
     },
-    button: {
-      backgroundColor: '#10aadd',
-      height: 40,
-      width: 40,
-      margin: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }
   })
 
   constructor(props) {
@@ -38,6 +33,8 @@ export default class Radar extends React.Component {
 
     this.state = {
       currentImage: 0,
+      preFetchLock: false,
+      timeout: null,
     }
   }
 
@@ -48,6 +45,18 @@ export default class Radar extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.radar.loadingDay && !nextProps.radar.loadingDay && nextProps.radar.files.length > 0 ) {
       this.setState({currentImage: nextProps.radar.files.length - 1})
+
+      // prefetch one image for every hour
+      for (var i = 0, len = nextProps.radar.files.length; i < len; i += 5) {
+        Image.prefetch(nextProps.radar.files[i].formats[0].link)
+      }
+
+      // and prefetch the closest ones
+      for (var j = nextProps.radar.files.length - 1; j >= 0; j--) {
+        if ( nextProps.radar.files.length - j < 40 ) {
+          Image.prefetch(nextProps.radar.files[j].formats[0].link)
+        }
+      }
     }
   }
 
@@ -58,24 +67,21 @@ export default class Radar extends React.Component {
     return (
       <ImageBackground
         source={{ uri: 'https://opendata-download-radar.smhi.se/explore/img/basemap.png' }}
-        style={this.style.container}
+        style={this.styles.container}
       >
-        {radar.loadingDay &&
-          <Text>Loading...</Text>
-        }
         {radar.files.length > 0 && !radar.loadingDay && currentImage <= radar.files.length &&
           <ImageBackground
             source={{ uri: radar.files[currentImage].formats[0].link }}
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-              alignItems: 'flex-end'
-            }}
+            style={this.styles.uiContainer}
           >
+            {radar.files.length > 0 &&
+              <View style={{flex: 10, justifyContent: 'flex-end'}}>
+                <Text>{radar.files[currentImage].formats[0].updated}</Text>
+              </View>
+            }
             {currentImage >= 0 && currentImage < radar.files.length &&
               <Slider
-                style={{flex: 1, margin: 30, height: 30}}
+                style={{flex: 1, width: '90%', margin: 30, height: 30}}
                 step={1}
                 maximumValue={radar.files.length - 1}
                 onValueChange={(v) => this.setState({currentImage: v})}
