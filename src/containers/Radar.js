@@ -39,7 +39,11 @@ export default class Radar extends React.Component {
   }
 
   componentDidMount() {
-    this.props.dispatch(fetchDay('2018/03/25'))
+    let now = new Date()
+    let dd = now.getDate();
+    let mm = now.getMonth() + 1; //January is 0!
+    let yyyy = now.getFullYear()
+    this.props.dispatch(fetchDay(`${yyyy}/${mm}/${dd}`))
   }
 
   componentWillReceiveProps(nextProps) {
@@ -72,6 +76,7 @@ export default class Radar extends React.Component {
         {radar.files.length > 0 && !radar.loadingDay && currentImage <= radar.files.length &&
           <ImageBackground
             source={{ uri: radar.files[currentImage].formats[0].link }}
+            defaultSource={require('../components/radar_clean.png')}
             style={this.styles.uiContainer}
           >
             {radar.files.length > 0 &&
