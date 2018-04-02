@@ -1,12 +1,15 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux'
-import thunk from 'redux-thunk'
+import createSagaMiddleware from 'redux-saga'
+
+import rootSaga from './sagas/rootSaga'
 import radar from './modules/radarImages'
 
 const reducer = combineReducers({
   radar,
 })
 
-const middleware = applyMiddleware(thunk)
+const sagaMiddleware = createSagaMiddleware()
+const middleware = applyMiddleware(sagaMiddleware)
 
 export default function createAppStore(initialValue = {}) {
   let store
@@ -23,6 +26,8 @@ export default function createAppStore(initialValue = {}) {
     // Production mode.
     store = createStore(reducer, initialValue, middleware)
   }
+
+  sagaMiddleware.run(rootSaga)
 
   return store
 }

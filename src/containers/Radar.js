@@ -10,7 +10,7 @@ import {
   Slider,
 } from 'react-native'
 
-import { fetchDay } from '../redux/modules/radarImages'
+import { FETCH_DAY } from '../redux/modules/radarImages'
 
 @connect(state => ({
   radar: state.radar,
@@ -39,11 +39,8 @@ export default class Radar extends React.Component {
   }
 
   componentDidMount() {
-    let now = new Date()
-    let dd = now.getDate();
-    let mm = now.getMonth() + 1; //January is 0!
-    let yyyy = now.getFullYear()
-    this.props.dispatch(fetchDay(`${yyyy}/${mm}/${dd}`))
+    let day = new Date()
+    this.props.dispatch({type: FETCH_DAY, day})
   }
 
   componentWillReceiveProps(nextProps) {
