@@ -10,12 +10,17 @@ import {
   Slider,
 } from "react-native";
 
+import StatusBarBg from "../components/StatusBarBg";
 import { FETCH_DAY } from "../redux/modules/radarImages";
 
 @connect(state => ({
   radar: state.radar,
 }))
 export default class Radar extends React.Component {
+  static navigationOptions = {
+    header: null,
+  };
+
   styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -101,6 +106,7 @@ export default class Radar extends React.Component {
                 )}
             </ImageBackground>
           )}
+        <StatusBarBg />
       </ImageBackground>
     );
   }
