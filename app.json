@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "regnkartan",
-    "description": "This project is really great.",
+    "description": "Shows you where the rain clouds are currently at",
     "slug": "regnkartan",
     "privacy": "public",
     "sdkVersion": "31.0.0",
@@ -17,9 +17,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     }
