@@ -9,9 +9,11 @@ import {
   ImageBackground,
   Slider,
 } from "react-native";
+import { BlurView, MapView, Overlay } from "expo";
 
-import StatusBarBg from "../components/StatusBarBg";
-import { FETCH_DAY } from "../redux/modules/radarImages";
+import RadarUi from "./RadarUi";
+import StatusBarBg from "../../components/StatusBarBg";
+import { FETCH_DAY } from "../../redux/modules/radarImages";
 
 @connect(state => ({
   radar: state.radar,
@@ -25,10 +27,8 @@ export default class Radar extends React.Component {
     container: {
       flex: 1,
     },
-    uiContainer: {
+    map: {
       flex: 1,
-      justifyContent: "flex-end",
-      alignItems: "center",
     },
   });
 
@@ -70,44 +70,40 @@ export default class Radar extends React.Component {
   }
 
   render() {
+    const { styles } = this;
     const { radar, dispatch } = this.props;
     const { currentImage } = this.state;
 
     return (
-      <ImageBackground
-        source={{
-          uri:
-            "https://opendata-download-radar.smhi.se/explore/img/basemap.png",
-        }}
-        style={this.styles.container}
-      >
-        {radar.files.length > 0 &&
-          !radar.loadingDay &&
-          currentImage <= radar.files.length && (
-            <ImageBackground
-              source={{ uri: radar.files[currentImage].formats[0].link }}
-              defaultSource={require("../components/radar_clean.png")}
-              style={this.styles.uiContainer}
-            >
-              {radar.files.length > 0 && (
-                <View style={{ flex: 10, justifyContent: "flex-end" }}>
-                  <Text>{radar.files[currentImage].formats[0].updated}</Text>
-                </View>
-              )}
-              {currentImage >= 0 &&
-                currentImage < radar.files.length && (
-                  <Slider
-                    style={{ flex: 1, width: "90%", margin: 30, height: 30 }}
-                    step={1}
-                    maximumValue={radar.files.length - 1}
-                    onValueChange={v => this.setState({ currentImage: v })}
-                    value={this.state.currentImage}
-                  />
-                )}
-            </ImageBackground>
-          )}
-        <StatusBarBg />
-      </ImageBackground>
+      <View style={styles.container}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            longitudeDelta: 25.028292923748296,
+            latitudeDelta: 21.65852361684243,
+            longitude: 12.726598744228632,
+            latitude: 60.277280957502605,
+          }}
+        >
+          {radar.files.length > 0 &&
+            !radar.loadingDay &&
+            currentImage <= radar.files.length && (
+              <MapView.Overlay
+                image={{ uri: radar.files[currentImage].formats[0].link }}
+                bounds={[
+                  [70.0481802310529, 5.284852981567384], // find the right coordinates
+                  [53.681407816665974, 29.781146049499515], // find the right coordinates
+                ]}
+              />
+            )}
+          <StatusBarBg />
+        </MapView>
+        <RadarUi
+          currentImage={currentImage}
+          radarFiles={radar.files}
+          setCurrentFile={i => this.setState({ currentImage: i })}
+        />
+      </View>
     );
   }
 }
