@@ -35,6 +35,13 @@ export default class Radar extends React.Component {
   constructor(props) {
     super(props);
 
+    this.initialRegion = {
+      latitude: 59.364109178579795,
+      latitudeDelta: 26.738496058255087,
+      longitude: 17.24189467728138,
+      longitudeDelta: 25.90066082775593,
+    };
+
     this.state = {
       currentImage: 0,
       preFetchLock: false,
@@ -69,34 +76,21 @@ export default class Radar extends React.Component {
     }
   }
 
-  // bl: 53.869605036, 9.31916477693
-  // tr: 69.4197073261, 29.7990320238
-
-  // tl: 69.781092, 5.284990
-  // br: 53.685564, 23.727174
-
-  // _northEast: L.LatLng {lat: 70.0481652870767, lng: 29.7811924432583}
-  // _southWest: L.LatLng {lat: 53.6813981284917, lng: 5.2849968932444}
+  onRegionChangeComplete(newRegion) {
+    var longDiff = newRegion.longitude - this.initialRegion.longitude;
+    var latDiff = newRegion.latitude - this.initialRegion.latitude;
+    if (
+      this.mapRef &&
+      (longDiff > 15 || longDiff < -15 || latDiff > 15 || latDiff < -10)
+    ) {
+      this.mapRef.animateToRegion(this.initialRegion);
+    }
+  }
 
   render() {
     const { styles } = this;
     const { radar, dispatch } = this.props;
     const { currentImage, showDebug } = this.state;
-
-    const radarCornersFromRR = {
-      top: 70.0481652870767,
-      left: 5.2849968932444,
-      right: 29.7811924432583,
-      bottom: 53.6813981284917,
-    };
-
-    //by conversion
-    const radarCornersByConvertion = {
-      top: 69.419707,
-      left: 9.319165,
-      right: 29.799063,
-      bottom: 53.869605,
-    };
 
     //by conversion
     const radarCorners = {
@@ -109,19 +103,17 @@ export default class Radar extends React.Component {
     return (
       <View style={styles.container}>
         <MapView
+          ref={ref => (this.mapRef = ref)}
+          onRegionChange={region => this.onRegionChangeComplete(region)}
+          onRegionChangeComplete={region => this.onRegionChangeComplete(region)}
           provider="google"
           showUserLocation={true}
           rotateEnabled={false}
           minZoomLevel={4.5}
-          maxZoomLevel={7}
+          maxZoomLevel={8}
           style={styles.map}
           customMapStyle={mapStyle}
-          initialRegion={{
-            latitude: 59.364109178579795,
-            latitudeDelta: 26.738496058255087,
-            longitude: 17.24189467728138,
-            longitudeDelta: 25.90066082775593,
-          }}
+          initialRegion={this.initialRegion}
         >
           {radar.files.length > 0 &&
             !radar.loadingDay &&
@@ -238,6 +230,18 @@ mapStyle = [
     ],
   },
   {
+    featureType: "administrative.country",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        visibility: "on",
+      },
+      {
+        color: "#ffffff",
+      },
+    ],
+  },
+  {
     featureType: "poi.park",
     elementType: "geometry",
     stylers: [
@@ -248,6 +252,7 @@ mapStyle = [
   },
   {
     featureType: "administrative.country",
+    elementType: "labels",
     stylers: [{ visibility: "off" }],
   },
   {
