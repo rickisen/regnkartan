@@ -1,6 +1,6 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import { Text, Slider, StyleSheet, View } from "react-native";
+import { TouchableOpacity, Text, Slider, StyleSheet, View } from "react-native";
 import { BlurView } from "expo";
 
 export default class RadarUi extends React.Component {
@@ -60,6 +60,18 @@ export default class RadarUi extends React.Component {
                 value={currentImage}
               />
             )}
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              backgroundColor: "#aad",
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+            onPress={() => this.props.ToggleDebugg()}
+          >
+            <Text>Toggle Map</Text>
+          </TouchableOpacity>
         </View>
       </BlurView>
     );

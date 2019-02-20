@@ -36,6 +36,7 @@ export default class Radar extends React.Component {
     super(props);
 
     this.state = {
+      showDebug: false,
       currentImage: 0,
       preFetchLock: false,
       timeout: null,
@@ -69,36 +70,83 @@ export default class Radar extends React.Component {
     }
   }
 
+  // bl: 53.869605036, 9.31916477693
+  // tr: 69.4197073261, 29.7990320238
+
+  // tl: 69.781092, 5.284990
+  // br: 53.685564, 23.727174
+
+  // _northEast: L.LatLng {lat: 70.0481652870767, lng: 29.7811924432583}
+  // _southWest: L.LatLng {lat: 53.6813981284917, lng: 5.2849968932444}
+
   render() {
     const { styles } = this;
     const { radar, dispatch } = this.props;
-    const { currentImage } = this.state;
+    const { currentImage, showDebug } = this.state;
+
+    const radarCornersFromRR = {
+      top: 70.0481652870767,
+      left: 5.2849968932444,
+      right: 29.7811924432583,
+      bottom: 53.6813981284917,
+    };
+
+    //by conversion
+    const radarCornersByConvertion = {
+      top: 69.419707,
+      left: 9.319165,
+      right: 29.799063,
+      bottom: 53.869605,
+    };
+
+    //by conversion
+    const radarCorners = {
+      top: 70.3891859,
+      left: 5.090008,
+      right: 30.1889371,
+      bottom: 53.1219345,
+    };
 
     return (
       <View style={styles.container}>
         <MapView
+          provider="google"
+          showUserLocation={true}
+          rotateEnabled={false}
+          minZoomLevel={4.5}
+          maxZoomLevel={7}
           style={styles.map}
+          customMapStyle={mapStyle}
           initialRegion={{
-            longitudeDelta: 25.028292923748296,
-            latitudeDelta: 21.65852361684243,
-            longitude: 12.726598744228632,
-            latitude: 60.277280957502605,
+            latitude: 59.364109178579795,
+            latitudeDelta: 26.738496058255087,
+            longitude: 17.24189467728138,
+            longitudeDelta: 25.90066082775593,
           }}
         >
           {radar.files.length > 0 &&
             !radar.loadingDay &&
             currentImage <= radar.files.length && (
               <MapView.Overlay
-                image={{ uri: radar.files[currentImage].formats[0].link }}
+                image={{
+                  uri: showDebug
+                    ? radar.files[currentImage].formats[0].link
+                    : "http://regn.rickisen.com/v1/" +
+                      radar.files[currentImage].key +
+                      ".png",
+                }}
                 bounds={[
-                  [70.0481802310529, 5.284852981567384], // find the right coordinates
-                  [53.681407816665974, 29.781146049499515], // find the right coordinates
+                  [radarCorners.top, radarCorners.left], // top-left
+                  [radarCorners.bottom, radarCorners.right], // bottom-right
                 ]}
               />
             )}
           <StatusBarBg />
         </MapView>
         <RadarUi
+          ToggleDebugg={() => {
+            this.setState({ showDebug: !showDebug });
+          }}
           currentImage={currentImage}
           radarFiles={radar.files}
           setCurrentFile={i => this.setState({ currentImage: i })}
@@ -107,3 +155,197 @@ export default class Radar extends React.Component {
     );
   }
 }
+
+mapStyle = [
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#193341",
+      },
+    ],
+  },
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#2c5a71",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#29768a",
+      },
+      {
+        lightness: -37,
+      },
+    ],
+  },
+  {
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#406d80",
+      },
+    ],
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#406d80",
+      },
+    ],
+  },
+  {
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        visibility: "on",
+      },
+      {
+        color: "#3e606f",
+      },
+      {
+        weight: 2,
+      },
+      {
+        gamma: 0.84,
+      },
+    ],
+  },
+  {
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#ffffff",
+      },
+    ],
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry",
+    stylers: [
+      {
+        weight: 0.6,
+      },
+      {
+        color: "#1a3541",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#2c5a71",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.country",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "administrative.land_parcel",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.neighborhood",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "poi",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.icon",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road.arterial",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "labels",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "road.local",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "transit",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text",
+    stylers: [
+      {
+        visibility: "off",
+      },
+    ],
+  },
+];

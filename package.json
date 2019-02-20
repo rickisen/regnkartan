@@ -10,17 +10,17 @@
     "test": "jest"
   },
   "dependencies": {
-    "expo": "^31.0.2",
+    "expo": "^32.0.0",
     "react": "16.5.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
-    "react-navigation": "^3.0.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
+    "react-navigation": "^3.0.9",
     "react-redux": "^5.0.7",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.0"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0",
-    "jest-expo": "31.0.0",
+    "jest-expo": "32.0.0",
     "react-test-renderer": "16.2.0"
   },
   "jest": {
