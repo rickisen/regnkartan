@@ -36,7 +36,6 @@ export default class Radar extends React.Component {
     super(props);
 
     this.state = {
-      showDebug: false,
       currentImage: 0,
       preFetchLock: false,
       timeout: null,
@@ -129,11 +128,10 @@ export default class Radar extends React.Component {
             currentImage <= radar.files.length && (
               <MapView.Overlay
                 image={{
-                  uri: showDebug
-                    ? radar.files[currentImage].formats[0].link
-                    : "http://regn.rickisen.com/v1/" +
-                      radar.files[currentImage].key +
-                      ".png",
+                  uri:
+                    "http://regn.rickisen.com/v1/" +
+                    radar.files[currentImage].key +
+                    ".png",
                 }}
                 bounds={[
                   [radarCorners.top, radarCorners.left], // top-left
@@ -144,9 +142,6 @@ export default class Radar extends React.Component {
           <StatusBarBg />
         </MapView>
         <RadarUi
-          ToggleDebugg={() => {
-            this.setState({ showDebug: !showDebug });
-          }}
           currentImage={currentImage}
           radarFiles={radar.files}
           setCurrentFile={i => this.setState({ currentImage: i })}

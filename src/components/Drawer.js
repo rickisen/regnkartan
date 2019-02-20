@@ -18,10 +18,10 @@ export default class Drawer extends React.Component {
     container: {
       paddingTop: Constants.statusBarHeight,
       flex: 1,
-      backgroundColor: "#2c77b0",
+      backgroundColor: "#2c5a71",
     },
     routes: {
-      backgroundColor: "white",
+      backgroundColor: "#193341",
     },
     header: {
       padding: 20,
@@ -35,6 +35,9 @@ export default class Drawer extends React.Component {
       flexDirection: "row",
       justifyContent: "flex-start",
       alignItems: "center",
+    },
+    menuItemText: {
+      color: "#fff",
     },
   });
 
@@ -54,7 +57,7 @@ export default class Drawer extends React.Component {
               key={routeName}
               onPress={() => navigation.navigate(routeName)}
             >
-              <Text>{routeName}</Text>
+              <Text style={styles.menuItemText}>{routeName}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

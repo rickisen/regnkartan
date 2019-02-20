@@ -29,6 +29,9 @@ export default class RadarUi extends React.Component {
       alignItems: "center",
       margin: 20,
     },
+    date: {
+      color: "#fff",
+    },
     slider: {
       alignSelf: "stretch",
     },
@@ -39,39 +42,29 @@ export default class RadarUi extends React.Component {
     const { radarFiles, currentImage, setCurrentFile } = this.props;
 
     return (
-      <BlurView tint="light" intensity={80} style={styles.uiContainer}>
+      <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
         <View style={styles.ui}>
+          {currentImage >= 0 && currentImage < radarFiles.length && (
+            <Slider
+              minimumTrackTintColor={"#4090aa"}
+              maximumTrackTintColor={"#0a2531"}
+              thumbTintColor={"#fff"}
+              style={styles.slider}
+              step={1}
+              maximumValue={radarFiles.length - 1}
+              onValueChange={i => setCurrentFile(i)}
+              value={currentImage}
+            />
+          )}
           {radarFiles.length > 0 && (
             <View>
-              <Text>
+              <Text style={styles.date}>
                 {new Date(
                   radarFiles[currentImage].formats[0].updated
                 ).toLocaleTimeString()}
               </Text>
             </View>
           )}
-          {currentImage >= 0 &&
-            currentImage < radarFiles.length && (
-              <Slider
-                style={styles.slider}
-                step={1}
-                maximumValue={radarFiles.length - 1}
-                onValueChange={i => setCurrentFile(i)}
-                value={currentImage}
-              />
-            )}
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              backgroundColor: "#aad",
-              bottom: 0,
-              left: 0,
-              right: 0,
-            }}
-            onPress={() => this.props.ToggleDebugg()}
-          >
-            <Text>Toggle Map</Text>
-          </TouchableOpacity>
         </View>
       </BlurView>
     );

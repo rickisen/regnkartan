@@ -1,6 +1,6 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import { StyleSheet, View } from "react-native";
+import { StatusBar, StyleSheet, View } from "react-native";
 import { BlurView, Constants } from "expo";
 
 export default class StatusBarHandler extends React.Component {
@@ -16,7 +16,9 @@ export default class StatusBarHandler extends React.Component {
 
   render() {
     return (
-      <BlurView tint="light" intensity={80} style={this.styles.container} />
+      <BlurView tint="dark" intensity={80} style={this.styles.container}>
+        <StatusBar backgroundColor="blue" barStyle="light-content" />
+      </BlurView>
     );
   }
 }
