@@ -121,7 +121,7 @@ export default class Radar extends React.Component {
               <MapView.Overlay
                 image={{
                   uri:
-                    "http://regn.rickisen.com/v1/" +
+                    "http://regn.rickisen.com/png/v1/" +
                     radar.files[currentImage].key +
                     ".png",
                 }}
