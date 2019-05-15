@@ -41,23 +41,41 @@ export default class Radar extends React.Component {
     longitudeDelta: 25.90066082775593,
   };
 
-  constructor(props) {
-    super(props);
+  timer = null
 
-    this.state = {
-      currentImage: -1,
-    };
-  }
+  state = {
+    currentImage: -1,
+  };
 
   componentDidMount() {
+    this.fetchZip()
+
+    // get a fresh zip for today every 5 minutes
+    this.timer = setInterval( () => {
+        this.fetchZip()
+      }, 60 * 1000 * 5 )
+  }
+
+  componentWillUnmount() {
+    if (this.timer) {
+      clearInterval(this.timer)
+    }
+  }
+
+  fetchZip() {
     let date = new Date();
     this.props.dispatch({ type: FETCH, date });
   }
 
   componentWillReceiveProps(nextProps) {
     const { unzippedFiles } = nextProps.zip
+    const { currentImage } = this.state
+    const oldUnzippedFiles = this.props.zip.unzippedFiles
 
-    if (unzippedFiles.length > 0 && this.props.zip.unzippedFiles.length === 0) {
+    if (
+      unzippedFiles.length > 0 &&
+      (oldUnzippedFiles.length === 0 || currentImage === oldUnzippedFiles.length - 1)
+    ) {
       this.setState({currentImage: unzippedFiles.length - 1})
     }
   }
@@ -77,7 +95,7 @@ export default class Radar extends React.Component {
   render() {
     const { styles, initialRegion } = this;
     const { currentImage } = this.state;
-    const { zip: { unzippedFiles } } = this.props;
+    const { zip: { unzippedFiles, loadingZip, unzipping } } = this.props;
 
     return (
       <View style={styles.container}>

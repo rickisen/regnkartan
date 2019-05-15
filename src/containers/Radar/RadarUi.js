@@ -2,6 +2,7 @@ import React from "react";
 import { PropTypes } from "prop-types";
 import { TouchableOpacity, Text, Slider, StyleSheet, View } from "react-native";
 import { BlurView } from "expo";
+import Loading from "./Loading";
 
 export default class RadarUi extends React.Component {
   static propTypes = {
@@ -39,7 +40,7 @@ export default class RadarUi extends React.Component {
     return (
       <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
         <View style={styles.ui}>
-          {currentImage >= 0 && currentImage < radarFiles.length && (
+          {currentImage >= 0 && currentImage < radarFiles.length ? (
             <Slider
               minimumTrackTintColor={"#4090aa"}
               maximumTrackTintColor={"#0a2531"}
@@ -50,6 +51,8 @@ export default class RadarUi extends React.Component {
               onValueChange={i => setCurrentFile(i)}
               value={currentImage}
             />
+          ) : (
+            <Loading show={true} />
           )}
         </View>
       </BlurView>
