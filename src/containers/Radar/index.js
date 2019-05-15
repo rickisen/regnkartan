@@ -9,15 +9,16 @@ import {
   ImageBackground,
   Slider,
 } from "react-native";
-import { FileSystem, BlurView, MapView, Overlay } from "expo";
+import { BlurView, MapView } from "expo";
 
+import RadarOverlay from "./RadarOverlay";
 import RadarUi from "./RadarUi";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
-import { FETCH_DAY } from "../../redux/modules/radarImages";
+import { FETCH } from "../../redux/modules/zip";
 
 @connect(state => ({
-  radar: state.radar,
+  zip: state.zip,
 }))
 export default class Radar extends React.Component {
   static navigationOptions = {
@@ -33,50 +34,35 @@ export default class Radar extends React.Component {
     },
   });
 
+  initialRegion = {
+    latitude: 59.364109178579795,
+    latitudeDelta: 26.738496058255087,
+    longitude: 17.24189467728138,
+    longitudeDelta: 25.90066082775593,
+  };
+
   constructor(props) {
     super(props);
 
-    this.initialRegion = {
-      latitude: 59.364109178579795,
-      latitudeDelta: 26.738496058255087,
-      longitude: 17.24189467728138,
-      longitudeDelta: 25.90066082775593,
-    };
-
     this.state = {
-      currentImage: 0,
-      preFetchLock: false,
-      timeout: null,
+      currentImage: -1,
     };
   }
 
   componentDidMount() {
-    let day = new Date();
-    this.props.dispatch({ type: FETCH_DAY, day });
+    let date = new Date();
+    this.props.dispatch({ type: FETCH, date });
   }
 
   componentWillReceiveProps(nextProps) {
-    if (
-      this.props.radar.loadingDay &&
-      !nextProps.radar.loadingDay &&
-      nextProps.radar.files.length > 0
-    ) {
-      this.setState({ currentImage: nextProps.radar.files.length - 1 });
+    const { unzippedFiles } = nextProps.zip
 
-      // prefetch one image for every hour
-      for (var i = 0, len = nextProps.radar.files.length; i < len; i += 5) {
-        Image.prefetch(nextProps.radar.files[i].formats[0].link);
-      }
-
-      // and prefetch the closest ones
-      for (var j = nextProps.radar.files.length - 1; j >= 0; j--) {
-        if (nextProps.radar.files.length - j < 40) {
-          Image.prefetch(nextProps.radar.files[j].formats[0].link);
-        }
-      }
+    if (unzippedFiles.length > 0 && this.props.zip.unzippedFiles.length === 0) {
+      this.setState({currentImage: unzippedFiles.length - 1})
     }
   }
 
+  // Bounce map region back if user drags it too far
   onRegionChangeComplete(newRegion) {
     var longDiff = newRegion.longitude - this.initialRegion.longitude;
     var latDiff = newRegion.latitude - this.initialRegion.latitude;
@@ -89,24 +75,9 @@ export default class Radar extends React.Component {
   }
 
   render() {
-    const { styles } = this;
-    const { radar, dispatch } = this.props;
-    const { currentImage, showDebug } = this.state;
-
-    //by conversion
-    const radarCorners = {
-      top: 70.3891859,
-      left: 5.090008,
-      right: 30.1889371,
-      bottom: 53.1219345,
-    };
-
-    // 'data:image/png;base64,'
-    let uri = 'http://regn.rickisen.com/png/v1/latest.png'
-    let files = [...radar.files, "http://regn.rickisen.com/png/v1/latest.png"]
-    if (currentImage <= radar.files.length) {
-      uri = "http://regn.rickisen.com/png/v1/" + files[currentImage].key + ".png"
-    }
+    const { styles, initialRegion } = this;
+    const { currentImage } = this.state;
+    const { zip: { unzippedFiles } } = this.props;
 
     return (
       <View style={styles.container}>
@@ -115,28 +86,23 @@ export default class Radar extends React.Component {
           onRegionChange={region => this.onRegionChangeComplete(region)}
           onRegionChangeComplete={region => this.onRegionChangeComplete(region)}
           provider="google"
-          showUserLocation={true}
+          showUserLocation={true} // Does this work?
           rotateEnabled={false}
           minZoomLevel={4.5}
           maxZoomLevel={8}
           style={styles.map}
           customMapStyle={mapStyle}
-          initialRegion={this.initialRegion}
+          initialRegion={initialRegion}
         >
-          {uri != '' && (
-            <MapView.Overlay
-              image={{ uri }}
-              bounds={[
-                [radarCorners.top, radarCorners.left],
-                [radarCorners.bottom, radarCorners.right],
-              ]}
-            />
-          )}
+          <RadarOverlay
+            files={unzippedFiles}
+            requestedImage={currentImage}
+          />
           <StatusBarBg />
         </MapView>
         <RadarUi
           currentImage={currentImage}
-          radarFiles={radar.files}
+          radarFiles={unzippedFiles}
           setCurrentFile={i => this.setState({ currentImage: i })}
         />
       </View>

@@ -5,13 +5,7 @@ import { BlurView } from "expo";
 
 export default class RadarUi extends React.Component {
   static propTypes = {
-    radarFiles: PropTypes.arrayOf(
-      PropTypes.shape({
-        formats: PropTypes.arrayOf(
-          PropTypes.shape({ updated: PropTypes.string })
-        ),
-      })
-    ).isRequired,
+    radarFiles: PropTypes.arrayOf(PropTypes.string).isRequired,
     currentImage: PropTypes.number.isRequired,
     setCurrentFile: PropTypes.func.isRequired,
   };
@@ -25,9 +19,10 @@ export default class RadarUi extends React.Component {
     },
     ui: {
       flex: 1,
-      justifyContent: "center",
+      justifyContent: "flex-start",
       alignItems: "center",
       margin: 20,
+      minHeight: 75,
     },
     date: {
       color: "#fff",
@@ -55,15 +50,6 @@ export default class RadarUi extends React.Component {
               onValueChange={i => setCurrentFile(i)}
               value={currentImage}
             />
-          )}
-          {radarFiles.length > 0 && (
-            <View>
-              <Text style={styles.date}>
-                {new Date(
-                  radarFiles[currentImage].formats[0].updated
-                ).toLocaleTimeString()}
-              </Text>
-            </View>
           )}
         </View>
       </BlurView>

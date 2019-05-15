@@ -8,7 +8,7 @@ export function generateDateCode(date) {
   let dateCode = ''
 
   if (typeof date !== 'object') {
-    console.log("date not real date", date);
+    console.error("date not real date", date);
     return dateCode
   }
 
@@ -20,7 +20,7 @@ export function generateDateCode(date) {
       }${
         pad(date.getDate())}`
   } catch (e) {
-    console.log("Error occured when trying to generate dateCode", e);
+    console.error("Error occured when trying to generate dateCode", e);
   }
 
   return dateCode

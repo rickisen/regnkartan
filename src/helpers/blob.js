@@ -1,4 +1,3 @@
-// https://github.com/expo/firebase-storage-upload-example/issues/14
 export function urlToBlob(url) {
   return new Promise((resolve, reject) => {
     var xhr = new XMLHttpRequest();
@@ -10,7 +9,8 @@ export function urlToBlob(url) {
       }
     };
     xhr.open('GET', url);
-    xhr.responseType = 'arraybuffer'; // convert type
+    // Would love to use blob here, but it seams like jszip doen't like rn's blobs
+    xhr.responseType = 'arraybuffer';
     xhr.send();
   })
 }

@@ -18,6 +18,10 @@ const API_URL =
 
 /** SAGAS **/
 export function* fetchZip({ date }) {
+  if (!date) {
+    console.error("fetch zip needs a valid date got: ", date);
+    return
+  }
   const dateCode = generateDateCode(date)
 
   let res = null
@@ -29,9 +33,14 @@ export function* fetchZip({ date }) {
     return
   }
 
-  yield put({ type: FETCH_SUCCESS });
-  yield put({ type: UNZIPPING });
+  if (!res) {
+    console.error("Failed to get zip from api, res: ", res);
+    return
+  }
 
+  yield put({ type: FETCH_SUCCESS });
+
+  yield put({ type: UNZIPPING });
   let unzippedFiles = []
   try {
     unzippedFiles = yield call(unzipToBase64Files, res)

@@ -27,6 +27,8 @@ export function unzipToBase64Files(zipData) {
       });
 
       Promise.all(promiseArr).then((unzippedFiles) => resolve(unzippedFiles))
-    }).catch((e) => {console.error('Error occured when unzipping files to disk', e) ; reject(e)});
+    }).catch((e) => {
+      console.error('Error occured when unzipping files to disk', e) ; reject(e)
+    });
   })
 }
