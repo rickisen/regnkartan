@@ -3,9 +3,11 @@ import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
 import radar from "./modules/radarImages";
+import zip from "./modules/zip";
 
 const reducer = combineReducers({
   radar,
+  zip,
 });
 
 const sagaMiddleware = createSagaMiddleware();
