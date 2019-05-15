@@ -2,9 +2,9 @@ import { call, put } from "redux-saga/effects";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/images";
-export const FETCH_DAY = `${NAME}/FETCH_DAY`;
-export const FETCH_DAY_SUCCESS = `${NAME}/FETCH_DAY_SUCCESS`;
-export const FETCH_DAY_FAIL = `${NAME}/FETCH_DAY_FAIL`;
+export const FETCH_DAY = `${NAME}/FETCH`;
+export const FETCH_DAY_SUCCESS = `${NAME}/FETCH_SUCCESS`;
+export const FETCH_DAY_FAIL = `${NAME}/FETCH_FAIL`;
 
 const API_URL =
   "https://opendata-download-radar.smhi.se/api/version/latest/area/sweden/product/comp/";
