@@ -9,9 +9,10 @@ import {
   ImageBackground,
   Slider,
 } from "react-native";
-import { BlurView, MapView, Overlay } from "expo";
+import { FileSystem, BlurView, MapView, Overlay } from "expo";
 
 import RadarUi from "./RadarUi";
+import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
 import { FETCH_DAY } from "../../redux/modules/radarImages";
 
@@ -100,6 +101,13 @@ export default class Radar extends React.Component {
       bottom: 53.1219345,
     };
 
+    // 'data:image/png;base64,'
+    let uri = 'http://regn.rickisen.com/png/v1/latest.png'
+    let files = [...radar.files, "http://regn.rickisen.com/png/v1/latest.png"]
+    if (currentImage <= radar.files.length) {
+      uri = "http://regn.rickisen.com/png/v1/" + files[currentImage].key + ".png"
+    }
+
     return (
       <View style={styles.container}>
         <MapView
@@ -115,22 +123,15 @@ export default class Radar extends React.Component {
           customMapStyle={mapStyle}
           initialRegion={this.initialRegion}
         >
-          {radar.files.length > 0 &&
-            !radar.loadingDay &&
-            currentImage <= radar.files.length && (
-              <MapView.Overlay
-                image={{
-                  uri:
-                    "http://regn.rickisen.com/png/v1/" +
-                    radar.files[currentImage].key +
-                    ".png",
-                }}
-                bounds={[
-                  [radarCorners.top, radarCorners.left], // top-left
-                  [radarCorners.bottom, radarCorners.right], // bottom-right
-                ]}
-              />
-            )}
+          {uri != '' && (
+            <MapView.Overlay
+              image={{ uri }}
+              bounds={[
+                [radarCorners.top, radarCorners.left],
+                [radarCorners.bottom, radarCorners.right],
+              ]}
+            />
+          )}
           <StatusBarBg />
         </MapView>
         <RadarUi
@@ -142,210 +143,3 @@ export default class Radar extends React.Component {
     );
   }
 }
-
-mapStyle = [
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#193341",
-      },
-    ],
-  },
-  {
-    featureType: "landscape",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#2c5a71",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#29768a",
-      },
-      {
-        lightness: -37,
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#406d80",
-      },
-    ],
-  },
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#406d80",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        visibility: "on",
-      },
-      {
-        color: "#3e606f",
-      },
-      {
-        weight: 2,
-      },
-      {
-        gamma: 0.84,
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#ffffff",
-      },
-    ],
-  },
-  {
-    featureType: "administrative",
-    elementType: "geometry",
-    stylers: [
-      {
-        weight: 0.6,
-      },
-      {
-        color: "#1a3541",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        visibility: "on",
-      },
-      {
-        color: "#ffffff",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#2c5a71",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "administrative.land_parcel",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.neighborhood",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.icon",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road.arterial",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "road.local",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "transit",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text",
-    stylers: [
-      {
-        visibility: "off",
-      },
-    ],
-  },
-];
