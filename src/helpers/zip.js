@@ -12,7 +12,7 @@ export function unzipToBase64Files(zipData) {
 
         const uri = `${FileSystem.cacheDirectory}${relativePath}`;
 
-        promiseArr.push( new Promise((resolve, reject) => {
+        promiseArr.push(new Promise((resolve, reject) => {
           file.async("base64").then(base64 => {
             FileSystem.writeAsStringAsync(uri, base64, {
               encoding: FileSystem.EncodingTypes.Base64,
@@ -20,7 +20,7 @@ export function unzipToBase64Files(zipData) {
               resolve(uri)
             }).catch((e) =>{
               // TODO: report which failed
-              console.error("Error occurred when writting unzipped file to disk", uri, e);
+              console.warn("Error occurred when writting unzipped file to disk", uri, e);
             });
           });
         }))
@@ -28,7 +28,7 @@ export function unzipToBase64Files(zipData) {
 
       Promise.all(promiseArr).then((unzippedFiles) => resolve(unzippedFiles))
     }).catch((e) => {
-      console.error('Error occured when unzipping files to disk', e) ; reject(e)
+      console.warn('Error occured when unzipping files to disk', e) ; reject(e)
     });
   })
 }

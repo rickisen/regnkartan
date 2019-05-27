@@ -15,7 +15,7 @@ import RadarOverlay from "./RadarOverlay";
 import RadarUi from "./RadarUi";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
-import { FETCH } from "../../redux/modules/zip";
+import { FETCH_FULL, FETCH_RECENT } from "../../redux/modules/zip";
 
 @connect(state => ({
   zip: state.zip,
@@ -64,7 +64,7 @@ export default class Radar extends React.Component {
 
   fetchZip() {
     let date = new Date();
-    this.props.dispatch({ type: FETCH, date });
+    this.props.dispatch({ type: FETCH_RECENT, date });
   }
 
   componentWillReceiveProps(nextProps) {

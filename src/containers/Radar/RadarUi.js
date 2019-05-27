@@ -6,7 +6,7 @@ import Loading from "./Loading";
 
 export default class RadarUi extends React.Component {
   static propTypes = {
-    radarFiles: PropTypes.arrayOf(PropTypes.string).isRequired,
+    // radarFiles: PropTypes.arrayOf(PropTypes.string).isRequired,
     currentImage: PropTypes.number.isRequired,
     setCurrentFile: PropTypes.func.isRequired,
   };
@@ -33,27 +33,31 @@ export default class RadarUi extends React.Component {
     },
   });
 
+  maxLen() {
+    const base = 60 * 23 // minutes in the last 23 hours
+    const lastHour = (new Date()).getMinutes()
+    const minutes = (base + lastHour) / 5
+    return minutes
+  }
+
   render() {
     const { styles } = this;
-    const { radarFiles, currentImage, setCurrentFile } = this.props;
+    const { currentImage, setCurrentFile } = this.props;
 
     return (
       <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
         <View style={styles.ui}>
-          {currentImage >= 0 && currentImage < radarFiles.length ? (
-            <Slider
-              minimumTrackTintColor={"#4090aa"}
-              maximumTrackTintColor={"#0a2531"}
-              thumbTintColor={"#fff"}
-              style={styles.slider}
-              step={1}
-              maximumValue={radarFiles.length - 1}
-              onValueChange={i => setCurrentFile(i)}
-              value={currentImage}
-            />
-          ) : (
-            <Loading show={true} />
-          )}
+          <Slider
+            minimumTrackTintColor={"#4090aa"}
+            maximumTrackTintColor={"#0a2531"}
+            thumbTintColor={"#fff"}
+            style={styles.slider}
+            step={1}
+            maximumValue={this.maxLen()}
+            onValueChange={i => setCurrentFile(i)}
+            value={currentImage}
+          />
+          <Text>{currentImage}</Text>
         </View>
       </BlurView>
     );
