@@ -5,12 +5,12 @@ import { MapView, FileSystem } from "expo";
 export default class RadarOverlay extends React.Component {
   static propTypes = {
     files: PropTypes.array,
-    requestedImage: PropTypes.number
+    requestedImage: PropTypes.string
   }
 
   static defaultProps = {
     files: [],
-    requestedImage: -1
+    requestedImage: ''
   }
 
   radarCorners = {
@@ -31,22 +31,23 @@ export default class RadarOverlay extends React.Component {
   };
 
   componentWillMount() {
-    if (this.requestedImage >= 0 ) {
+    if (this.requestedImage) {
       this.loadImage(this.requestedImage)
     }
   }
 
   componentWillReceiveProps(nextProps) {
     const { requestedImage } = nextProps
-    if (this.props.requestedImage !== requestedImage && requestedImage >= 0) {
+    if (this.props.requestedImage !== requestedImage && requestedImage) {
       this.loadImage(nextProps.requestedImage)
     }
   }
 
   loadImage(requestedImage) {
     const { files } = this.props
-    if (files && files.length > 0 && files[requestedImage]) {
-      FileSystem.readAsStringAsync(files[requestedImage])
+    const filepath = files.find((p) => p.includes(requestedImage))
+    if (filepath) {
+      FileSystem.readAsStringAsync(filepath)
       .then((data) => {
         this.setState({imageLoaded: false}, () => {
           this.loadedImage = 'data:image/png;base64,' + data

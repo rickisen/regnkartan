@@ -1,3 +1,9 @@
+export function incrementsOfFive(num) {
+  const x = num / 5
+  const y = Math.round(x)
+  return y * 5
+}
+
 export function pad(n, width = 2, z) {
   z = z || '0';
   n = n + '';
@@ -14,15 +20,15 @@ export function generateDateCode(date, hour = false, minute = false) {
 
   try {
     dateCode = `${
-        date.getFullYear() - 2000
+        date.getUTCFullYear() - 2000
       }${
-        pad(date.getMonth() + 1)
+        pad(date.getUTCMonth() + 1)
       }${
-        pad(date.getDate())
+        pad(date.getUTCDate())
       }${
-        hour? pad(date.getHours()) : ''
+        hour? pad(date.getUTCHours()) : ''
       }${
-        minute? pad(date.getMinutes()) : ''
+        minute? pad(incrementsOfFive(date.getUTCMinutes())) : ''
     }`
   } catch (e) {
     console.error("Error occured when trying to generate dateCode", e);
@@ -30,6 +36,30 @@ export function generateDateCode(date, hour = false, minute = false) {
   }
 
   return dateCode
+}
+
+export function generateDateCodeRange(start, end) {
+  let ret = []
+  let startStamp = 0
+  let endStamp = 0
+
+  try {
+    startStamp = start.getTime()
+    endStamp = end.getTime()
+  } catch (e) {
+    console.error("Both start and end must be valid Date object got: ", start, end, e);
+  }
+
+  if (startStamp && endStamp && startStamp < endStamp) {
+    while(startStamp < endStamp) {
+      ret.push(generateDateCode(new Date(startStamp), true, true))
+      startStamp += 1000 * 60 * 5
+    }
+  } else {
+    console.error("start must be before end");
+  }
+
+  return ret
 }
 
 // https://stackoverflow.com/questions/4833651/javascript-array-sort-and-unique
@@ -44,3 +74,4 @@ export function sort_unique(arr) {
   }
   return ret;
 }
+

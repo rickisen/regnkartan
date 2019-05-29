@@ -16,6 +16,7 @@ import RadarUi from "./RadarUi";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
 import { FETCH_FULL, FETCH_RECENT } from "../../redux/modules/zip";
+import { generateDateCode } from "../../helpers/general";
 
 @connect(state => ({
   zip: state.zip,
@@ -44,16 +45,11 @@ export default class Radar extends React.Component {
   timer = null
 
   state = {
-    currentImage: -1,
+    currentImage: 'latest',
   };
 
   componentDidMount() {
     this.fetchZip()
-
-    // get a fresh zip for today every 5 minutes
-    this.timer = setInterval( () => {
-        this.fetchZip()
-      }, 60 * 1000 * 5 )
   }
 
   componentWillUnmount() {
@@ -68,19 +64,17 @@ export default class Radar extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { unzippedFiles } = nextProps.zip
+    const { unzippedFiles, selectedRange } = nextProps.zip
     const { currentImage } = this.state
     const oldUnzippedFiles = this.props.zip.unzippedFiles
-
     if (
-      unzippedFiles.length > 0 &&
-      (oldUnzippedFiles.length === 0 || currentImage === oldUnzippedFiles.length - 1)
+      unzippedFiles.length > 0 && oldUnzippedFiles.length === 0
     ) {
-      this.setState({currentImage: unzippedFiles.length - 1})
+      this.setState({currentImage: generateDateCode(selectedRange.selected, true, true)})
     }
   }
 
-  // Bounce map region back if user drags it too far
+  // Bounce the map region back if user drags it too far
   onRegionChangeComplete(newRegion) {
     var longDiff = newRegion.longitude - this.initialRegion.longitude;
     var latDiff = newRegion.latitude - this.initialRegion.latitude;
@@ -95,7 +89,7 @@ export default class Radar extends React.Component {
   render() {
     const { styles, initialRegion } = this;
     const { currentImage } = this.state;
-    const { zip: { unzippedFiles, loadingZip, unzipping } } = this.props;
+    const { zip: { unzippedFiles, loadingZip, unzipping, selectedRange } } = this.props;
 
     return (
       <View style={styles.container}>
@@ -119,9 +113,10 @@ export default class Radar extends React.Component {
           <StatusBarBg />
         </MapView>
         <RadarUi
+          selectedRange={selectedRange}
           currentImage={currentImage}
           radarFiles={unzippedFiles}
-          setCurrentFile={i => this.setState({ currentImage: i })}
+          setCurrentFile={ci => this.setState({ currentImage: ci })}
         />
       </View>
     );

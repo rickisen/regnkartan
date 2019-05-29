@@ -2,12 +2,13 @@ import React from "react";
 import { PropTypes } from "prop-types";
 import { TouchableOpacity, Text, Slider, StyleSheet, View } from "react-native";
 import { BlurView } from "expo";
+
+import { generateDateCodeRange } from "../../helpers/general";
 import Loading from "./Loading";
 
 export default class RadarUi extends React.Component {
   static propTypes = {
-    // radarFiles: PropTypes.arrayOf(PropTypes.string).isRequired,
-    currentImage: PropTypes.number.isRequired,
+    currentImage: PropTypes.string.isRequired,
     setCurrentFile: PropTypes.func.isRequired,
   };
 
@@ -33,16 +34,10 @@ export default class RadarUi extends React.Component {
     },
   });
 
-  maxLen() {
-    const base = 60 * 23 // minutes in the last 23 hours
-    const lastHour = (new Date()).getMinutes()
-    const minutes = (base + lastHour) / 5
-    return minutes
-  }
-
   render() {
     const { styles } = this;
-    const { currentImage, setCurrentFile } = this.props;
+    const { currentImage, setCurrentFile, selectedRange } = this.props;
+    const dateCodeRange = generateDateCodeRange(selectedRange.start, selectedRange.end)
 
     return (
       <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
@@ -53,9 +48,9 @@ export default class RadarUi extends React.Component {
             thumbTintColor={"#fff"}
             style={styles.slider}
             step={1}
-            maximumValue={this.maxLen()}
-            onValueChange={i => setCurrentFile(i)}
-            value={currentImage}
+            maximumValue={dateCodeRange.length - 1}
+            onValueChange={i => setCurrentFile(dateCodeRange[i])}
+            value={dateCodeRange.length - 1 || dateCodeRange.indexOf(currentImage)}
           />
           <Text>{currentImage}</Text>
         </View>

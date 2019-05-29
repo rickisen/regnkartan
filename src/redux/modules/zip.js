@@ -1,8 +1,12 @@
 import { call, put } from "redux-saga/effects";
 
-import { generateDateCode, sort_unique } from "../../helpers/general";
 import { unzipToBase64Files } from "../../helpers/zip";
 import { urlToBlob, urlToArrayBuffer } from "../../helpers/blob";
+import {
+  generateDateCode,
+  sort_unique,
+  incrementsOfFive
+} from "../../helpers/general";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/ZIP";
@@ -32,8 +36,9 @@ const API_URL =
 /** SAGAS **/
 export function* fetchRecent() {
   // Start is "now" since we want to fetch the chunks in reverse
-  const start = new Date() // TODO: Round to nearest 5 minute increment
-  const end = new Date(Date.now() - (1000 * 60 * 60 * 24)) // 24 hours ago
+  const start = new Date()
+  start.setMinutes(incrementsOfFive(start.getMinutes()))
+  const end = new Date(start.getTime() - (1000 * 60 * 60 * 24)) // 24 hours ago
   const chunkSize = 1000 * 60 * 60 // 1 hour in miliseconds (for this api version)
 
   const chunks = []
@@ -132,15 +137,24 @@ export function* fetchFullDay({ date }) {
   yield put({ type: UNZIPPING_FULL_SUCCESS, unzippedFiles });
 }
 
+const initialTime = new Date(Date.now() - 1000 * 60 * 5)
+
+const initialState = {
+  error: null,
+  loadingZip: false,
+  unzipping: false,
+  chunks: [],
+  unzippedFiles: [],
+  selectedRange: {
+    start: new Date(initialTime.getTime() - 1000 * 60 * 60 * 24), // 24h ago
+    end: initialTime,
+    selected: initialTime,
+  }
+}
+
 /** REDUCER **/
 export default function reducer(
-  state = {
-    error: null,
-    loadingZip: false,
-    unzipping: false,
-    chunks: [],
-    unzippedFiles: [],
-  },
+  state = initialState,
   action
 ) {
   switch (action.type) {
