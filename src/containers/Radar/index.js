@@ -42,19 +42,19 @@ export default class Radar extends React.Component {
     longitudeDelta: 25.90066082775593,
   };
 
-  timer = null
+  timer = null;
 
   state = {
-    currentImage: 'latest',
+    currentImage: "latest",
   };
 
   componentDidMount() {
-    this.fetchZip()
+    this.fetchZip();
   }
 
   componentWillUnmount() {
     if (this.timer) {
-      clearInterval(this.timer)
+      clearInterval(this.timer);
     }
   }
 
@@ -64,13 +64,13 @@ export default class Radar extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { unzippedFiles, selectedRange } = nextProps.zip
-    const { currentImage } = this.state
-    const oldUnzippedFiles = this.props.zip.unzippedFiles
-    if (
-      unzippedFiles.length > 0 && oldUnzippedFiles.length === 0
-    ) {
-      this.setState({currentImage: generateDateCode(selectedRange.selected, true, true)})
+    const { unzippedFiles, selectedRange } = nextProps.zip;
+    const { currentImage } = this.state;
+    const oldUnzippedFiles = this.props.zip.unzippedFiles;
+    if (unzippedFiles.length > 0 && oldUnzippedFiles.length === 0) {
+      this.setState({
+        currentImage: generateDateCode(selectedRange.end, true, true),
+      });
     }
   }
 
@@ -89,7 +89,9 @@ export default class Radar extends React.Component {
   render() {
     const { styles, initialRegion } = this;
     const { currentImage } = this.state;
-    const { zip: { unzippedFiles, loadingZip, unzipping, selectedRange } } = this.props;
+    const {
+      zip: { chunks, unzippedFiles, loadingZip, unzipping, selectedRange },
+    } = this.props;
 
     return (
       <View style={styles.container}>
@@ -106,13 +108,11 @@ export default class Radar extends React.Component {
           customMapStyle={mapStyle}
           initialRegion={initialRegion}
         >
-          <RadarOverlay
-            files={unzippedFiles}
-            requestedImage={currentImage}
-          />
+          <RadarOverlay files={unzippedFiles} requestedImage={currentImage} />
           <StatusBarBg />
         </MapView>
         <RadarUi
+          chunks={chunks}
           selectedRange={selectedRange}
           currentImage={currentImage}
           radarFiles={unzippedFiles}

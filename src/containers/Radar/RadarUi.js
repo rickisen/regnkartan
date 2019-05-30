@@ -1,10 +1,9 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import { TouchableOpacity, Text, Slider, StyleSheet, View } from "react-native";
+import { Text, Slider, StyleSheet, View } from "react-native";
 import { BlurView } from "expo";
 
-import { generateDateCodeRange } from "../../helpers/general";
-import Loading from "./Loading";
+import TimeLine from "./TimeLine";
 
 export default class RadarUi extends React.Component {
   static propTypes = {
@@ -36,22 +35,33 @@ export default class RadarUi extends React.Component {
 
   render() {
     const { styles } = this;
-    const { currentImage, setCurrentFile, selectedRange } = this.props;
-    const dateCodeRange = generateDateCodeRange(selectedRange.start, selectedRange.end)
+    const { chunks, currentImage, setCurrentFile, selectedRange } = this.props;
 
     return (
       <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
         <View style={styles.ui}>
-          <Slider
-            minimumTrackTintColor={"#4090aa"}
-            maximumTrackTintColor={"#0a2531"}
-            thumbTintColor={"#fff"}
-            style={styles.slider}
-            step={1}
-            maximumValue={dateCodeRange.length - 1}
-            onValueChange={i => setCurrentFile(dateCodeRange[i])}
-            value={dateCodeRange.length - 1 || dateCodeRange.indexOf(currentImage)}
+          <TimeLine
+            chunks={chunks}
+            selectedRange={selectedRange}
+            currentImage={currentImage}
           />
+          {selectedRange && selectedRange.dateCodeRange && (
+            <Slider
+              minimumTrackTintColor={"#4090aa"}
+              maximumTrackTintColor={"#0a2531"}
+              thumbTintColor={"#fff"}
+              style={styles.slider}
+              step={1}
+              maximumValue={selectedRange.dateCodeRange.length - 1}
+              onValueChange={i =>
+                setCurrentFile(selectedRange.dateCodeRange[i])
+              }
+              value={
+                selectedRange.dateCodeRange.length - 1 ||
+                selectedRange.dateCodeRange.indexOf(currentImage)
+              }
+            />
+          )}
           <Text>{currentImage}</Text>
         </View>
       </BlurView>

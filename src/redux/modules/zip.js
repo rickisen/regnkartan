@@ -5,7 +5,8 @@ import { urlToBlob, urlToArrayBuffer } from "../../helpers/blob";
 import {
   generateDateCode,
   sort_unique,
-  incrementsOfFive
+  incrementsOfFive,
+  generateDateCodeRange,
 } from "../../helpers/general";
 
 /** ACTION TYPES **/
@@ -29,73 +30,75 @@ export const UNZIPPING_RECENT = `${NAME}/UNZIPPING_RECENT`;
 export const UNZIPPING_RECENT_FAIL = `${NAME}/UNZIPPING_RECENT_FAIL`;
 export const UNZIPPING_RECENT_SUCCESS = `${NAME}/UNZIPPING_RECENT_SUCCESS`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
+export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 
-const API_URL =
-  "http://regn.rickisen.com/zip/v1/";
+const API_URL = "http://regn.rickisen.com/zip/v1/";
 
 /** SAGAS **/
 export function* fetchRecent() {
-  // Start is "now" since we want to fetch the chunks in reverse
-  const start = new Date()
-  start.setMinutes(incrementsOfFive(start.getMinutes()))
-  const end = new Date(start.getTime() - (1000 * 60 * 60 * 24)) // 24 hours ago
-  const chunkSize = 1000 * 60 * 60 // 1 hour in miliseconds (for this api version)
+  const end = new Date();
+  end.setMinutes(incrementsOfFive(end.getMinutes()));
+  const start = new Date(end.getTime() - 1000 * 60 * 60 * 12); // 12 hours ago
+  const chunkSize = 1000 * 60 * 60; // 1 hour in miliseconds (for this api version)
 
-  const chunks = []
+  yield put({ type: SELECT_RANGE, start, end });
+
+  const chunks = [];
+  const current = new Date(end.getTime());
   try {
-    while (end.getTime() < start.getTime()) {
+    while (start.getTime() < current.getTime()) {
       chunks.push({
-        time: new Date(start.getTime()),
-        status: 'qued'
-      })
-      start.setTime(start.getTime() - chunkSize)
+        time: new Date(current.getTime()),
+        status: "qued",
+      });
+      current.setTime(current.getTime() - chunkSize);
     }
   } catch (e) {
     console.error("Something went wrong when generating chunks", e);
-    yield put({ type: FETCH_RECENT_FAIL, error: e })
-    return
+    yield put({ type: FETCH_RECENT_FAIL, error: e });
+    return;
   }
 
-  yield put({type: REGISTER_CHUNKS, chunks})
+  yield put({ type: REGISTER_CHUNKS, chunks });
 
   // TODO: Add ability to cancel whilst fetching
   for (var i = 0, len = chunks.length; i < len; i++) {
     const chunk = chunks[i];
-    yield call(fetchChunk, chunk)
+    yield call(fetchChunk, chunk);
   }
 }
 
 export function* fetchChunk({ time }) {
   if (!time) {
     console.error("fetch chunk needs a valid time got: ", time);
-    return
+    return;
   }
-  const dateCode = generateDateCode(time, true)
+  const dateCode = generateDateCode(time, true);
 
-  let res = null
+  let res = null;
   try {
-    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`)
+    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`);
   } catch (e) {
     console.warn("Error occured when fetching zip", e, time);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
-    return
+    return;
   }
 
   if (!res) {
     console.error("Failed to get zip chunk from api, res: ", res, time);
-    return
+    return;
   }
 
   yield put({ type: FETCH_CHUNK_SUCCESS, time });
 
   yield put({ type: UNZIPPING_CHUNK, time });
-  let unzippedFiles = []
+  let unzippedFiles = [];
   try {
-    unzippedFiles = yield call(unzipToBase64Files, res)
+    unzippedFiles = yield call(unzipToBase64Files, res);
   } catch (e) {
     console.warn("Error occured when unzipping chunk files", e, time);
     yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
-    return
+    return;
   }
 
   yield put({ type: UNZIPPING_CHUNK_SUCCESS, unzippedFiles, time });
@@ -104,40 +107,38 @@ export function* fetchChunk({ time }) {
 export function* fetchFullDay({ date }) {
   if (!date) {
     console.error("fetch full day zip needs a valid date got: ", date);
-    return
+    return;
   }
-  const dateCode = generateDateCode(date)
+  const dateCode = generateDateCode(date);
 
-  let res = null
+  let res = null;
   try {
-    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`)
+    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`);
   } catch (e) {
     console.error("Error occured when fetching zip", e);
     yield put({ type: FETCH_FULL_FAIL, error: e });
-    return
+    return;
   }
 
   if (!res) {
     console.error("Failed to get zip from api, res: ", res);
-    return
+    return;
   }
 
   yield put({ type: FETCH_FULL_SUCCESS });
 
   yield put({ type: UNZIPPING_FULL });
-  let unzippedFiles = []
+  let unzippedFiles = [];
   try {
-    unzippedFiles = yield call(unzipToBase64Files, res)
+    unzippedFiles = yield call(unzipToBase64Files, res);
   } catch (e) {
     console.error("Error occured when unzipping files", e);
     yield put({ type: UNZIPPING_FULL_FAIL, error: e });
-    return
+    return;
   }
 
   yield put({ type: UNZIPPING_FULL_SUCCESS, unzippedFiles });
 }
-
-const initialTime = new Date(Date.now() - 1000 * 60 * 5)
 
 const initialState = {
   error: null,
@@ -146,52 +147,82 @@ const initialState = {
   chunks: [],
   unzippedFiles: [],
   selectedRange: {
-    start: new Date(initialTime.getTime() - 1000 * 60 * 60 * 24), // 24h ago
-    end: initialTime,
-    selected: initialTime,
-  }
-}
+    start: null,
+    end: null,
+    dateCodeRange: [],
+  },
+};
 
 /** REDUCER **/
-export default function reducer(
-  state = initialState,
-  action
-) {
+export default function reducer(state = initialState, action) {
   switch (action.type) {
+    case SELECT_RANGE:
+      return {
+        ...state,
+        selectedRange: {
+          start: action.start,
+          end: action.end,
+          dateCodeRange: generateDateCodeRange(action.start, action.end),
+        },
+      };
     case REGISTER_CHUNKS:
       return {
         ...state,
-        chunks: [ ...state.chunks, ...action.chunks ]
+        chunks: [...state.chunks, ...action.chunks],
       };
     case FETCH_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'loading' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "loading" }
+            : c
+        ),
       };
     case FETCH_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'loaded' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "loaded" }
+            : c
+        ),
       };
     case FETCH_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'failed' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "failed" }
+            : c
+        ),
       };
     case UNZIPPING_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'unzipping' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "unzipping" }
+            : c
+        ),
       };
     case UNZIPPING_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'unzip-fail' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "unzip-fail" }
+            : c
+        ),
       };
     case UNZIPPING_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks.map((c) => c.time.getTime() === action.time.getTime() ? { ...c, status: 'unzipped' } : c ),
+        chunks: state.chunks.map(c =>
+          c.time.getTime() === action.time.getTime()
+            ? { ...c, status: "unzipped" }
+            : c
+        ),
         unzippedFiles: sort_unique([
           ...action.unzippedFiles,
           ...state.unzippedFiles,
