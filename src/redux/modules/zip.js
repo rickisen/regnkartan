@@ -1,7 +1,7 @@
 import { call, put } from "redux-saga/effects";
 
 import { unzipToBase64Files } from "../../helpers/zip";
-import { urlToArrayBuffer } from "../../helpers/blob";
+import { urlToArrayBuffer } from "../../helpers/binaryRequest";
 import {
   generateDateCode,
   sort_unique,
