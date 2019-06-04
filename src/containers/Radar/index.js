@@ -59,7 +59,7 @@ export default class Radar extends React.Component {
   }
 
   fetchZip() {
-    let date = new Date();
+    const date = new Date();
     this.props.dispatch({ type: FETCH_RECENT, date });
   }
 
@@ -76,8 +76,8 @@ export default class Radar extends React.Component {
 
   // Bounce the map region back if user drags it too far
   onRegionChangeComplete(newRegion) {
-    var longDiff = newRegion.longitude - this.initialRegion.longitude;
-    var latDiff = newRegion.latitude - this.initialRegion.latitude;
+    const longDiff = newRegion.longitude - this.initialRegion.longitude;
+    const latDiff = newRegion.latitude - this.initialRegion.latitude;
     if (
       this.mapRef &&
       (longDiff > 15 || longDiff < -15 || latDiff > 15 || latDiff < -10)
