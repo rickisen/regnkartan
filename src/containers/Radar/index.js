@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { BlurView, MapView } from "expo";
 
+import Ui from "./Ui";
 import RadarOverlay from "./RadarOverlay";
 import RadarUi from "./RadarUi";
 import mapStyle from "./mapStyle";
@@ -111,13 +112,20 @@ export default class Radar extends React.Component {
           <RadarOverlay files={unzippedFiles} requestedImage={currentImage} />
           <StatusBarBg />
         </MapView>
-        <RadarUi
+        <Ui
           chunks={chunks}
           selectedRange={selectedRange}
           currentImage={currentImage}
           radarFiles={unzippedFiles}
           setCurrentFile={ci => this.setState({ currentImage: ci })}
         />
+        {/* <RadarUi */}
+        {/*   chunks={chunks} */}
+        {/*   selectedRange={selectedRange} */}
+        {/*   currentImage={currentImage} */}
+        {/*   radarFiles={unzippedFiles} */}
+        {/*   setCurrentFile={ci => this.setState({ currentImage: ci })} */}
+        {/* /> */}
       </View>
     );
   }

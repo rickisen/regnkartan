@@ -25,9 +25,6 @@ export default class RadarUi extends React.Component {
       margin: 20,
       minHeight: 75,
     },
-    date: {
-      color: "#fff",
-    },
     slider: {
       alignSelf: "stretch",
     },
