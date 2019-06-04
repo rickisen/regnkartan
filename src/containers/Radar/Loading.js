@@ -1,10 +1,6 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import {
-  StyleSheet,
-  View,
-  ActivityIndicator
-} from "react-native";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 
 export default class Loading extends React.Component {
   static propTypes = {
@@ -29,14 +25,11 @@ export default class Loading extends React.Component {
     if (show) {
       return (
         <View style={styles.container}>
-          <ActivityIndicator
-            size="large"
-            style={styles.spinner}
-          />
+          <ActivityIndicator size="large" style={styles.spinner} />
         </View>
       );
     } else {
-      return null
+      return null;
     }
   }
 }

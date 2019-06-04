@@ -1,4 +1,4 @@
-export default mapStyle = [
+const mapStyle = [
   {
     featureType: "water",
     elementType: "geometry",
@@ -204,3 +204,4 @@ export default mapStyle = [
     ],
   },
 ];
+export default mapStyle;
