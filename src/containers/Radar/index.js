@@ -90,6 +90,7 @@ export default class Radar extends React.Component {
     const { styles, initialRegion } = this;
     const { currentImage } = this.state;
     const {
+      dispatch,
       zip: { chunks, unzippedFiles, loadingZip, unzipping, selectedRange },
     } = this.props;
 
@@ -117,6 +118,7 @@ export default class Radar extends React.Component {
           currentImage={currentImage}
           radarFiles={unzippedFiles}
           setCurrentFile={ci => this.setState({ currentImage: ci })}
+          fetchRecent={() => dispatch({ type: FETCH_RECENT, date: new Date() })}
         />
       </View>
     );

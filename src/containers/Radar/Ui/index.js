@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo";
 
 import * as localTypes from "./localTypes";
@@ -13,6 +13,7 @@ export default class UI extends React.Component {
     currentImage: localTypes.currentImage,
     chunks: localTypes.chunks,
     selectedRange: localTypes.selectedRange,
+    fetchRecent: localTypes.fetchRecent,
   };
 
   static defaultProps = {
@@ -49,7 +50,13 @@ export default class UI extends React.Component {
   });
 
   render() {
-    const { chunks, selectedRange, currentImage, setCurrentFile } = this.props;
+    const {
+      chunks,
+      selectedRange,
+      currentImage,
+      setCurrentFile,
+      fetchRecent,
+    } = this.props;
     const { styles } = this;
     const { start, end, dateCodeRange } = selectedRange;
     const { svgWidth } = this.state;
@@ -82,6 +89,22 @@ export default class UI extends React.Component {
             setCurrentFile={setCurrentFile}
           />
           <Chunkometer svgWidth={svgWidth} chunks={chunks} />
+          <TouchableOpacity onPress={fetchRecent}>
+            <Text
+              style={{
+                color: "white",
+                borderColor: "white",
+                padding: 15,
+                borderWidth: 1,
+                borderRadius: 5,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Refresh
+            </Text>
+          </TouchableOpacity>
         </View>
       </BlurView>
     );
