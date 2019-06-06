@@ -13,7 +13,6 @@ import { BlurView, MapView } from "expo";
 
 import Ui from "./Ui";
 import RadarOverlay from "./RadarOverlay";
-import RadarUi from "./RadarUi";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
 import { FETCH_FULL, FETCH_RECENT } from "../../redux/modules/zip";
@@ -119,13 +118,6 @@ export default class Radar extends React.Component {
           radarFiles={unzippedFiles}
           setCurrentFile={ci => this.setState({ currentImage: ci })}
         />
-        {/* <RadarUi */}
-        {/*   chunks={chunks} */}
-        {/*   selectedRange={selectedRange} */}
-        {/*   currentImage={currentImage} */}
-        {/*   radarFiles={unzippedFiles} */}
-        {/*   setCurrentFile={ci => this.setState({ currentImage: ci })} */}
-        {/* /> */}
       </View>
     );
   }

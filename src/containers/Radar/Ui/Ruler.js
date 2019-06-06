@@ -1,7 +1,7 @@
 import React from "react";
-import { PropTypes } from "prop-types";
 import { Svg } from "expo";
 
+import * as localTypes from "./localTypes";
 import { pad, timeFromDateCode } from "../../../helpers/general";
 
 const { Line, Text, G } = Svg;
@@ -24,11 +24,11 @@ function isHalfHourIncrement(dateCode) {
   }
 }
 
-export default function({
+const Ruler = ({
   selectedRange: { dateCodeRange, start, end },
   currentImage,
   svgWidth,
-}) {
+}) => {
   const lines = dateCodeRange.filter(isHalfHourIncrement);
   const selectedDate = timeFromDateCode(currentImage);
 
@@ -71,4 +71,12 @@ export default function({
       </G>
     </Svg>
   );
-}
+};
+
+Ruler.propTypes = {
+  selectedRange: localTypes.selectedRange,
+  currentImage: localTypes.currentImage,
+  svgWidth: localTypes.svgWidth,
+};
+
+export default Ruler;

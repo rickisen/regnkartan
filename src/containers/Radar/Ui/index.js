@@ -1,27 +1,18 @@
 import React from "react";
-import { PropTypes } from "prop-types";
-import { View, Slider, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { BlurView } from "expo";
 
+import * as localTypes from "./localTypes";
 import Chunkometer from "./Chunkometer";
 import Ruler from "./Ruler";
-import Zlider from "./Slider";
+import Slider from "./Slider";
 
-export default class TimeLine extends React.Component {
+export default class UI extends React.Component {
   static propTypes = {
-    setCurrentFile: PropTypes.func.isRequired,
-    currentImage: PropTypes.string,
-    chunks: PropTypes.arrayOf(
-      PropTypes.shape({
-        time: PropTypes.date,
-        status: PropTypes.string,
-      })
-    ),
-    selectedRange: PropTypes.shape({
-      start: PropTypes.date,
-      end: PropTypes.date,
-      dateCodeRange: PropTypes.arrayOf(PropTypes.string),
-    }),
+    setCurrentFile: localTypes.setCurrentFile,
+    currentImage: localTypes.currentImage,
+    chunks: localTypes.chunks,
+    selectedRange: localTypes.selectedRange,
   };
 
   static defaultProps = {
@@ -73,26 +64,13 @@ export default class TimeLine extends React.Component {
             currentImage={currentImage}
             svgWidth={svgWidth}
           />
-          <Zlider
+          <Slider
             dateCodeRange={dateCodeRange}
             currentImage={currentImage}
             svgWidth={svgWidth}
+            setCurrentFile={setCurrentFile}
           />
           <Chunkometer svgWidth={svgWidth} chunks={chunks} />
-          {dateCodeRange && (
-            <Slider
-              minimumTrackTintColor={"#4090aa"}
-              maximumTrackTintColor={"#0a2531"}
-              thumbTintColor={"#fff"}
-              style={styles.slider}
-              step={1}
-              maximumValue={dateCodeRange.length - 1}
-              onValueChange={i => setCurrentFile(dateCodeRange[i])}
-              value={
-                dateCodeRange.length - 1 || dateCodeRange.indexOf(currentImage)
-              }
-            />
-          )}
         </View>
       </BlurView>
     );
