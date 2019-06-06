@@ -32,8 +32,7 @@ export const UNZIPPING_RECENT_SUCCESS = `${NAME}/UNZIPPING_RECENT_SUCCESS`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 
-// const API_URL = "http://regn.rickisen.com/zip/v1/";
-const API_URL = "http://rickard-laptop:8000/v1/";
+const API_URL = "http://regn.rickisen.com/zip/v1/";
 
 /** SAGAS **/
 export function* fetchRecent() {
