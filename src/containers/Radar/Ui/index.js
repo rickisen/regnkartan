@@ -24,6 +24,8 @@ export default class UI extends React.Component {
     },
   };
 
+  state = { svgWidth: 340 };
+
   styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -50,7 +52,7 @@ export default class UI extends React.Component {
     const { chunks, selectedRange, currentImage, setCurrentFile } = this.props;
     const { styles } = this;
     const { start, end, dateCodeRange } = selectedRange;
-    const svgWidth = 340;
+    const { svgWidth } = this.state;
 
     if (!start || !end || !dateCodeRange) {
       return null;
@@ -58,7 +60,16 @@ export default class UI extends React.Component {
 
     return (
       <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
-        <View style={styles.container}>
+        <View
+          onLayout={({
+            nativeEvent: {
+              layout: { width },
+            },
+          }) =>
+            this.setState({ svgWidth: width - styles.container.padding * 2 })
+          }
+          style={styles.container}
+        >
           <Ruler
             selectedRange={selectedRange}
             currentImage={currentImage}
