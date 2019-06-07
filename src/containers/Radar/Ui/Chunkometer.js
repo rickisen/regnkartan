@@ -1,12 +1,19 @@
 import React from "react";
-import { PropTypes } from "prop-types";
 import { Svg } from "expo";
 
 import * as localTypes from "./localTypes";
+import { propTypes as zipTypes } from "../../../redux/modules/zip";
 
 const { Rect, G } = Svg;
 
-const Chunkometer = ({ svgWidth, chunks }) => {
+function timeRelativeInRange(time, { start, end }) {
+  const max = end.getTime() - start.getTime();
+  const current = time.getTime() - start.getTime();
+
+  return current / max;
+}
+
+const Chunkometer = ({ svgWidth, chunks, selectedRange }) => {
   return (
     <Svg width={svgWidth} height="20" viewBox={`0 0 ${svgWidth} 20`}>
       <G y={5}>
@@ -62,7 +69,7 @@ const Chunkometer = ({ svgWidth, chunks }) => {
 
 Chunkometer.propTypes = {
   svgWidth: localTypes.svgWidth,
-  chunks: localTypes.chunks,
+  chunks: zipTypes.chunks,
 };
 
 export default Chunkometer;

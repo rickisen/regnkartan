@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo";
 
+import { propTypes as zipTypes } from "../../../redux/modules/zip";
 import * as localTypes from "./localTypes";
 import Chunkometer from "./Chunkometer";
 import Ruler from "./Ruler";
@@ -11,9 +12,9 @@ export default class UI extends React.Component {
   static propTypes = {
     setCurrentFile: localTypes.setCurrentFile,
     currentImage: localTypes.currentImage,
-    chunks: localTypes.chunks,
-    selectedRange: localTypes.selectedRange,
     fetchRecent: localTypes.fetchRecent,
+    chunks: zipTypes.chunks,
+    selectedRange: zipTypes.selectedRange,
   };
 
   static defaultProps = {
@@ -88,7 +89,11 @@ export default class UI extends React.Component {
             svgWidth={svgWidth}
             setCurrentFile={setCurrentFile}
           />
-          <Chunkometer svgWidth={svgWidth} chunks={chunks} />
+          <Chunkometer
+            selectedRange={selectedRange}
+            svgWidth={svgWidth}
+            chunks={chunks}
+          />
           <TouchableOpacity onPress={fetchRecent}>
             <Text
               style={{

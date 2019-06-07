@@ -2,6 +2,7 @@ import React from "react";
 import { Svg } from "expo";
 
 import * as localTypes from "./localTypes";
+import { propTypes as zipTypes } from "../../../redux/modules/zip";
 import { pad, timeFromDateCode } from "../../../helpers/general";
 
 const { Line, Text, G } = Svg;
@@ -74,7 +75,7 @@ const Ruler = ({
 };
 
 Ruler.propTypes = {
-  selectedRange: localTypes.selectedRange,
+  selectedRange: zipTypes.selectedRange,
   currentImage: localTypes.currentImage,
   svgWidth: localTypes.svgWidth,
 };

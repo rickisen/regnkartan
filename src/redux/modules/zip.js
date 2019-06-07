@@ -1,4 +1,5 @@
 import { call, put } from "redux-saga/effects";
+import { PropTypes } from "prop-types";
 
 import { unzipToBase64Files } from "../../helpers/zip";
 import { urlToArrayBuffer } from "../../helpers/binaryRequest";
@@ -139,6 +140,24 @@ export function* fetchFullDay({ date }) {
 
   yield put({ type: UNZIPPING_FULL_SUCCESS, unzippedFiles });
 }
+
+export const propTypes = {
+  error: PropTypes.bool,
+  loadingZip: PropTypes.bool,
+  unzipping: PropTypes.bool,
+  chunks: PropTypes.arrayOf(
+    PropTypes.shape({
+      status: PropTypes.string,
+      unzippedFiles: PropTypes.arrayOf(PropTypes.string),
+    })
+  ),
+  unzippedFiles: PropTypes.arrayOf(PropTypes.string),
+  selectedRange: PropTypes.shape({
+    start: PropTypes.date,
+    end: PropTypes.date,
+    dateCodeRange: PropTypes.arrayOf(PropTypes.string),
+  }),
+};
 
 const initialState = {
   error: null,

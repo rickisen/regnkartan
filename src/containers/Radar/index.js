@@ -15,7 +15,12 @@ import Ui from "./Ui";
 import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
-import { FETCH_FULL, FETCH_RECENT } from "../../redux/modules/zip";
+import {
+  FETCH_FULL,
+  FETCH_RECENT,
+  FETCH_CHUNK,
+  propTypes,
+} from "../../redux/modules/zip";
 import { generateDateCode } from "../../helpers/general";
 
 @connect(state => ({
@@ -24,6 +29,11 @@ import { generateDateCode } from "../../helpers/general";
 export default class Radar extends React.Component {
   static navigationOptions = {
     header: null,
+  };
+
+  static propTypes = {
+    ...propTypes,
+    navigation: PropTypes.object.isRequired,
   };
 
   styles = StyleSheet.create({
@@ -118,7 +128,7 @@ export default class Radar extends React.Component {
           currentImage={currentImage}
           radarFiles={unzippedFiles}
           setCurrentFile={ci => this.setState({ currentImage: ci })}
-          fetchRecent={() => dispatch({ type: FETCH_RECENT, date: new Date() })}
+          fetchRecent={() => dispatch({ type: FETCH_CHUNK, time: new Date() })}
         />
       </View>
     );
