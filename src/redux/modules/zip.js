@@ -114,6 +114,7 @@ export function* fetchFullDay({ date }) {
 
   let res = null;
   try {
+    // Would love to use a blob for this, but jszip doesn't like reat-native blobs
     res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`);
   } catch (e) {
     console.error("Error occured when fetching zip", e);

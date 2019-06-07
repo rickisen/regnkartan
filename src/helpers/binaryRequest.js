@@ -9,7 +9,6 @@ export function urlToArrayBuffer(url) {
       }
     };
     xhr.open("GET", url);
-    // Would love to use blob here, but it seams like jszip doen't like rn's blobs
     xhr.responseType = "arraybuffer";
     xhr.send();
   });
@@ -26,7 +25,6 @@ export function urlToBlob(url) {
       }
     };
     xhr.open("GET", url);
-    // Would love to use blob here, but it seams like jszip doen't like rn's blobs
     xhr.responseType = "blob";
     xhr.send();
   });
