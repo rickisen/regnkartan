@@ -128,7 +128,7 @@ export default class Radar extends React.Component {
           currentImage={currentImage}
           radarFiles={unzippedFiles}
           setCurrentFile={ci => this.setState({ currentImage: ci })}
-          fetchRecent={() => dispatch({ type: FETCH_CHUNK, time: new Date() })}
+          fetchRecent={() => dispatch({ type: FETCH_RECENT })}
         />
       </View>
     );
