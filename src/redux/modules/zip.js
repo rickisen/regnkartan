@@ -2,7 +2,7 @@ import { call, put } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 
 import { unzipToBase64Files } from "../../helpers/zip";
-import { urlToArrayBuffer } from "../../helpers/binaryRequest";
+import { req } from "../../helpers/binaryRequest";
 import {
   generateDateCode,
   sort_unique,
@@ -34,13 +34,16 @@ export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 
 const API_URL = "http://regn.rickisen.com/zip/v1/";
+// const API_URL = "http://desktop:8000/v1/";
 
 /** SAGAS **/
+
+/** @generator fetchRecent - fetches last 12 hours of image data in chunks */
 export function* fetchRecent() {
   const end = new Date();
   end.setMinutes(incrementsOfFive(end.getMinutes()));
   const start = new Date(end.getTime() - 1000 * 60 * 60 * 12); // 12 hours ago
-  const chunkSize = 1000 * 60 * 60; // 1 hour in miliseconds (for this api version)
+  const chunkSize = 1000 * 60 * 60 * 3; // 3 hours
 
   yield put({ type: SELECT_RANGE, start, end });
 
@@ -51,6 +54,7 @@ export function* fetchRecent() {
       chunks.push({
         time: new Date(current.getTime()),
         status: "qued",
+        chunkSize,
       });
       current.setTime(current.getTime() - chunkSize);
     }
@@ -69,18 +73,38 @@ export function* fetchRecent() {
   }
 }
 
-export function* fetchChunk({ time }) {
+/** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
+ * @param {object} Chunk - Qued 'chunk' object that implements time property and chunkSize
+ */
+export function* fetchChunk({ time, chunkSize }) {
   if (!time) {
-    console.error("fetch chunk needs a valid time got: ", time);
+    console.error(
+      "fetch chunk needs a valid chunk with a time prop got: ",
+      time
+    );
     return;
   }
   const dateCode = generateDateCode(time, true);
 
+  const chunkSizeQuery = `?end=${generateDateCode(
+    new Date(time.getTime() + chunkSize),
+    true
+  )}`;
+
   let res = null;
   try {
-    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`);
+    res = yield call(
+      req,
+      `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`,
+      "arraybuffer"
+    );
   } catch (e) {
-    console.warn("Error occured when fetching zip", e, time);
+    console.warn(
+      "Error occured when fetching zip",
+      e,
+      time,
+      `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`
+    );
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
     return;
   }
@@ -114,8 +138,8 @@ export function* fetchFullDay({ date }) {
 
   let res = null;
   try {
-    // Would love to use a blob for this, but jszip doesn't like reat-native blobs
-    res = yield call(urlToArrayBuffer, `${API_URL}radar_${dateCode}.zip`);
+    // Would love to use a blob for this, but jszip doesn't like react-native blobs
+    res = yield call(req, `${API_URL}radar_${dateCode}.zip`, "arraybuffer");
   } catch (e) {
     console.error("Error occured when fetching zip", e);
     yield put({ type: FETCH_FULL_FAIL, error: e });
@@ -150,6 +174,7 @@ export const propTypes = {
     PropTypes.shape({
       status: PropTypes.string,
       unzippedFiles: PropTypes.arrayOf(PropTypes.string),
+      chunkSize: PropTypes.number,
     })
   ),
   unzippedFiles: PropTypes.arrayOf(PropTypes.string),
