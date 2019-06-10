@@ -25,6 +25,12 @@ export function timeFromDateCode(dateCode) {
   return date;
 }
 
+/** @function generateDateCode
+ * @param {Date} date -
+ * @param {Boolean} hour - include hours in code [hour=false]
+ * @param {Boolean} minute - include minutes in code [minute=false]
+ * @return {string} dateCode
+ */
 export function generateDateCode(date, hour = false, minute = false) {
   let dateCode = "";
 
