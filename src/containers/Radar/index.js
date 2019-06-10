@@ -19,6 +19,7 @@ import {
   FETCH_FULL,
   FETCH_RECENT,
   FETCH_CHUNK,
+  CLEAR_CACHE,
   propTypes,
 } from "../../redux/modules/zip";
 import { generateDateCode } from "../../helpers/general";
@@ -59,6 +60,8 @@ export default class Radar extends React.Component {
   };
 
   componentDidMount() {
+    // TODO: figure out a clever way to delete unneeded cached files
+    // this.props.dispatch({ type: CLEAR_CACHE });
     this.fetchZip();
   }
 

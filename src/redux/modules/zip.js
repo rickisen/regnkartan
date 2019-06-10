@@ -1,5 +1,7 @@
-import { call, put } from "redux-saga/effects";
+import { call, put, select, all } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
+import { Map } from "immutable";
+import { FileSystem } from "expo";
 
 import { unzipToBase64Files } from "../../helpers/zip";
 import { req } from "../../helpers/binaryRequest";
@@ -32,11 +34,42 @@ export const UNZIPPING_RECENT_FAIL = `${NAME}/UNZIPPING_RECENT_FAIL`;
 export const UNZIPPING_RECENT_SUCCESS = `${NAME}/UNZIPPING_RECENT_SUCCESS`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
+export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 
-const API_URL = "http://regn.rickisen.com/zip/v1/";
-// const API_URL = "http://desktop:8000/v1/";
+// const API_URL = "http://regn.rickisen.com/zip/v1/";
+const API_URL = "http://desktop:8000/v1/";
 
 /** SAGAS **/
+
+/** @generator clearCache - clears all zip and png files in our cache directory
+ * */
+export function* clearCache() {
+  let files = [];
+  try {
+    files = yield call(
+      FileSystem.readDirectoryAsync,
+      FileSystem.cacheDirectory
+    );
+  } catch (e) {
+    console.error("something went wrong when listing cached files: ", e);
+  }
+
+  files.sort();
+
+  for (var i = 0, len = files.length; i < len; i++) {
+    const file = files[i];
+    if (file.includes("zip") || file.includes("png")) {
+      try {
+        yield call(FileSystem.deleteAsync, FileSystem.cacheDirectory + file);
+      } catch (e) {
+        console.error(
+          "something wen wrong when trying to delete a cached file ",
+          e
+        );
+      }
+    }
+  }
+}
 
 /** @generator fetchRecent - fetches last 12 hours of image data in chunks */
 export function* fetchRecent() {
@@ -47,12 +80,11 @@ export function* fetchRecent() {
 
   yield put({ type: SELECT_RANGE, start, end });
 
-  const chunks = [];
+  let chunks = yield select(({ zip: { chunks } }) => chunks);
   const current = new Date(end.getTime());
   try {
     while (start.getTime() < current.getTime()) {
-      chunks.push({
-        time: new Date(current.getTime()),
+      chunks = chunks.set(new Date(current.getTime()), {
         status: "qued",
         chunkSize,
       });
@@ -67,16 +99,19 @@ export function* fetchRecent() {
   yield put({ type: REGISTER_CHUNKS, chunks });
 
   // TODO: Add ability to cancel whilst fetching
-  for (var i = 0, len = chunks.length; i < len; i++) {
-    const chunk = chunks[i];
-    yield call(fetchChunk, chunk);
-  }
+  const chunksToFetch = yield select(({ zip: { chunks } }) => chunks);
+  yield all(
+    chunksToFetch
+      .toArray()
+      .map(([time, chunk]) => call(fetchChunk, chunk, time))
+  );
 }
 
 /** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
- * @param {object} Chunk - Qued 'chunk' object that implements time property and chunkSize
+ * @param {object} Chunk - Qued 'chunk' object that implements  chunkSize
+ * @param {Date} time - key for the chunk
  */
-export function* fetchChunk({ time, chunkSize }) {
+export function* fetchChunk({ chunkSize }, time) {
   if (!time) {
     console.error(
       "fetch chunk needs a valid chunk with a time prop got: ",
@@ -99,12 +134,7 @@ export function* fetchChunk({ time, chunkSize }) {
       "arraybuffer"
     );
   } catch (e) {
-    console.warn(
-      "Error occured when fetching zip",
-      e,
-      time,
-      `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`
-    );
+    console.warn("Error occured when fetching zip", e, time);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
     return;
   }
@@ -170,13 +200,7 @@ export const propTypes = {
   error: PropTypes.bool,
   loadingZip: PropTypes.bool,
   unzipping: PropTypes.bool,
-  chunks: PropTypes.arrayOf(
-    PropTypes.shape({
-      status: PropTypes.string,
-      unzippedFiles: PropTypes.arrayOf(PropTypes.string),
-      chunkSize: PropTypes.number,
-    })
-  ),
+  chunks: PropTypes.instanceOf(Map),
   unzippedFiles: PropTypes.arrayOf(PropTypes.string),
   selectedRange: PropTypes.shape({
     start: PropTypes.date,
@@ -189,7 +213,7 @@ const initialState = {
   error: null,
   loadingZip: false,
   unzipping: false,
-  chunks: [],
+  chunks: Map(),
   unzippedFiles: [],
   selectedRange: {
     start: null,
@@ -213,61 +237,45 @@ export default function reducer(state = initialState, action) {
     case REGISTER_CHUNKS:
       return {
         ...state,
-        chunks: [...state.chunks, ...action.chunks],
+        chunks: state.chunks.merge(action.chunks),
       };
     case FETCH_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "loading" }
-            : c
-        ),
+        chunks: state.chunks.updateIn([action.time, "status"], () => "loading"),
       };
     case FETCH_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "loaded" }
-            : c
-        ),
+        chunks: state.chunks.updateIn([action.time, "status"], () => "loaded"),
       };
     case FETCH_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "failed" }
-            : c
-        ),
+        chunks: state.chunks.updateIn([action.time, "status"], () => "failed"),
       };
     case UNZIPPING_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "unzipping" }
-            : c
+        chunks: state.chunks.updateIn(
+          [action.time, "status"],
+          () => "unzipping"
         ),
       };
     case UNZIPPING_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "unzip-fail" }
-            : c
+        chunks: state.chunks.updateIn(
+          [action.time, "status"],
+          () => "unzip-fail"
         ),
       };
     case UNZIPPING_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks.map(c =>
-          c.time.getTime() === action.time.getTime()
-            ? { ...c, status: "unzipped" }
-            : c
-        ),
+        chunks: state.chunks
+          .updateIn([action.time, "status"], () => "unzipped")
+          .updateIn([action.time, "unzippedFiles"], () => action.unzippedFiles),
         unzippedFiles: sort_unique([
           ...action.unzippedFiles,
           ...state.unzippedFiles,

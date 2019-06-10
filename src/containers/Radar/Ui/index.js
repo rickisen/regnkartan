@@ -18,7 +18,7 @@ export default class UI extends React.Component {
   };
 
   static defaultProps = {
-    chunks: [],
+    chunks: null,
     selectedRange: {
       start: null,
       end: null,
