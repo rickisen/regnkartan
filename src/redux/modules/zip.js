@@ -14,12 +14,6 @@ import {
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/ZIP";
-export const FETCH_FULL = `${NAME}/FETCH_FULL`;
-export const FETCH_FULL_SUCCESS = `${NAME}/FETCH_FULL_SUCCESS`;
-export const FETCH_FULL_FAIL = `${NAME}/FETCH_FULL_FAIL`;
-export const UNZIPPING_FULL = `${NAME}/UNZIPPING_FULL`;
-export const UNZIPPING_FULL_FAIL = `${NAME}/UNZIPPING_FULL_FAIL`;
-export const UNZIPPING_FULL_SUCCESS = `${NAME}/UNZIPPING_FULL_SUCCESS`;
 export const FETCH_CHUNK = `${NAME}/FETCH_CHUNK`;
 export const FETCH_CHUNK_SUCCESS = `${NAME}/FETCH_CHUNK_SUCCESS`;
 export const FETCH_CHUNK_FAIL = `${NAME}/FETCH_CHUNK_FAIL`;
@@ -29,9 +23,6 @@ export const UNZIPPING_CHUNK_SUCCESS = `${NAME}/UNZIPPING_CHUNK_SUCCESS`;
 export const FETCH_RECENT = `${NAME}/FETCH_RECENT`;
 export const FETCH_RECENT_SUCCESS = `${NAME}/FETCH_RECENT_SUCCESS`;
 export const FETCH_RECENT_FAIL = `${NAME}/FETCH_RECENT_FAIL`;
-export const UNZIPPING_RECENT = `${NAME}/UNZIPPING_RECENT`;
-export const UNZIPPING_RECENT_FAIL = `${NAME}/UNZIPPING_RECENT_FAIL`;
-export const UNZIPPING_RECENT_SUCCESS = `${NAME}/UNZIPPING_RECENT_SUCCESS`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
@@ -102,11 +93,19 @@ export function* fetchRecent() {
 
   // TODO: Add ability to cancel whilst fetching
   const chunksToFetch = yield select(({ zip: { chunks } }) => chunks);
-  yield all(
-    chunksToFetch
-      .toArray()
-      .map(([time, chunk]) => call(fetchChunk, chunk, time))
-  );
+  try {
+    yield all(
+      chunksToFetch
+        .toArray()
+        .map(([time, chunk]) => call(fetchChunk, chunk, time))
+    );
+  } catch (e) {
+    console.error("Something went wrong when fetching all chunks", e);
+    yield put({ type: FETCH_RECENT_FAIL, error: e });
+    return;
+  }
+
+  yield put({ type: FETCH_RECENT_SUCCESS });
 }
 
 /** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
@@ -159,43 +158,6 @@ export function* fetchChunk({ chunkSize }, time) {
   }
 
   yield put({ type: UNZIPPING_CHUNK_SUCCESS, unzippedFiles, time });
-}
-
-export function* fetchFullDay({ date }) {
-  if (!date) {
-    console.error("fetch full day zip needs a valid date got: ", date);
-    return;
-  }
-  const dateCode = generateDateCode(date);
-
-  let res = null;
-  try {
-    // Would love to use a blob for this, but jszip doesn't like react-native blobs
-    res = yield call(req, `${API_URL}radar_${dateCode}.zip`, "arraybuffer");
-  } catch (e) {
-    console.error("Error occured when fetching zip", e);
-    yield put({ type: FETCH_FULL_FAIL, error: e });
-    return;
-  }
-
-  if (!res) {
-    console.error("Failed to get zip from api, res: ", res);
-    return;
-  }
-
-  yield put({ type: FETCH_FULL_SUCCESS });
-
-  yield put({ type: UNZIPPING_FULL });
-  let unzippedFiles = [];
-  try {
-    unzippedFiles = yield call(unzipToBase64Files, res);
-  } catch (e) {
-    console.error("Error occured when unzipping files", e);
-    yield put({ type: UNZIPPING_FULL_FAIL, error: e });
-    return;
-  }
-
-  yield put({ type: UNZIPPING_FULL_SUCCESS, unzippedFiles });
 }
 
 export const propTypes = {
@@ -278,45 +240,6 @@ export default function reducer(state = initialState, action) {
         chunks: state.chunks
           .updateIn([action.time, "status"], () => "unzipped")
           .updateIn([action.time, "unzippedFiles"], () => action.unzippedFiles),
-        unzippedFiles: sort_unique([
-          ...action.unzippedFiles,
-          ...state.unzippedFiles,
-        ]),
-      };
-    case FETCH_FULL:
-      return {
-        ...state,
-        error: null,
-        loadingZip: true,
-      };
-    case FETCH_FULL_SUCCESS:
-      return {
-        ...state,
-        error: null,
-        loadingZip: false,
-      };
-    case FETCH_FULL_FAIL:
-      return {
-        ...state,
-        error: action.error,
-        loadingZip: false,
-      };
-    case UNZIPPING_FULL:
-      return {
-        ...state,
-        unzipping: true,
-      };
-    case UNZIPPING_FULL_FAIL:
-      return {
-        ...state,
-        error: action.error,
-        unzipping: false,
-      };
-    case UNZIPPING_FULL_SUCCESS:
-      return {
-        ...state,
-        error: action.error,
-        unzipping: false,
         unzippedFiles: sort_unique([
           ...action.unzippedFiles,
           ...state.unzippedFiles,

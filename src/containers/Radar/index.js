@@ -16,7 +16,6 @@ import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../components/StatusBarBg";
 import {
-  FETCH_FULL,
   FETCH_RECENT,
   FETCH_CHUNK,
   CLEAR_CACHE,
