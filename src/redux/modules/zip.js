@@ -36,8 +36,10 @@ export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 
-// const API_URL = "http://regn.rickisen.com/zip/v1/";
-const API_URL = "http://desktop:8000/v1/";
+const API_URL = "http://regn.rickisen.com/zip/v1/";
+// const API_URL = "http://desktop:8000/v1/";
+// const API_URL = "http://laptop:8000/v1/";
+// const API_URL = "http://minikube/zip/v1/";
 
 /** SAGAS **/
 
