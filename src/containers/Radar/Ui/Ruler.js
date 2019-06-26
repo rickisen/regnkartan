@@ -25,6 +25,12 @@ function isHalfHourIncrement(dateCode) {
   }
 }
 
+// makes a slight opacity gradient
+function calcOpacity(i, length) {
+  const fullRange = 1 - Math.abs(i - length / 2) / (length / 2);
+  return fullRange + 0.5 / 2;
+}
+
 const Ruler = ({
   selectedRange: { dateCodeRange, start, end },
   currentImage,
@@ -34,7 +40,7 @@ const Ruler = ({
   const selectedDate = timeFromDateCode(currentImage);
 
   return (
-    <Svg width={svgWidth} height="40" viewBox={`0 0 ${svgWidth} 40`}>
+    <Svg width={svgWidth} height="50" viewBox={`0 0 ${svgWidth} 40`}>
       <G y="10">
         <Text fill="white" x={svgWidth / 2 - 55 / 2}>
           {`${pad(selectedDate.getDate())}/${pad(
@@ -55,7 +61,7 @@ const Ruler = ({
       <G y="30">
         {lines.map((c, i) => {
           const xPos = (i / lines.length) * svgWidth;
-          const opacity = 0.75;
+          const opacity = calcOpacity(i, lines.length);
           const firstOnHour = isFirstOnHour(c);
           return (
             <Line
@@ -67,6 +73,18 @@ const Ruler = ({
               stroke={`rgba(255,255,255, ${opacity})`}
               strokeWidth={1}
             />
+          );
+        })}
+      </G>
+      <G y="42" x="-5">
+        {lines.map((c, i) => {
+          const xPos = (i / lines.length) * svgWidth;
+          const firstOnHour = isFirstOnHour(c);
+          const opacity = calcOpacity(i, lines.length);
+          return !firstOnHour ? null : (
+            <Text opacity={opacity} fontSize="10" key={c} x={xPos} fill="white">
+              {pad(timeFromDateCode(c).getHours())}
+            </Text>
           );
         })}
       </G>
