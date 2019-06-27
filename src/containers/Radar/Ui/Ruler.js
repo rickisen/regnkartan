@@ -42,17 +42,17 @@ const Ruler = ({
   return (
     <Svg width={svgWidth} height="50" viewBox={`0 0 ${svgWidth} 40`}>
       <G y="10">
-        <Text fill="white" x={svgWidth / 2 - 55 / 2}>
+        <Text fill="black" x={svgWidth / 2 - 55 / 2}>
           {`${pad(selectedDate.getDate())}/${pad(
             selectedDate.getHours()
           )}:${pad(selectedDate.getMinutes())}`}
         </Text>
-        <Text fill="white">
+        <Text fill="black">
           {`${pad(start.getDate())}/${pad(start.getHours())}:${pad(
             start.getMinutes()
           )}`}
         </Text>
-        <Text x={svgWidth - 55} fill="white">
+        <Text x={svgWidth - 55} fill="black">
           {`${pad(end.getDate())}/${pad(end.getHours())}:${pad(
             end.getMinutes()
           )}`}
@@ -70,7 +70,7 @@ const Ruler = ({
               y2="0"
               x2={xPos}
               y1={firstOnHour ? "-10" : "-5"}
-              stroke={`rgba(255,255,255, ${opacity})`}
+              stroke={`rgba(0,0,0, ${opacity})`}
               strokeWidth={1}
             />
           );
@@ -82,7 +82,7 @@ const Ruler = ({
           const firstOnHour = isFirstOnHour(c);
           const opacity = calcOpacity(i, lines.length);
           return !firstOnHour ? null : (
-            <Text opacity={opacity} fontSize="10" key={c} x={xPos} fill="white">
+            <Text opacity={opacity} fontSize="10" key={c} x={xPos} fill="black">
               {pad(timeFromDateCode(c).getHours())}
             </Text>
           );

@@ -9,7 +9,7 @@ import {
   ImageBackground,
   Slider,
 } from "react-native";
-import { BlurView, MapView } from "expo";
+import { MapView } from "expo";
 
 import Ui from "./Ui";
 import RadarOverlay from "./RadarOverlay";

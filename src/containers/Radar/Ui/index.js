@@ -40,6 +40,9 @@ export default class UI extends React.Component {
       left: 0,
       right: 0,
       position: "absolute",
+      marginHorizontal: 10,
+      borderTopRightRadius: 5,
+      borderTopLeftRadius: 5,
     },
     ui: {
       flex: 1,
@@ -67,7 +70,7 @@ export default class UI extends React.Component {
     }
 
     return (
-      <BlurView tint="dark" intensity={80} style={styles.uiContainer}>
+      <BlurView tint="light" intensity={80} style={styles.uiContainer}>
         <View
           onLayout={({
             nativeEvent: {
@@ -97,8 +100,8 @@ export default class UI extends React.Component {
           <TouchableOpacity onPress={fetchRecent}>
             <Text
               style={{
-                color: "white",
-                borderColor: "white",
+                color: "black",
+                borderColor: "black",
                 padding: 15,
                 borderWidth: 1,
                 borderRadius: 5,

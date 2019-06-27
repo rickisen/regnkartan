@@ -28,7 +28,7 @@ export default class Drawer extends React.Component {
       alignItems: "center",
     },
     headerText: {
-      color: "white",
+      color: "black",
     },
     menuItem: {
       padding: 20,

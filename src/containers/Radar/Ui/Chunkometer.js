@@ -16,21 +16,21 @@ function timeRelativeInRange(time, { start, end }) {
 function statusToColor(status) {
   switch (status) {
     case "qued":
-      return "rgba(255,255,255,0.0)";
+      return "rgba(100,100,100,0.0)";
     case "loading":
-      return "rgba(255,255,255,0.1)";
+      return "rgba(100,100,100,0.1)";
     case "loaded":
-      return "rgba(255,255,255,0.2)";
+      return "rgba(100,100,100,0.2)";
     case "unzipping":
-      return "rgba(255,255,255,0.3)";
+      return "rgba(100,100,100,0.3)";
     case "unzipped":
-      return "rgba(255,255,255,0.75)";
+      return "rgba(100,100,100,0.75)";
     case "failed":
       return "rgba(255,100,100,0.4)";
     case "unzip-fail":
-      return "rgba(255,255,255,0.0)";
+      return "rgba(100,100,100,0.0)";
     default:
-      return "rgba(255,255,255,0)";
+      return "rgba(100,100,100,0)";
   }
 }
 
@@ -66,7 +66,7 @@ const Chunkometer = ({ svgWidth, chunks, selectedRange }) => {
               ry={3}
               key={time}
               fill={bg}
-              stroke={`rgba(255,255,255, ${
+              stroke={`rgba(100,100,100, ${
                 chunk.status === "unzipped" ? "0" : "0.5"
               })`}
             />

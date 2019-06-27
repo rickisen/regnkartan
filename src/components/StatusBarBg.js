@@ -16,8 +16,8 @@ export default class StatusBarHandler extends React.Component {
 
   render() {
     return (
-      <BlurView tint="dark" intensity={80} style={this.styles.container}>
-        <StatusBar backgroundColor="blue" barStyle="light-content" />
+      <BlurView tint="light" intensity={80} style={this.styles.container}>
+        <StatusBar backgroundColor="white" barStyle="dark-content" />
       </BlurView>
     );
   }

@@ -85,17 +85,15 @@ export default class Slider extends React.Component {
               y1={0}
               x2={svgWidth}
               y2={0}
-              stroke={
-                touching ? "rgba(255,255,255, 1)" : "rgba(255,255,255, 0.2)"
-              }
+              stroke="black"
+              opacity={touching ? "1" : "0.2"}
               strokeWidth={1}
             />
             <G scale={1} y={-25} x={xOffset}>
               <Path
                 x={-10}
-                fill="white"
+                fill="gray"
                 stroke="transparent"
-                stroke-width="2"
                 d="M15 3 Q16.5 6.8 25 18 A12.8 12.8 0 1 1 5 18 Q13.5 6.8 15 3z"
               />
             </G>
