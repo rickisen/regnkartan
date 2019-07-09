@@ -109,7 +109,7 @@ export function* fetchRecent() {
 }
 
 /** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
- * @param {object} Chunk - Qued 'chunk' object that implements  chunkSize
+ * @param {object} Chunk - Qued 'chunk' object that implements chunkSize
  * @param {Date} time - key for the chunk
  */
 export function* fetchChunk({ chunkSize }, time) {

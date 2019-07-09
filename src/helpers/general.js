@@ -17,11 +17,21 @@ export function timeFromDateCode(dateCode) {
   const hour = parseInt(dateCode[6] + dateCode[7]);
   const minute = parseInt(dateCode[8] + dateCode[9]);
   const date = new Date();
-  date.setUTCFullYear(year);
-  date.setUTCMonth(month - 1);
-  date.setUTCDate(day);
-  date.setUTCHours(hour);
-  date.setUTCMinutes(minute);
+  if (year) {
+    date.setUTCFullYear(2000 + year);
+  }
+  if (month) {
+    date.setUTCMonth(month - 1);
+  }
+  if (day) {
+    date.setUTCDate(day);
+  }
+  if (hour) {
+    date.setUTCHours(hour);
+  }
+  if (minute) {
+    date.setUTCMinutes(minute);
+  }
   return date;
 }
 
@@ -96,4 +106,20 @@ export function sort_unique(arr) {
     }
   }
   return ret;
+}
+
+export function timeIncrementsInRange(increment, { start, end }) {
+  const ret = [];
+  const applyIncrement = iter => new Date(iter.getTime() + increment);
+
+  for (var i = new Date(start); i.getTime() < end; i = applyIncrement(i)) {
+    ret.push(new Date(i.getTime()));
+  }
+
+  return ret;
+}
+
+export function midpointInRange({ start, end }) {
+  const diff = end - start;
+  return new Date(start + diff / 2);
 }

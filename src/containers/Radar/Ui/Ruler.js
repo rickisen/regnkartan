@@ -1,101 +1,228 @@
 import React from "react";
 import { Svg } from "expo";
+import { StyleSheet, View } from "react-native";
 
 import * as localTypes from "./localTypes";
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
-import { pad, timeFromDateCode } from "../../../helpers/general";
+import {
+  pad,
+  generateDateCode,
+  timeFromDateCode,
+} from "../../../helpers/general";
 
-const { Line, Text, G } = Svg;
+const { Line, Text, G, Defs, LinearGradient, Stop } = Svg;
+const hours = [...Array(24).keys()];
 
-function isFirstOnHour(dateCode) {
-  if (typeof dateCode === "string" && dateCode.length === 10) {
+function msFromStartOfDay(datetime) {
+  const datetimeStamp = datetime.getTime();
+  const startOfDay = new Date(datetimeStamp);
+  startOfDay.setHours(0);
+  startOfDay.setMinutes(0);
+  startOfDay.setMilliseconds(0);
+  const startOfDayStamp = startOfDay.getTime();
+
+  return datetimeStamp - startOfDayStamp;
+}
+
+// Makes slight centered gradient opacity
+function calcOpacity(pos, max, gentle) {
+  const half = max / 2;
+  const fullRange = 1 - Math.abs(pos - half) / half;
+  if (gentle) {
+    return fullRange + 0.5 / 2; // So that we dont go fully from 0 to 1
+  }
+  return fullRange;
+}
+
+export default class Ruler extends React.Component {
+  static propTypes = {
+    selectedRange: zipTypes.selectedRange,
+    currentImage: localTypes.currentImage,
+    svgWidth: localTypes.svgWidth,
+    setCurrentFile: localTypes.setCurrentFile,
+  };
+
+  static defaultProps = {
+    svgWidth: 100,
+    setCurrentFile: () => {},
+  };
+
+  state = {
+    touching: false,
+    firstTouch: -1,
+    prevMoved: 0,
+    moved: 0,
+  };
+
+  styles = StyleSheet.create({
+    touching: {},
+    container: {
+      flex: 1,
+    },
+    rotate: {
+      transform: [{ rotateY: "45deg" }],
+    },
+  });
+
+  grantTouch = event => {
+    this.setState({ touching: true, firstTouch: event.nativeEvent.locationX });
+  };
+
+  updatePos = event => {
+    const { setCurrentFile, currentImage } = this.props;
+    const { firstTouch, prevMoved } = this.state;
+    let moved = 0;
+    if (firstTouch) {
+      moved = event.nativeEvent.locationX - firstTouch; // maybe round this for optimization
+    }
+
+    setCurrentFile(
+      generateDateCode(
+        new Date(
+          timeFromDateCode(currentImage).getTime() -
+            this.pxToMs(moved + prevMoved)
+        ),
+        true,
+        true
+      )
+    );
+    this.setState({ moved });
+  };
+
+  releaseTouch = event => {
+    const { prevMoved, moved } = this.state;
+    this.setState({
+      touching: false,
+      firstTouch: -1,
+      prevMoved: prevMoved + moved,
+      moved: 0,
+    });
+  };
+
+  msToPx(ms) {
+    const { svgWidth } = this.props;
+    const widthInMS = 12 * 60 * 60 * 1000;
+    return (svgWidth / widthInMS) * ms;
+  }
+
+  pxToMs(px) {
+    const { svgWidth } = this.props;
+    const widthInMS = 12 * 60 * 60 * 1000;
+    return (widthInMS / svgWidth) * px;
+  }
+
+  render() {
+    const styles = this.styles;
+    const { svgWidth, currentImage } = this.props;
+    const { prevMoved, moved, touching } = this.state;
+    const svgHeight = 70;
+    const midpoint = timeFromDateCode(currentImage);
+    const dayOffset = this.msToPx(msFromStartOfDay(midpoint)) * -1;
+    // Since all math up to this point uses the far left as 0 (origin/origo)
+    const originToMid = this.msToPx((12 * 60 * 60 * 1000) / 2);
+    const offset = prevMoved + moved + dayOffset + originToMid;
+
     return (
-      dateCode[dateCode.length - 2] === "0" &&
-      dateCode[dateCode.length - 1] === "0"
+      <View
+        style={[styles.container, touching ? styles.touching : null]}
+        onStartShouldSetResponder={() => true}
+        onResponderGrant={this.grantTouch}
+        onResponderMove={this.updatePos}
+        onResponderReject={this.releaseTouch}
+        onResponderTerminate={this.releaseTouch}
+        onResponderRelease={this.releaseTouch}
+      >
+        <Svg
+          width={svgWidth}
+          height={svgHeight}
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        >
+          <Defs>
+            <LinearGradient id="grad" x1="0" y1="0" x2={svgWidth} y2="0">
+              <Stop
+                offset="0%"
+                stopColor="black"
+                stopOpacity={touching ? "0.5" : "0"}
+              />
+              <Stop offset="50%" stopColor="black" stopOpacity="1" />
+              <Stop
+                offset="100%"
+                stopColor="black"
+                stopOpacity={touching ? "0.5" : "0"}
+              />
+            </LinearGradient>
+          </Defs>
+          <G y="10">
+            <Text fill="black" x={svgWidth / 2 - 28.5 / 2}>
+              {`${pad(midpoint.getHours())}:${pad(midpoint.getMinutes())}`}
+            </Text>
+          </G>
+          <G x={svgWidth / 2}>
+            <Line y1="15" y2="20" stroke="black" />
+            <Line
+              opacity="0.4"
+              y1="20"
+              y2="20"
+              x1={svgWidth / 2}
+              x2={svgWidth * -0.5}
+              stroke="url(#grad)"
+            />
+            <Line y1="55" y2="60" stroke="black" />
+            <Line
+              opacity="0.5"
+              y1="55"
+              y2="55"
+              x1={svgWidth / 2}
+              x2={svgWidth * -0.5}
+              stroke="url(#grad)"
+            />
+          </G>
+          <G y="35">
+            {hours.map((c, i) => {
+              const doubleWidth = svgWidth * 2;
+              const tick = doubleWidth / hours.length;
+              // Make use of modulas and Math.abs to make the hours repeat when
+              // rendering over the 24 hour point
+              let xPos =
+                ((i / hours.length) * doubleWidth + offset) % doubleWidth;
+              if (xPos < 0) {
+                xPos = xPos + doubleWidth;
+              }
+              const opacity = calcOpacity(xPos, svgWidth, touching);
+              return (
+                <G key={c + ""}>
+                  <Line
+                    x1={xPos}
+                    y2="0"
+                    x2={xPos}
+                    y1="-10"
+                    stroke={`rgba(0,0,0, ${opacity})`}
+                    strokeWidth={1}
+                  />
+                  <Text
+                    transform="rotate(0, 45, 45)"
+                    opacity={opacity}
+                    fontSize="10"
+                    x={xPos - 5}
+                    y="12"
+                    fill="black"
+                  >
+                    {pad(c)}
+                  </Text>
+                  <Line
+                    x1={xPos + tick / 2}
+                    y2="0"
+                    x2={xPos + tick / 2}
+                    y1="-5"
+                    stroke={`rgba(0,0,0, ${opacity})`}
+                    strokeWidth={1}
+                  />
+                </G>
+              );
+            })}
+          </G>
+        </Svg>
+      </View>
     );
   }
-  return false;
 }
-
-function isHalfHourIncrement(dateCode) {
-  if (typeof dateCode === "string" && dateCode.length === 10) {
-    const minutes =
-      dateCode[dateCode.length - 2] + dateCode[dateCode.length - 1];
-    return minutes === "00" || minutes === "30";
-  }
-}
-
-// makes a slight opacity gradient
-function calcOpacity(i, length) {
-  const fullRange = 1 - Math.abs(i - length / 2) / (length / 2);
-  return fullRange + 0.5 / 2;
-}
-
-const Ruler = ({
-  selectedRange: { dateCodeRange, start, end },
-  currentImage,
-  svgWidth,
-}) => {
-  const lines = dateCodeRange.filter(isHalfHourIncrement);
-  const selectedDate = timeFromDateCode(currentImage);
-
-  return (
-    <Svg width={svgWidth} height="50" viewBox={`0 0 ${svgWidth} 40`}>
-      <G y="10">
-        <Text fill="black" x={svgWidth / 2 - 55 / 2}>
-          {`${pad(selectedDate.getDate())}/${pad(
-            selectedDate.getHours()
-          )}:${pad(selectedDate.getMinutes())}`}
-        </Text>
-        <Text fill="black">
-          {`${pad(start.getDate())}/${pad(start.getHours())}:${pad(
-            start.getMinutes()
-          )}`}
-        </Text>
-        <Text x={svgWidth - 55} fill="black">
-          {`${pad(end.getDate())}/${pad(end.getHours())}:${pad(
-            end.getMinutes()
-          )}`}
-        </Text>
-      </G>
-      <G y="30">
-        {lines.map((c, i) => {
-          const xPos = (i / lines.length) * svgWidth;
-          const opacity = calcOpacity(i, lines.length);
-          const firstOnHour = isFirstOnHour(c);
-          return (
-            <Line
-              key={c}
-              x1={xPos}
-              y2="0"
-              x2={xPos}
-              y1={firstOnHour ? "-10" : "-5"}
-              stroke={`rgba(0,0,0, ${opacity})`}
-              strokeWidth={1}
-            />
-          );
-        })}
-      </G>
-      <G y="42" x="-5">
-        {lines.map((c, i) => {
-          const xPos = (i / lines.length) * svgWidth;
-          const firstOnHour = isFirstOnHour(c);
-          const opacity = calcOpacity(i, lines.length);
-          return !firstOnHour ? null : (
-            <Text opacity={opacity} fontSize="10" key={c} x={xPos} fill="black">
-              {pad(timeFromDateCode(c).getHours())}
-            </Text>
-          );
-        })}
-      </G>
-    </Svg>
-  );
-};
-
-Ruler.propTypes = {
-  selectedRange: zipTypes.selectedRange,
-  currentImage: localTypes.currentImage,
-  svgWidth: localTypes.svgWidth,
-};
-
-export default Ruler;
