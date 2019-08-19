@@ -1,7 +1,8 @@
 import React from "react";
 import { PropTypes } from "prop-types";
 import { StatusBar, StyleSheet, View } from "react-native";
-import { BlurView, Constants } from "expo";
+import Constants from 'expo-constants';
+import { BlurView } from 'expo-blur';
 
 export default class StatusBarHandler extends React.Component {
   styles = StyleSheet.create({

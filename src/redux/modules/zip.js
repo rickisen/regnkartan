@@ -1,7 +1,7 @@
 import { call, put, select, all } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import { Map } from "immutable";
-import { FileSystem } from "expo";
+import * as FileSystem from 'expo-file-system';
 
 import { unzipToBase64Files } from "../../helpers/zip";
 import { req } from "../../helpers/binaryRequest";

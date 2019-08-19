@@ -1,5 +1,13 @@
 import React from "react";
-import { Svg } from "expo";
+import {
+  Line,
+  Text,
+  G,
+  Defs,
+  LinearGradient,
+  Stop,
+  Svg,
+} from "react-native-svg";
 import { StyleSheet, View } from "react-native";
 
 import * as localTypes from "./localTypes";
@@ -10,7 +18,6 @@ import {
   timeFromDateCode,
 } from "../../../helpers/general";
 
-const { Line, Text, G, Defs, LinearGradient, Stop } = Svg;
 const hours = [...Array(24).keys()];
 
 function msFromStartOfDay(datetime) {

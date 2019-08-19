@@ -1,10 +1,8 @@
 import React from "react";
-import { Svg } from "expo";
+import { Line, Path, G, Svg } from "react-native-svg";
 import { View, StyleSheet } from "react-native";
 
 import * as localTypes from "./localTypes";
-
-const { Line, Path, G } = Svg;
 
 export default class Slider extends React.Component {
   static propTypes = {

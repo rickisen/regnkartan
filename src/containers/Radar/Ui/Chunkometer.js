@@ -1,10 +1,8 @@
 import React from "react";
-import { Svg } from "expo";
+import { Rect, G, Svg } from "react-native-svg";
 
 import * as localTypes from "./localTypes";
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
-
-const { Rect, G } = Svg;
 
 function timeRelativeInRange(time, { start, end }) {
   const max = end.getTime() - start.getTime();

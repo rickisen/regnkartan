@@ -7,7 +7,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { Constants } from "expo";
+import Constants from 'expo-constants';
 
 export default class Drawer extends React.Component {
   static propTypes = {

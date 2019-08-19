@@ -1,4 +1,8 @@
-import { FileSystem } from "expo";
+import {
+  cacheDirectory,
+  writeAsStringAsync,
+  EncodingType,
+} from "expo-file-system";
 import JSZip from "jszip";
 
 export function unzipToBase64Files(zipData) {
@@ -10,13 +14,13 @@ export function unzipToBase64Files(zipData) {
         // write unzipped files
         zip.forEach((relativePath, file) => {
           if (file.dir) return;
-          const uri = `${FileSystem.cacheDirectory}${relativePath}`;
+          const uri = `${cacheDirectory}${relativePath}`;
 
           promiseArr.push(
             new Promise(resolve => {
               file.async("base64").then(base64 => {
-                FileSystem.writeAsStringAsync(uri, base64, {
-                  encoding: FileSystem.EncodingTypes.Base64,
+                writeAsStringAsync(uri, base64, {
+                  encoding: EncodingType.Base64,
                 })
                   .then(() => {
                     resolve(uri);

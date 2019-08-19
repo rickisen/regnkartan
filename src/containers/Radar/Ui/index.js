@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { BlurView } from "expo";
+import { BlurView } from 'expo-blur';
 
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
 import * as localTypes from "./localTypes";

@@ -1,6 +1,6 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import { MapView } from "expo";
+import MapView from 'react-native-maps';
 
 export default class RadarOverlay extends React.Component {
   static propTypes = {
