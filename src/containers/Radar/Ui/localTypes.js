@@ -6,5 +6,7 @@ export const currentImage = PropTypes.string;
 
 export const svgWidth = PropTypes.number;
 
+export const timestamp = PropTypes.number;
+
 export const setCurrentFile = PropTypes.func.isRequired;
 export const fetchRecent = PropTypes.func.isRequired;

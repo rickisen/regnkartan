@@ -1,12 +1,12 @@
 import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { BlurView } from 'expo-blur';
+import { BlurView } from "expo-blur";
 
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
 import * as localTypes from "./localTypes";
 import Chunkometer from "./Chunkometer";
 import Ruler from "./Ruler";
-import Slider from "./Slider";
+import { timeFromDateCode } from "../../../helpers/general";
 
 export default class UI extends React.Component {
   static propTypes = {
@@ -82,13 +82,7 @@ export default class UI extends React.Component {
           style={styles.container}
         >
           <Ruler
-            selectedRange={selectedRange}
-            currentImage={currentImage}
-            svgWidth={svgWidth}
-          />
-          <Slider
-            dateCodeRange={dateCodeRange}
-            currentImage={currentImage}
+            initialTime={timeFromDateCode(currentImage).getTime()}
             svgWidth={svgWidth}
             setCurrentFile={setCurrentFile}
           />

@@ -11,12 +11,7 @@ import {
 import { StyleSheet, View } from "react-native";
 
 import * as localTypes from "./localTypes";
-import { propTypes as zipTypes } from "../../../redux/modules/zip";
-import {
-  pad,
-  generateDateCode,
-  timeFromDateCode,
-} from "../../../helpers/general";
+import { pad, generateDateCode } from "../../../helpers/general";
 
 const hours = [...Array(24).keys()];
 
@@ -41,10 +36,16 @@ function calcOpacity(pos, max, gentle) {
   return fullRange;
 }
 
+const initialState = {
+  touching: false,
+  firstTouch: -1,
+  firstTime: 0,
+  targetTime: 0,
+};
+
 export default class Ruler extends React.Component {
   static propTypes = {
-    selectedRange: zipTypes.selectedRange,
-    currentImage: localTypes.currentImage,
+    initialTime: localTypes.timestamp.isRequired,
     svgWidth: localTypes.svgWidth,
     setCurrentFile: localTypes.setCurrentFile,
   };
@@ -54,12 +55,7 @@ export default class Ruler extends React.Component {
     setCurrentFile: () => {},
   };
 
-  state = {
-    touching: false,
-    firstTouch: -1,
-    prevMoved: 0,
-    moved: 0,
-  };
+  state = initialState;
 
   styles = StyleSheet.create({
     touching: {},
@@ -71,38 +67,43 @@ export default class Ruler extends React.Component {
     },
   });
 
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps.initialTime != this.props.initialTime &&
+      !this.state.touching
+    ) {
+      this.setState({ ...initialState, targetTime: this.props.initialTime });
+    }
+  }
+
   grantTouch = event => {
-    this.setState({ touching: true, firstTouch: event.nativeEvent.locationX });
+    this.setState({
+      touching: true,
+      firstTouch: event.nativeEvent.locationX,
+      firstTime: this.props.initialTime,
+      targetTime: this.props.initialTime,
+    });
   };
 
   updatePos = event => {
-    const { setCurrentFile, currentImage } = this.props;
-    const { firstTouch, prevMoved } = this.state;
+    const { setCurrentFile } = this.props;
+    const { firstTouch, firstTime } = this.state;
+    let { targetTime } = this.state;
+
     let moved = 0;
     if (firstTouch) {
       moved = event.nativeEvent.locationX - firstTouch; // maybe round this for optimization
     }
 
-    setCurrentFile(
-      generateDateCode(
-        new Date(
-          timeFromDateCode(currentImage).getTime() -
-            this.pxToMs(moved + prevMoved)
-        ),
-        true,
-        true
-      )
-    );
-    this.setState({ moved });
+    targetTime = firstTime - this.pxToMs(moved);
+    setCurrentFile(generateDateCode(new Date(targetTime), true, true));
+    this.setState({ targetTime });
   };
 
-  releaseTouch = event => {
-    const { prevMoved, moved } = this.state;
+  releaseTouch = () => {
     this.setState({
-      touching: false,
-      firstTouch: -1,
-      prevMoved: prevMoved + moved,
-      moved: 0,
+      ...initialState,
+      targetTime: this.state.targetTime,
     });
   };
 
@@ -120,14 +121,14 @@ export default class Ruler extends React.Component {
 
   render() {
     const styles = this.styles;
-    const { svgWidth, currentImage } = this.props;
-    const { prevMoved, moved, touching } = this.state;
+    const { svgWidth } = this.props;
+    const { touching, targetTime } = this.state;
     const svgHeight = 70;
-    const midpoint = timeFromDateCode(currentImage);
+    const midpoint = new Date(targetTime);
     const dayOffset = this.msToPx(msFromStartOfDay(midpoint)) * -1;
     // Since all math up to this point uses the far left as 0 (origin/origo)
     const originToMid = this.msToPx((12 * 60 * 60 * 1000) / 2);
-    const offset = prevMoved + moved + dayOffset + originToMid;
+    const offset = dayOffset + originToMid;
 
     return (
       <View
@@ -160,8 +161,9 @@ export default class Ruler extends React.Component {
             </LinearGradient>
           </Defs>
           <G y="10">
-            <Text fill="black" x={svgWidth / 2 - 28.5 / 2}>
+            <Text fill="black" x={svgWidth / 2 - 70 / 2}>
               {`${pad(midpoint.getHours())}:${pad(midpoint.getMinutes())}`}
+              {`-${pad(midpoint.getDate())}/${pad(midpoint.getMonth() + 1)}`}
             </Text>
           </G>
           <G x={svgWidth / 2}>
