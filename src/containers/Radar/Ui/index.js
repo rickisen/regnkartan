@@ -1,114 +1,72 @@
-import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { memo } from "react";
+import { View, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
 import * as localTypes from "./localTypes";
-import Chunkometer from "./Chunkometer";
-import Ruler from "./Ruler";
-import { timeFromDateCode } from "../../../helpers/general";
+import { generateDateCode } from "../../../helpers/general";
+import TimePointPicker from "../../../components/TimePointPicker";
 
-export default class UI extends React.Component {
-  static propTypes = {
-    setCurrentFile: localTypes.setCurrentFile,
-    currentImage: localTypes.currentImage,
-    fetchRecent: localTypes.fetchRecent,
-    chunks: zipTypes.chunks,
-    selectedRange: zipTypes.selectedRange,
-  };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "flex-start",
+    alignItems: "stretch",
+  },
+  uiContainer: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderRadius: 10,
+    position: "absolute",
+    marginHorizontal: 10,
+    borderTopRightRadius: 5,
+    borderTopLeftRadius: 5,
+  },
+  ui: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    margin: 20,
+    minHeight: 75,
+  },
+});
 
-  static defaultProps = {
-    chunks: null,
-    selectedRange: {
-      start: null,
-      end: null,
-      dateCodeRange: [],
-    },
-  };
+function UI({ chunks, selectedRange, setCurrentFile }) {
+  const { start, end, dateCodeRange } = selectedRange;
 
-  state = { svgWidth: 340 };
-
-  styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      justifyContent: "flex-start",
-      alignItems: "stretch",
-    },
-    uiContainer: {
-      bottom: 0,
-      left: 0,
-      right: 0,
-      position: "absolute",
-      marginHorizontal: 10,
-      borderTopRightRadius: 5,
-      borderTopLeftRadius: 5,
-    },
-    ui: {
-      flex: 1,
-      justifyContent: "flex-start",
-      alignItems: "center",
-      margin: 20,
-      minHeight: 75,
-    },
-  });
-
-  render() {
-    const {
-      chunks,
-      selectedRange,
-      currentImage,
-      setCurrentFile,
-      fetchRecent,
-    } = this.props;
-    const { styles } = this;
-    const { start, end, dateCodeRange } = selectedRange;
-    const { svgWidth } = this.state;
-
-    if (!start || !end || !dateCodeRange) {
-      return null;
-    }
-
-    return (
-      <BlurView tint="light" intensity={80} style={styles.uiContainer}>
-        <View
-          onLayout={({
-            nativeEvent: {
-              layout: { width },
-            },
-          }) =>
-            this.setState({ svgWidth: width - styles.container.padding * 2 })
-          }
-          style={styles.container}
-        >
-          <Ruler
-            initialTime={timeFromDateCode(currentImage).getTime()}
-            svgWidth={svgWidth}
-            setCurrentFile={setCurrentFile}
-          />
-          <Chunkometer
-            selectedRange={selectedRange}
-            svgWidth={svgWidth}
-            chunks={chunks}
-          />
-          <TouchableOpacity onPress={fetchRecent}>
-            <Text
-              style={{
-                color: "black",
-                borderColor: "black",
-                padding: 15,
-                borderWidth: 1,
-                borderRadius: 5,
-                textAlign: "center",
-                marginTop: 10,
-                marginBottom: 10,
-              }}
-            >
-              Refresh
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </BlurView>
-    );
+  if (!start || !end || !dateCodeRange) {
+    return null;
   }
+
+  return (
+    <BlurView tint="light" intensity={80} style={styles.uiContainer}>
+      <View style={styles.container}>
+        <TimePointPicker
+          onSelected={stamp => {
+            setCurrentFile(generateDateCode(new Date(stamp), true, true));
+          }}
+        />
+      </View>
+    </BlurView>
+  );
 }
+
+UI.propTypes = {
+  setCurrentFile: localTypes.setCurrentFile,
+  currentImage: localTypes.currentImage,
+  chunks: zipTypes.chunks,
+  selectedRange: zipTypes.selectedRange,
+};
+
+UI.defaultProps = {
+  chunks: null,
+  selectedRange: {
+    start: null,
+    end: null,
+    dateCodeRange: [],
+  },
+};
+
+export default memo(UI);
