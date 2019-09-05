@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import { PropTypes } from "prop-types";
 import { FlatList, View, Text } from "react-native";
 import { Svg, Line } from "react-native-svg";
 
+import { propTypes as zipTypes } from "../../redux/modules/zip";
 import Hour from "./Hour.js";
 import { pad } from "../../helpers/general";
 
-function TimePointPicker({ range, initialHour, onSelected }) {
+function TimePointPicker({ chunks, range, initialHour, onSelected }) {
   const hourWidth = 60;
 
   const [pickerWidth, setPickerWidth] = useState(375); // maybe initialize with styled value?
@@ -61,7 +63,6 @@ function TimePointPicker({ range, initialHour, onSelected }) {
       });
     }, 10);
   }, []);
-
   return (
     <View
       onLayout={onLayout}
@@ -113,18 +114,25 @@ function TimePointPicker({ range, initialHour, onSelected }) {
                     stamp={item}
                     hourWidth={hourWidth}
                     index={index}
-                    future
+                    status="future"
                   />
                 );
               })}
             </View>
           );
         }}
-        horizontal
+        horizontal={true}
         showsHorizontalScrollIndicator={false}
-        renderItem={({ item, index }) => (
-          <Hour stamp={item} hourWidth={hourWidth} index={index} />
-        )}
+        renderItem={({ item, index }) => {
+          return (
+            <Hour
+              status={chunkStatusForHour(item, chunks)}
+              stamp={item}
+              hourWidth={hourWidth}
+              index={index}
+            />
+          );
+        }}
         keyExtractor={stamp => "" + stamp}
         onScroll={onScroll}
         getItemLayout={(data, index) => ({
@@ -138,9 +146,17 @@ function TimePointPicker({ range, initialHour, onSelected }) {
 }
 
 TimePointPicker.defaultProps = {
+  chunks: {},
   range: hourRangeFrom(),
   initialHour: 99,
   onSelected: () => {},
+};
+
+TimePointPicker.propTypes = {
+  chunks: zipTypes.chunks,
+  range: PropTypes.arrayOf(PropTypes.number),
+  initialHour: PropTypes.number,
+  onSelected: PropTypes.func,
 };
 
 export function hourRangeFrom(start = new Date().getTime(), size = 100) {
@@ -157,6 +173,26 @@ export function hourRangeFrom(start = new Date().getTime(), size = 100) {
   }
 
   return range;
+}
+
+/** @function chunkStatusForHour
+ * @param {number} hour - timestamp of the hour to check
+ * @param {object} chunks - object holding the chunks to test against
+ * @return {string} status, might be empty string
+ */
+export function chunkStatusForHour(hour, chunks) {
+  if (!hour && !chunks) {
+    return "";
+  }
+
+  for (var stamp in chunks) {
+    const beginingOfChunk = parseInt(stamp);
+    const endOfChunk = beginingOfChunk + chunks[stamp].chunkSize;
+    if (hour >= beginingOfChunk && hour < endOfChunk) {
+      return chunks[stamp].status;
+    }
+  }
+  return "";
 }
 
 export default TimePointPicker;

@@ -96,7 +96,7 @@ export default class Ruler extends React.Component {
     }
 
     targetTime = firstTime - this.pxToMs(moved);
-    setCurrentFile(generateDateCode(new Date(targetTime), true, true));
+    setCurrentFile(generateDateCode(targetTime, true, true));
     this.setState({ targetTime });
   };
 

@@ -1,6 +1,5 @@
 import { call, put, select, all } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
-import { Map } from "immutable";
 import * as FileSystem from "expo-file-system";
 
 import { unzipToBase64Files } from "../../helpers/zip";
@@ -67,21 +66,25 @@ export function* clearCache() {
 /** @generator fetchRecent - fetches last 12 hours of image data in chunks */
 export function* fetchRecent() {
   const end = new Date();
-  end.setMinutes(incrementsOfFive(end.getMinutes()));
+  end.setMinutes(0);
+  end.setSeconds(0);
+  end.setMilliseconds(0);
   const start = new Date(end.getTime() - 1000 * 60 * 60 * 12); // 12 hours ago
   const chunkSize = 1000 * 60 * 60 * 3; // 3 hours
 
   yield put({ type: SELECT_RANGE, start, end });
 
-  let chunks = yield select(({ zip: { chunks } }) => chunks);
-  const current = new Date(end.getTime());
+  const chunks = yield select(({ zip: { chunks } }) => chunks);
+  let current = end.getTime();
+
   try {
-    while (start.getTime() < current.getTime()) {
-      chunks = chunks.set(new Date(current.getTime()), {
+    while (start.getTime() < current) {
+      chunks[current] = {
         status: "qued",
         chunkSize,
-      });
-      current.setTime(current.getTime() - chunkSize);
+        unzippedFiles: [],
+      };
+      current -= chunkSize;
     }
   } catch (e) {
     console.error("Something went wrong when generating chunks", e);
@@ -92,12 +95,13 @@ export function* fetchRecent() {
   yield put({ type: REGISTER_CHUNKS, chunks });
 
   // TODO: Add ability to cancel whilst fetching
+  // TODO: fetch in order?
   const chunksToFetch = yield select(({ zip: { chunks } }) => chunks);
   try {
     yield all(
-      chunksToFetch
-        .toArray()
-        .map(([time, chunk]) => call(fetchChunk, chunk, time))
+      Object.keys(chunksToFetch).map(time =>
+        call(fetchChunk, chunksToFetch[time], time)
+      )
     );
   } catch (e) {
     console.error("Something went wrong when fetching all chunks", e);
@@ -120,22 +124,19 @@ export function* fetchChunk({ chunkSize }, time) {
     );
     return;
   }
-  const dateCode = generateDateCode(time, true);
+  const dateCode = generateDateCode(parseInt(time), true);
 
   const chunkSizeQuery = `?end=${generateDateCode(
-    new Date(time.getTime() + chunkSize),
+    parseInt(time) + chunkSize,
     true
   )}`;
 
   let res = null;
+  const url = `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`;
   try {
-    res = yield call(
-      req,
-      `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`,
-      "arraybuffer"
-    );
+    res = yield call(req, url, "arraybuffer");
   } catch (e) {
-    console.warn("Error occured when fetching zip", e, time);
+    console.warn("Error occured when fetching zip", e, time, url);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
     return;
   }
@@ -164,7 +165,20 @@ export const propTypes = {
   error: PropTypes.bool,
   loadingZip: PropTypes.bool,
   unzipping: PropTypes.bool,
-  chunks: PropTypes.instanceOf(Map),
+  chunks: PropTypes.shape({
+    [PropTypes.string]: PropTypes.shape({
+      status: PropTypes.oneOf([
+        "loading",
+        "loaded",
+        "failed",
+        "unzipping",
+        "unzip-fail",
+        "unzipped",
+      ]),
+      unzippedFiles: PropTypes.arrayOf(PropTypes.string),
+      chunkSize: PropTypes.number,
+    }),
+  }),
   unzippedFiles: PropTypes.arrayOf(PropTypes.string),
   selectedRange: PropTypes.shape({
     start: PropTypes.date,
@@ -177,7 +191,7 @@ const initialState = {
   error: null,
   loadingZip: false,
   unzipping: false,
-  chunks: Map(),
+  chunks: {},
   unzippedFiles: [],
   selectedRange: {
     start: null,
@@ -201,48 +215,77 @@ export default function reducer(state = initialState, action) {
     case REGISTER_CHUNKS:
       return {
         ...state,
-        chunks: state.chunks.merge(action.chunks),
+        chunks: { ...state.chunks, ...action.chunks },
       };
     case FETCH_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.updateIn([action.time, "status"], () => "loading"),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "loading" },
+          },
+        },
       };
     case FETCH_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks.updateIn([action.time, "status"], () => "loaded"),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "loaded" },
+          },
+        },
       };
     case FETCH_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.updateIn([action.time, "status"], () => "failed"),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "failed" },
+          },
+        },
       };
     case UNZIPPING_CHUNK:
       return {
         ...state,
-        chunks: state.chunks.updateIn(
-          [action.time, "status"],
-          () => "unzipping"
-        ),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "unzipping" },
+          },
+        },
       };
     case UNZIPPING_CHUNK_FAIL:
       return {
         ...state,
-        chunks: state.chunks.updateIn(
-          [action.time, "status"],
-          () => "unzip-fail"
-        ),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "unzip-fail" },
+          },
+        },
       };
     case UNZIPPING_CHUNK_SUCCESS:
       return {
         ...state,
-        chunks: state.chunks
-          .updateIn([action.time, "status"], () => "unzipped")
-          .updateIn([action.time, "unzippedFiles"], () => action.unzippedFiles),
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "unzipped" },
+            ...{ unzippedFiles: action.unzippedFiles },
+          },
+        },
         unzippedFiles: sort_unique([
-          ...action.unzippedFiles,
           ...state.unzippedFiles,
+          ...action.unzippedFiles,
         ]),
       };
     default:

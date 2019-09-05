@@ -1,5 +1,5 @@
-import React, { memo } from "react";
-import { View, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
 
 import { propTypes as zipTypes } from "../../../redux/modules/zip";
@@ -39,13 +39,16 @@ function UI({ chunks, selectedRange, setCurrentFile }) {
   if (!start || !end || !dateCodeRange) {
     return null;
   }
+  const chunksDone = allChunksDone(chunks);
 
   return (
     <BlurView tint="light" intensity={80} style={styles.uiContainer}>
       <View style={styles.container}>
+        <Text>{chunksDone ? "" : "loading data..."}</Text>
         <TimePointPicker
+          chunks={chunks}
           onSelected={stamp => {
-            setCurrentFile(generateDateCode(new Date(stamp), true, true));
+            setCurrentFile(generateDateCode(stamp, true, true));
           }}
         />
       </View>
@@ -69,4 +72,17 @@ UI.defaultProps = {
   },
 };
 
-export default memo(UI);
+function allChunksDone(chunks) {
+  for (var stamp in chunks) {
+    if (
+      chunks[stamp].status !== "unzipped" &&
+      chunks[stamp].status !== "unzip-fail" &&
+      chunks[stamp].status !== "failed"
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export default UI;

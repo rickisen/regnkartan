@@ -1,7 +1,7 @@
-import React, {memo} from 'react';
-import {Line} from 'react-native-svg';
+import React, { memo } from "react";
+import { Line } from "react-native-svg";
 
-function RulerLines({hourWidth, isStartOfDay}) {
+function RulerLines({ color, hourWidth, isStartOfDay }) {
   const everyTenth = hourWidth / 4;
   const everyHalf = hourWidth / 2;
   const minutes = Array.from(Array(hourWidth), (v, i) => i);
@@ -21,10 +21,10 @@ function RulerLines({hourWidth, isStartOfDay}) {
             y1={
               minute % everyHalf === 0 ? (minute === everyHalf ? 20 : 15) : 10
             }
-            stroke={minute === everyHalf && isStartOfDay ? 'black' : '#999'}
+            stroke={minute === everyHalf && isStartOfDay ? "black" : color}
             strokeWidth="1"
           />
-        ) : null,
+        ) : null
       )}
     </>
   );

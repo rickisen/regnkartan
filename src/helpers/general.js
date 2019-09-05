@@ -36,13 +36,14 @@ export function timeFromDateCode(dateCode) {
 }
 
 /** @function generateDateCode
- * @param {Date} date -
+ * @param {number} time - timestamp
  * @param {Boolean} hour - include hours in code [hour=false]
  * @param {Boolean} minute - include minutes in code [minute=false]
  * @return {string} dateCode
  */
-export function generateDateCode(date, hour = false, minute = false) {
+export function generateDateCode(time, hour = false, minute = false) {
   let dateCode = "";
+  const date = new Date(time);
 
   if (typeof date !== "object") {
     console.error("date not real date got: ", date);
@@ -82,7 +83,7 @@ export function generateDateCodeRange(start, end) {
 
   if (startStamp && endStamp && startStamp < endStamp) {
     while (startStamp < endStamp) {
-      ret.push(generateDateCode(new Date(startStamp), true, true));
+      ret.push(generateDateCode(startStamp, true, true));
       startStamp += 1000 * 60 * 5;
     }
   } else {
