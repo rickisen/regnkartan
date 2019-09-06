@@ -14,7 +14,7 @@ export default class About extends React.Component {
   render() {
     return (
       <View style={this.styles.container}>
-        <Text>Om appen</Text>
+        <Text>Just a bad wheather app</Text>
       </View>
     );
   }
