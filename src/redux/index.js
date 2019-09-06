@@ -3,9 +3,11 @@ import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
 import zip from "./modules/zip";
+import radarSelection from "./modules/radarSelection";
 
 const reducer = combineReducers({
   zip,
+  radarSelection,
 });
 
 const sagaMiddleware = createSagaMiddleware();

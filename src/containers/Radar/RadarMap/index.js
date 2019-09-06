@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import { PropTypes } from "prop-types";
 import { StyleSheet } from "react-native";
 import MapView from "react-native-maps";
 
@@ -7,7 +6,7 @@ import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../../components/StatusBarBg";
 
-const initialRegion = {
+const INITIAL_REGION = {
   latitude: 59.364109178579795,
   latitudeDelta: 26.738496058255087,
   longitude: 17.24189467728138,
@@ -20,24 +19,19 @@ const styles = StyleSheet.create({
   },
 });
 
-RadarMap.propTypes = {
-  unzippedFiles: PropTypes.array,
-  currentImage: PropTypes.string,
-};
-
 function bounceBackMap(newRegion, mapRef) {
-  const longDiff = newRegion.longitude - initialRegion.longitude;
-  const latDiff = newRegion.latitude - initialRegion.latitude;
+  const longDiff = newRegion.longitude - INITIAL_REGION.longitude;
+  const latDiff = newRegion.latitude - INITIAL_REGION.latitude;
   if (
     mapRef.current &&
     (longDiff > 15 || longDiff < -15 || latDiff > 15 || latDiff < -10)
   ) {
-    mapRef.current.animateToRegion(initialRegion);
+    mapRef.current.animateToRegion(INITIAL_REGION);
   }
 }
 
 // Also gets a navigation prop
-function RadarMap({ currentImage, unzippedFiles }) {
+function RadarMap() {
   const mapRef = useRef(null);
   const onRegionChangeComplete = newRegion => bounceBackMap(newRegion, mapRef);
 
@@ -53,9 +47,9 @@ function RadarMap({ currentImage, unzippedFiles }) {
       maxZoomLevel={9}
       style={styles.map}
       customMapStyle={mapStyle}
-      initialRegion={initialRegion}
+      initialRegion={INITIAL_REGION}
     >
-      <RadarOverlay files={unzippedFiles} requestedImage={currentImage} />
+      <RadarOverlay />
       <StatusBarBg />
     </MapView>
   );

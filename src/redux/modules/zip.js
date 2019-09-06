@@ -4,7 +4,7 @@ import * as FileSystem from "expo-file-system";
 
 import { unzipToBase64Files } from "../../helpers/zip";
 import { req } from "../../helpers/binaryRequest";
-import { generateDateCode, sort_unique } from "../../helpers/general";
+import { generateDateCode } from "../../helpers/general";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/ZIP";
@@ -171,7 +171,6 @@ export const propTypes = {
       chunkSize: PropTypes.number,
     }),
   }),
-  unzippedFiles: PropTypes.arrayOf(PropTypes.string),
 };
 
 const initialState = {
@@ -179,7 +178,6 @@ const initialState = {
   loadingZip: false,
   unzipping: false,
   chunks: {},
-  unzippedFiles: [],
 };
 
 /** REDUCER **/
@@ -256,10 +254,6 @@ export default function reducer(state = initialState, action) {
             ...{ unzippedFiles: action.unzippedFiles },
           },
         },
-        unzippedFiles: sort_unique([
-          ...state.unzippedFiles,
-          ...action.unzippedFiles,
-        ]),
       };
     default:
       return state;

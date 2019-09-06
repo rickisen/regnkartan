@@ -1,10 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 import { BlurView } from "expo-blur";
 
-import { propTypes as zipTypes } from "../../../redux/modules/zip";
-import * as localTypes from "./localTypes";
 import { generateDateCode } from "../../../helpers/general";
+
+import { SELECT_FILE } from "../../../redux/modules/radarSelection";
 import TimePointPicker from "../../../components/TimePointPicker";
 
 const styles = StyleSheet.create({
@@ -33,8 +34,29 @@ const styles = StyleSheet.create({
   },
 });
 
-function UI({ chunks, setCurrentFile }) {
+function selectFile(chunks, stamp, dispatch) {
+  let uri = null;
+  const dateCode = generateDateCode(stamp, true, true);
+  for (var hour in chunks) {
+    const chunk = chunks[hour];
+    const chunkBegin = parseInt(hour);
+    const chunkEnd = parseInt(hour) + chunk.chunkSize;
+
+    if (
+      chunk.status === "unzipped" &&
+      stamp >= chunkBegin &&
+      stamp < chunkEnd
+    ) {
+      uri = chunk.unzippedFiles.find(p => p.includes(dateCode));
+    }
+  }
+  dispatch({ type: SELECT_FILE, uri, stamp, dateCode });
+}
+
+function UI() {
+  const chunks = useSelector(({ zip: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
+  const dispatch = useDispatch();
 
   return (
     <BlurView tint="light" intensity={80} style={styles.uiContainer}>
@@ -43,23 +65,13 @@ function UI({ chunks, setCurrentFile }) {
         <TimePointPicker
           chunks={chunks}
           onSelected={stamp => {
-            setCurrentFile(generateDateCode(stamp, true, true));
+            selectFile(chunks, stamp, dispatch);
           }}
         />
       </View>
     </BlurView>
   );
 }
-
-UI.propTypes = {
-  setCurrentFile: localTypes.setCurrentFile,
-  currentImage: localTypes.currentImage,
-  chunks: zipTypes.chunks,
-};
-
-UI.defaultProps = {
-  chunks: null,
-};
 
 function allChunksDone(chunks) {
   for (var stamp in chunks) {
