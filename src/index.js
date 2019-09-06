@@ -8,7 +8,7 @@ import {
 import createAppStore from "./redux"; // pun intended
 
 import Drawer from "./components/Drawer";
-import Radar from "./containers/Radar/RadarMap";
+import Radar from "./containers/Radar";
 import About from "./containers/About";
 
 const RootNavigator = createAppContainer(

@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { PropTypes } from "prop-types";
-import { useDispatch, useSelector } from "react-redux";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import MapView from "react-native-maps";
 
-import Ui from "../Ui";
 import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../../components/StatusBarBg";
-import { FETCH_RECENT } from "../../../redux/modules/zip";
 
 const initialRegion = {
   latitude: 59.364109178579795,
@@ -18,20 +15,14 @@ const initialRegion = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   map: {
     flex: 1,
   },
 });
 
-RadarMap.navigationOptions = {
-  header: null,
-};
-
 RadarMap.propTypes = {
-  navigation: PropTypes.object,
+  unzippedFiles: PropTypes.array,
+  currentImage: PropTypes.string,
 };
 
 function bounceBackMap(newRegion, mapRef) {
@@ -46,45 +37,27 @@ function bounceBackMap(newRegion, mapRef) {
 }
 
 // Also gets a navigation prop
-function RadarMap() {
-  const [currentImage, setCurrentFile] = useState("latest"); // to be replaced by value in redux state
-  const dispatch = useDispatch();
-  const { chunks, unzippedFiles, selectedRange } = useSelector(
-    ({ zip }) => zip
-  );
+function RadarMap({ currentImage, unzippedFiles }) {
   const mapRef = useRef(null);
   const onRegionChangeComplete = newRegion => bounceBackMap(newRegion, mapRef);
-  useEffect(() => {
-    dispatch({ type: FETCH_RECENT });
-  }, []); // fetch recent zip-chunks when mounted
 
   return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        onRegionChange={onRegionChangeComplete}
-        onRegionChangeComplete={onRegionChangeComplete}
-        provider="google"
-        showUserLocation={true} // need to get permissions too
-        rotateEnabled={false}
-        minZoomLevel={4.5}
-        maxZoomLevel={9}
-        style={styles.map}
-        customMapStyle={mapStyle}
-        initialRegion={initialRegion}
-      >
-        <RadarOverlay files={unzippedFiles} requestedImage={currentImage} />
-        <StatusBarBg />
-      </MapView>
-      <Ui
-        chunks={chunks}
-        selectedRange={selectedRange}
-        currentImage={currentImage}
-        radarFiles={unzippedFiles}
-        setCurrentFile={setCurrentFile}
-        fetchRecent={() => dispatch({ type: FETCH_RECENT })}
-      />
-    </View>
+    <MapView
+      ref={mapRef}
+      onRegionChange={onRegionChangeComplete}
+      onRegionChangeComplete={onRegionChangeComplete}
+      provider="google"
+      showUserLocation={true} // need to get permissions too
+      rotateEnabled={false}
+      minZoomLevel={4.5}
+      maxZoomLevel={9}
+      style={styles.map}
+      customMapStyle={mapStyle}
+      initialRegion={initialRegion}
+    >
+      <RadarOverlay files={unzippedFiles} requestedImage={currentImage} />
+      <StatusBarBg />
+    </MapView>
   );
 }
 
