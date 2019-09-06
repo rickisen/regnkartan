@@ -113,7 +113,7 @@ export default class Radar extends React.Component {
           onRegionChange={region => this.onRegionChangeComplete(region)}
           onRegionChangeComplete={region => this.onRegionChangeComplete(region)}
           provider="google"
-          showUserLocation={true}
+          showUserLocation={true} // need to get permissions too
           rotateEnabled={false}
           minZoomLevel={4.5}
           maxZoomLevel={9}
