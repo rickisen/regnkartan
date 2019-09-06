@@ -4,12 +4,7 @@ import * as FileSystem from "expo-file-system";
 
 import { unzipToBase64Files } from "../../helpers/zip";
 import { req } from "../../helpers/binaryRequest";
-import {
-  generateDateCode,
-  sort_unique,
-  incrementsOfFive,
-  generateDateCodeRange,
-} from "../../helpers/general";
+import { generateDateCode, sort_unique } from "../../helpers/general";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/ZIP";
@@ -23,7 +18,6 @@ export const FETCH_RECENT = `${NAME}/FETCH_RECENT`;
 export const FETCH_RECENT_SUCCESS = `${NAME}/FETCH_RECENT_SUCCESS`;
 export const FETCH_RECENT_FAIL = `${NAME}/FETCH_RECENT_FAIL`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
-export const SELECT_RANGE = `${NAME}/SELECT_RANGE`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 
 const API_URL = "http://regn.rickisen.com/zip/v1/";
@@ -71,8 +65,6 @@ export function* fetchRecent() {
   end.setMilliseconds(0);
   const start = new Date(end.getTime() - 1000 * 60 * 60 * 12); // 12 hours ago
   const chunkSize = 1000 * 60 * 60 * 3; // 3 hours
-
-  yield put({ type: SELECT_RANGE, start, end });
 
   const chunks = yield select(({ zip: { chunks } }) => chunks);
   let current = end.getTime();
@@ -180,11 +172,6 @@ export const propTypes = {
     }),
   }),
   unzippedFiles: PropTypes.arrayOf(PropTypes.string),
-  selectedRange: PropTypes.shape({
-    start: PropTypes.date,
-    end: PropTypes.date,
-    dateCodeRange: PropTypes.arrayOf(PropTypes.string),
-  }),
 };
 
 const initialState = {
@@ -193,25 +180,11 @@ const initialState = {
   unzipping: false,
   chunks: {},
   unzippedFiles: [],
-  selectedRange: {
-    start: null,
-    end: null,
-    dateCodeRange: [],
-  },
 };
 
 /** REDUCER **/
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case SELECT_RANGE:
-      return {
-        ...state,
-        selectedRange: {
-          start: action.start,
-          end: action.end,
-          dateCodeRange: generateDateCodeRange(action.start, action.end),
-        },
-      };
     case REGISTER_CHUNKS:
       return {
         ...state,

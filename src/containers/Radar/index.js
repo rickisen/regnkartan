@@ -23,11 +23,9 @@ Radar.propTypes = {
 
 // Also gets a navigation prop
 function Radar() {
-  const [currentImage, setCurrentFile] = useState("latest"); // to be replaced by value in redux state
+  const [currentImage, setCurrentFile] = useState(""); // to be replaced by value in redux state
   const dispatch = useDispatch();
-  const { chunks, unzippedFiles, selectedRange } = useSelector(
-    ({ zip }) => zip
-  );
+  const { chunks, unzippedFiles } = useSelector(({ zip }) => zip);
   useEffect(() => {
     dispatch({ type: FETCH_RECENT });
   }, []); // fetch recent zip-chunks when mounted
@@ -37,7 +35,6 @@ function Radar() {
       <RadarMap unzippedFiles={unzippedFiles} currentImage={currentImage} />
       <Ui
         chunks={chunks}
-        selectedRange={selectedRange}
         currentImage={currentImage}
         radarFiles={unzippedFiles}
         setCurrentFile={setCurrentFile}

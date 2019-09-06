@@ -33,12 +33,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function UI({ chunks, selectedRange, setCurrentFile }) {
-  const { start, end, dateCodeRange } = selectedRange;
-
-  if (!start || !end || !dateCodeRange) {
-    return null;
-  }
+function UI({ chunks, setCurrentFile }) {
   const chunksDone = allChunksDone(chunks);
 
   return (
@@ -60,16 +55,10 @@ UI.propTypes = {
   setCurrentFile: localTypes.setCurrentFile,
   currentImage: localTypes.currentImage,
   chunks: zipTypes.chunks,
-  selectedRange: zipTypes.selectedRange,
 };
 
 UI.defaultProps = {
   chunks: null,
-  selectedRange: {
-    start: null,
-    end: null,
-    dateCodeRange: [],
-  },
 };
 
 function allChunksDone(chunks) {
