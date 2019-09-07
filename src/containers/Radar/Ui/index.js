@@ -5,7 +5,10 @@ import { BlurView } from "expo-blur";
 
 import { generateDateCode } from "../../../helpers/general";
 
-import { SELECT_FILE } from "../../../redux/modules/radarSelection";
+import {
+  SELECT_FILE,
+  SELECT_HOUR,
+} from "../../../redux/modules/radarSelection";
 import TimePointPicker from "../../../components/TimePointPicker";
 
 const styles = StyleSheet.create({
@@ -34,7 +37,11 @@ const styles = StyleSheet.create({
   },
 });
 
-function selectFile(chunks, stamp, dispatch) {
+function registerHour(hourStamp, dispatch) {
+  dispatch({ type: SELECT_HOUR, hourStamp });
+}
+
+function registerTime(chunks, stamp, dispatch) {
   let uri = null;
   const dateCode = generateDateCode(stamp, true, true);
   for (var hour in chunks) {
@@ -64,8 +71,11 @@ function UI() {
         <Text>{chunksDone ? "" : "loading data..."}</Text>
         <TimePointPicker
           chunks={chunks}
+          onSelectedHour={hourStamp => {
+            registerHour(hourStamp, dispatch);
+          }}
           onSelected={stamp => {
-            selectFile(chunks, stamp, dispatch);
+            registerTime(chunks, stamp, dispatch);
           }}
         />
       </View>

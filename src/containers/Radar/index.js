@@ -5,7 +5,6 @@ import { StyleSheet, View } from "react-native";
 
 import Ui from "./Ui";
 import RadarMap from "./RadarMap";
-import { FETCH_RECENT } from "../../redux/modules/zip";
 
 const styles = StyleSheet.create({
   container: {
@@ -23,11 +22,6 @@ Radar.propTypes = {
 
 // Also gets a navigation prop
 function Radar() {
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch({ type: FETCH_RECENT });
-  }, []); // fetch recent zip-chunks when mounted
-
   return (
     <View style={styles.container}>
       <RadarMap />

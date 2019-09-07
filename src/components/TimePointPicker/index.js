@@ -7,7 +7,13 @@ import { propTypes as zipTypes } from "../../redux/modules/zip";
 import Hour from "./Hour.js";
 import { pad } from "../../helpers/general";
 
-function TimePointPicker({ chunks, range, initialHour, onSelected }) {
+function TimePointPicker({
+  chunks,
+  range,
+  initialHour,
+  onSelected,
+  onSelectedHour,
+}) {
   const hourWidth = 60;
 
   const [pickerWidth, setPickerWidth] = useState(375); // maybe initialize with styled value?
@@ -16,6 +22,8 @@ function TimePointPicker({ chunks, range, initialHour, onSelected }) {
       layout: { width },
     },
   }) => setPickerWidth(width);
+
+  const [reportHourSelection, setReportHourSelection] = useState(false);
 
   const [scrolled, setScrolled] = useState(initialHour);
   const onScroll = ({
@@ -49,19 +57,30 @@ function TimePointPicker({ chunks, range, initialHour, onSelected }) {
     minutes,
   ]);
 
+  // Run a callback for every hour touched (after initial scroll setup)
+  useEffect(() => {
+    if (reportHourSelection) {
+      onSelectedHour(selectedHour);
+    }
+  }, [selectedHour, reportHourSelection]);
+
   const flatList = useRef(null);
   useEffect(() => {
     const offsetInMinutes = (new Date().getTime() - range[0]) / 1000 / 60;
     const minutesPerPx = hourWidth / 60;
     const offsetToNow =
-      offsetInMinutes * minutesPerPx - pickerWidth / 2 + hourWidth / 2;
+      offsetInMinutes * minutesPerPx - pickerWidth / 2 + hourWidth;
 
     setTimeout(() => {
       flatList.current.scrollToOffset({
-        animated: true,
+        animated: false,
         offset: offsetToNow,
       });
     }, 10);
+
+    setTimeout(() => {
+      setReportHourSelection(true);
+    }, 100);
   }, []);
   return (
     <View
@@ -150,6 +169,7 @@ TimePointPicker.defaultProps = {
   range: hourRangeFrom(),
   initialHour: 99,
   onSelected: () => {},
+  onSelectedHour: () => {},
 };
 
 TimePointPicker.propTypes = {
@@ -157,6 +177,7 @@ TimePointPicker.propTypes = {
   range: PropTypes.arrayOf(PropTypes.number),
   initialHour: PropTypes.number,
   onSelected: PropTypes.func,
+  onSelectedHour: PropTypes.func,
 };
 
 export function hourRangeFrom(start = new Date().getTime(), size = 100) {
