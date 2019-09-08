@@ -1,4 +1,4 @@
-import { call, put, select, all } from "redux-saga/effects";
+import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
@@ -99,11 +99,9 @@ export function* fetchQued() {
   // TODO: Add ability to cancel whilst fetching
   // TODO: fetch in order?
   try {
-    yield all(
-      Object.keys(quedChunks).map(chunkKey =>
-        call(fetchChunk, quedChunks[chunkKey], parseInt(chunkKey))
-      )
-    );
+    for (var chunkKey in quedChunks) {
+      yield fork(fetchChunk, quedChunks[chunkKey], parseInt(chunkKey));
+    }
   } catch (e) {
     console.error("Something went wrong when fetching all qued chunks", e);
     yield put({ type: FETCH_QUED_FAIL, error: e });
@@ -131,6 +129,7 @@ export function* fetchChunk({ chunkSize }, time) {
 
   let res = null;
   const url = `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`;
+  yield put({ type: FETCH_CHUNK, time, url });
   try {
     res = yield call(req, url, "arraybuffer");
   } catch (e) {
