@@ -2,7 +2,7 @@ import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
-import { unzipToBase64Files } from "../../helpers/zip";
+import unzipSaga from "../sagas/unzipSaga";
 import { req } from "../../helpers/binaryRequest";
 import { generateDateCode, packHoursIntoChunks } from "../../helpers/general";
 
@@ -50,35 +50,6 @@ export function* clearCache() {
     }
   }
 }
-
-// /** @generator fetchRecent - fetches last 12 hours of image data in chunks */
-// export function* fetchRecent() {
-//   const end = new Date();
-//   end.setMinutes(0);
-//   end.setSeconds(0);
-//   end.setMilliseconds(0);
-//   const start = new Date(end.getTime() - 1000 * 60 * 60 * 12); // 12 hours ago
-//   const chunkSize = 1000 * 60 * 60 * 3; // 3 hours
-//
-//   const chunks = yield select(({ zip: { chunks } }) => chunks);
-//   let current = end.getTime();
-//
-//   try {
-//     while (start.getTime() < current) {
-//       chunks[current] = {
-//         status: "qued",
-//         chunkSize,
-//         unzippedFiles: [],
-//       };
-//       current -= chunkSize;
-//     }
-//   } catch (e) {
-//     console.error("Something went wrong when generating chunks", e);
-//     yield put({ type: FETCH_RECENT_FAIL, error: e });
-//     return;
-//   }
-//   yield put({ type: REGISTER_CHUNKS, chunks });
-// }
 
 /** @generator fetchQued - saga that fetches all chunks that are marked as
  * qued, designed to be run from a takeAll triggered by REGISTER_CHUNKS
@@ -148,7 +119,7 @@ export function* fetchChunk({ chunkSize }, time) {
   yield put({ type: UNZIPPING_CHUNK, time });
   let unzippedFiles = [];
   try {
-    unzippedFiles = yield call(unzipToBase64Files, res);
+    unzippedFiles = yield call(unzipSaga, res);
   } catch (e) {
     console.warn("Error occured when unzipping chunk files", e, time);
     yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
