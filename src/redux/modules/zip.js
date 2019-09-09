@@ -71,6 +71,10 @@ export function* fetchQued() {
     {}
   );
 
+  if (quedChunks.length === 0) {
+    return;
+  }
+
   // TODO: Add ability to cancel whilst fetching
   // TODO: fetch in order?
   try {
@@ -87,8 +91,10 @@ export function* fetchQued() {
 }
 
 /**
- * @generator unzipSaga - clears all zip and png files in our cache directory
+ * @generator unzipSaga - Unzips data to disk, and fires an action with the uri
+ * to the unzipped file
  * @param {ArrayBuffer} zipData - zip file as array buffer
+ * @param {number} time - timestamp to be used as chunkKey in action
  * */
 export function* unzipSaga(zipData, time) {
   const chan = yield call(unzipChannel, zipData);
@@ -150,8 +156,6 @@ export function* fetchChunk({ chunkSize }, time) {
     yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
     return;
   }
-
-  yield put({ type: UNZIPPING_CHUNK_SUCCESS, time });
 }
 
 /** @generator queRequestedHours - saga that puts new chunks into state.zip
@@ -203,6 +207,7 @@ const initialState = {
 };
 
 export default function reducer(state = initialState, action) {
+  // console.log("action.type", action.type);
   switch (action.type) {
     case REGISTER_CHUNKS:
       return {
