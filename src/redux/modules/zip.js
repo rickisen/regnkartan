@@ -20,9 +20,11 @@ export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 
 const API_URL = "http://regn.rickisen.com/zip/v1/";
+// const API_URL = "http://desktop.lan:8000/v1/";
 
 /** SAGAS **/
-/** @generator clearCache - clears all zip and png files in our cache directory */
+/** @generator clearCache - saga that clears all zip and png files in our cache
+ * directory */
 export function* clearCache() {
   let files = [];
   try {
@@ -129,6 +131,10 @@ export function* fetchChunk({ chunkSize }, time) {
   yield put({ type: UNZIPPING_CHUNK_SUCCESS, unzippedFiles, time });
 }
 
+/** @generator queRequestedHours - saga that puts new chunks into state.zip
+ * that contains the hours listed as required in state.radarSelection.
+ * meant to be called from a saga watching for SELECT_HOUR.
+ */
 export function* queRequestedHours() {
   const [requestedHours, chunks] = yield select(
     ({ radarSelection: { requestedHours }, zip: { chunks } }) => [
@@ -136,7 +142,11 @@ export function* queRequestedHours() {
       chunks,
     ]
   );
-  const packedChunks = packHoursIntoChunks(requestedHours, chunks);
+  const packedChunks = packHoursIntoChunks(
+    requestedHours,
+    chunks,
+    1000 * 60 * 60
+  );
   yield put({ type: REGISTER_CHUNKS, chunks: packedChunks });
 }
 
