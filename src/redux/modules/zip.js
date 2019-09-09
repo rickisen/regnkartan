@@ -1,8 +1,8 @@
-import { call, put, select, fork } from "redux-saga/effects";
+import { call, put, select, fork, take } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
-import unzipSaga from "../sagas/unzipSaga";
+import unzipChannel from "../sagas/unzipChannel";
 import { req } from "../../helpers/binaryRequest";
 import { generateDateCode, packHoursIntoChunks } from "../../helpers/general";
 
@@ -14,6 +14,8 @@ export const FETCH_CHUNK_FAIL = `${NAME}/FETCH_CHUNK_FAIL`;
 export const UNZIPPING_CHUNK = `${NAME}/UNZIPPING_CHUNK`;
 export const UNZIPPING_CHUNK_FAIL = `${NAME}/UNZIPPING_CHUNK_FAIL`;
 export const UNZIPPING_CHUNK_SUCCESS = `${NAME}/UNZIPPING_CHUNK_SUCCESS`;
+export const UNZIPPING_FILE_FAIL = `${NAME}/UNZIPPING_FILE_FAIL`;
+export const UNZIPPING_FILE_SUCCESS = `${NAME}/UNZIPPING_FILE_SUCCESS`;
 export const FETCH_QUED_SUCCESS = `${NAME}/FETCH_QUED_SUCCESS`;
 export const FETCH_QUED_FAIL = `${NAME}/FETCH_QUED_FAIL`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
@@ -84,6 +86,28 @@ export function* fetchQued() {
   yield put({ type: FETCH_QUED_SUCCESS });
 }
 
+/**
+ * @generator unzipSaga - clears all zip and png files in our cache directory
+ * @param {ArrayBuffer} zipData - zip file as array buffer
+ * */
+export function* unzipSaga(zipData, time) {
+  const chan = yield call(unzipChannel, zipData);
+  try {
+    // while (true) loops work in a non blocking way inside generators don't
+    // panic!
+    while (true) {
+      // take(END) will cause the saga to terminate by jumping to the finally block
+      const { uri } = yield take(chan);
+      yield put({ type: UNZIPPING_FILE_SUCCESS, uri, time });
+    }
+  } catch (e) {
+    console.warn("Error occurred when unzipping a file", e);
+    yield put({ type: UNZIPPING_FILE_FAIL, time });
+  } finally {
+    yield put({ type: UNZIPPING_CHUNK_SUCCESS, time }); // will this always succeed?
+  }
+}
+
 /** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
  * @param {object} Chunk - Qued 'chunk' object that implements chunkSize
  * @param {number} time - key for the chunk
@@ -119,16 +143,15 @@ export function* fetchChunk({ chunkSize }, time) {
   yield put({ type: FETCH_CHUNK_SUCCESS, time });
 
   yield put({ type: UNZIPPING_CHUNK, time });
-  let unzippedFiles = [];
   try {
-    unzippedFiles = yield call(unzipSaga, res);
+    yield call(unzipSaga, res, time);
   } catch (e) {
     console.warn("Error occured when unzipping chunk files", e, time);
     yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
     return;
   }
 
-  yield put({ type: UNZIPPING_CHUNK_SUCCESS, unzippedFiles, time });
+  yield put({ type: UNZIPPING_CHUNK_SUCCESS, time });
 }
 
 /** @generator queRequestedHours - saga that puts new chunks into state.zip
@@ -241,6 +264,22 @@ export default function reducer(state = initialState, action) {
           },
         },
       };
+    case UNZIPPING_FILE_SUCCESS:
+      return {
+        ...state,
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{
+              unzippedFiles: [
+                ...state.chunks[action.time].unzippedFiles,
+                action.uri,
+              ],
+            },
+          },
+        },
+      };
     case UNZIPPING_CHUNK_SUCCESS:
       return {
         ...state,
@@ -249,7 +288,6 @@ export default function reducer(state = initialState, action) {
           [action.time]: {
             ...state.chunks[action.time],
             ...{ status: "unzipped" },
-            ...{ unzippedFiles: action.unzippedFiles },
           },
         },
       };
