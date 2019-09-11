@@ -23,8 +23,6 @@ function TimePointPicker({
     },
   }) => setPickerWidth(width);
 
-  const [reportHourSelection, setReportHourSelection] = useState(false);
-
   const [scrolled, setScrolled] = useState(initialHour);
   const onScroll = ({
     nativeEvent: {
@@ -57,12 +55,15 @@ function TimePointPicker({
     minutes,
   ]);
 
-  // Run a callback for every hour touched (after initial scroll setup)
+  // Run a callback for every hour touched (with a timer to prevent excess
+  // loading)
+  const timer = useRef(null);
   useEffect(() => {
-    if (reportHourSelection) {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
       onSelectedHour(selectedHour);
-    }
-  }, [selectedHour, reportHourSelection]);
+    }, 1000);
+  }, [selectedHour, timer]);
 
   const flatList = useRef(null);
   useEffect(() => {
@@ -77,10 +78,6 @@ function TimePointPicker({
         offset: offsetToNow,
       });
     }, 10);
-
-    setTimeout(() => {
-      setReportHourSelection(true);
-    }, 100);
   }, []);
   return (
     <View

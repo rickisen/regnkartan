@@ -172,7 +172,7 @@ export function* queRequestedHours() {
   const packedChunks = packHoursIntoChunks(
     requestedHours,
     chunks,
-    1000 * 60 * 60
+    1000 * 60 * 60 * 8
   );
   yield put({ type: REGISTER_CHUNKS, chunks: packedChunks });
 }
@@ -207,7 +207,7 @@ const initialState = {
 };
 
 export default function reducer(state = initialState, action) {
-  // console.log("action.type", action.type);
+  // console.log("action.type", action.type, action.time || "");
   switch (action.type) {
     case REGISTER_CHUNKS:
       return {
