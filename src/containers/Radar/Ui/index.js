@@ -38,20 +38,6 @@ const styles = StyleSheet.create({
 });
 
 function registerHour(hourStamp, dispatch) {
-  // drop future hours to prevent bugs
-  const beginningOfCurrentHour = new Date();
-  beginningOfCurrentHour.setUTCMinutes(0);
-  beginningOfCurrentHour.setUTCSeconds(0);
-  beginningOfCurrentHour.setUTCMilliseconds(0);
-  if (hourStamp > beginningOfCurrentHour.getTime()) {
-    console.log(
-      "hourStamp, beginningOfCurrentHour",
-      hourStamp,
-      beginningOfCurrentHour.getTime()
-    );
-    return;
-  }
-  console.log("dispatching", new Date(hourStamp), beginningOfCurrentHour);
   dispatch({ type: SELECT_HOUR, hourStamp });
 }
 
@@ -93,7 +79,6 @@ function UI() {
             registerTime(chunks, stamp, dispatch);
           }}
           onRefresh={() => {
-            console.log("refrer");
             setRefreshing(true);
             setTimeout(() => setRefreshing(false), 1000);
           }}

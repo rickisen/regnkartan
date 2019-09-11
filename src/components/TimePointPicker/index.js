@@ -4,7 +4,8 @@ import { FlatList, View, Text } from "react-native";
 import { Svg, Line } from "react-native-svg";
 
 import { propTypes as zipTypes } from "../../redux/modules/zip";
-import Hour from "./Hour.js";
+import Hour from "./Hour";
+import Footer from "./Footer";
 import { pad } from "../../helpers/general";
 
 function TimePointPicker({
@@ -52,10 +53,10 @@ function TimePointPicker({
   );
 
   // Run the callback and pass the selected timestamp, if selection changed
-  useEffect(
-    () => onSelected(selectedHour + minutes * 1000 * 60, { over, under }),
-    [selectedHour, minutes, over, under]
-  );
+  useEffect(() => onSelected(selectedHour + minutes * 1000 * 60), [
+    selectedHour,
+    minutes,
+  ]);
 
   // Run a callback for every hour touched (with a timer to prevent excess
   // loading)
@@ -78,7 +79,7 @@ function TimePointPicker({
 
     setTimeout(() => {
       flatList.current.scrollToOffset({
-        animated: false,
+        animated: true,
         offset: offsetToNow,
       });
     }, 10);
@@ -117,32 +118,14 @@ function TimePointPicker({
         contentContainerStyle={{ height: 100 }}
         data={range}
         initialScrollIndex={initialHour}
-        ListFooterComponent={() => {
-          const amountOfFutureHours = Math.floor(pickerWidth / 2 / hourWidth);
-          return (
-            <View
-              style={{
-                width: pickerWidth / 2,
-                flexDirection: "row",
-              }}
-            >
-              {hourRangeFrom(
-                range[range.length - 2] + amountOfFutureHours * 1000 * 60 * 60,
-                amountOfFutureHours
-              ).map((item, index) => {
-                return (
-                  <Hour
-                    key={"" + item}
-                    stamp={item}
-                    hourWidth={hourWidth}
-                    index={index}
-                    status="future"
-                  />
-                );
-              })}
-            </View>
-          );
-        }}
+        ListFooterComponent={
+          <Footer
+            refreshing={refreshing}
+            pickerWidth={pickerWidth}
+            hourWidth={hourWidth}
+            range={range}
+          />
+        }
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item, index }) => {
