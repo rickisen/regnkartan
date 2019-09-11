@@ -38,6 +38,14 @@ const styles = StyleSheet.create({
 });
 
 function registerHour(hourStamp, dispatch) {
+  // drop future hours to prevent bugs
+  const beginningOfCurrentHour = new Date();
+  beginningOfCurrentHour.setUTCMinutes(0);
+  beginningOfCurrentHour.setUTCSeconds(0);
+  beginningOfCurrentHour.setUTCMilliseconds(0);
+  if (hourStamp > beginningOfCurrentHour.getTime()) {
+    return;
+  }
   dispatch({ type: SELECT_HOUR, hourStamp });
 }
 
