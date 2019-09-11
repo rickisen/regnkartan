@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { BlurView } from "expo-blur";
@@ -44,8 +44,14 @@ function registerHour(hourStamp, dispatch) {
   beginningOfCurrentHour.setUTCSeconds(0);
   beginningOfCurrentHour.setUTCMilliseconds(0);
   if (hourStamp > beginningOfCurrentHour.getTime()) {
+    console.log(
+      "hourStamp, beginningOfCurrentHour",
+      hourStamp,
+      beginningOfCurrentHour.getTime()
+    );
     return;
   }
+  console.log("dispatching", new Date(hourStamp), beginningOfCurrentHour);
   dispatch({ type: SELECT_HOUR, hourStamp });
 }
 
@@ -72,6 +78,7 @@ function UI() {
   const chunks = useSelector(({ zip: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
+  const [refreshing, setRefreshing] = useState(false);
 
   return (
     <BlurView tint="light" intensity={80} style={styles.uiContainer}>
@@ -85,6 +92,12 @@ function UI() {
           onSelected={stamp => {
             registerTime(chunks, stamp, dispatch);
           }}
+          onRefresh={() => {
+            console.log("refrer");
+            setRefreshing(true);
+            setTimeout(() => setRefreshing(false), 1000);
+          }}
+          refreshing={refreshing}
         />
       </View>
     </BlurView>

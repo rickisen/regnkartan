@@ -13,6 +13,8 @@ function TimePointPicker({
   initialHour,
   onSelected,
   onSelectedHour,
+  refreshing,
+  onRefresh,
 }) {
   const hourWidth = 60;
 
@@ -50,20 +52,22 @@ function TimePointPicker({
   );
 
   // Run the callback and pass the selected timestamp, if selection changed
-  useEffect(() => onSelected(selectedHour + minutes * 1000 * 60), [
-    selectedHour,
-    minutes,
-  ]);
+  useEffect(
+    () => onSelected(selectedHour + minutes * 1000 * 60, { over, under }),
+    [selectedHour, minutes, over, under]
+  );
 
   // Run a callback for every hour touched (with a timer to prevent excess
   // loading)
   const timer = useRef(null);
   useEffect(() => {
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      onSelectedHour(selectedHour);
-    }, 1000);
-  }, [selectedHour, timer]);
+    if (!over && !under) {
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        onSelectedHour(selectedHour);
+      }, 1000);
+    }
+  }, [selectedHour, timer, over, under]);
 
   const flatList = useRef(null);
   useEffect(() => {
@@ -107,6 +111,8 @@ function TimePointPicker({
       </Svg>
       <FlatList
         ref={flatList}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         style={{ height: 100 }}
         contentContainerStyle={{ height: 100 }}
         data={range}
@@ -167,6 +173,8 @@ TimePointPicker.defaultProps = {
   initialHour: 99,
   onSelected: () => {},
   onSelectedHour: () => {},
+  onRefresh: () => {},
+  refreshing: false,
 };
 
 TimePointPicker.propTypes = {
@@ -175,6 +183,7 @@ TimePointPicker.propTypes = {
   initialHour: PropTypes.number,
   onSelected: PropTypes.func,
   onSelectedHour: PropTypes.func,
+  refreshing: PropTypes.bool,
 };
 
 export function hourRangeFrom(start = new Date().getTime(), size = 100) {

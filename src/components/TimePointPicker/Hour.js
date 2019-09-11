@@ -51,21 +51,21 @@ function Hour({ status, stamp, hourWidth, index }) {
 function statusToColor(status) {
   switch (status) {
     case "qued":
-      return "#000";
+      return "#777";
     case "loading":
-      return "#444";
+      return "#555";
     case "loaded":
-      return "#333";
+      return "#222";
     case "failed":
       return "#a00";
     case "unzipping":
-      return "#222";
+      return "#111";
     case "unzipped":
-      return "#03a";
+      return "#000";
     case "unzip-fail":
       return "#a0a";
     case "future":
-      return "#a0a";
+      return "#aaa";
     default:
       return "#aaa";
   }
