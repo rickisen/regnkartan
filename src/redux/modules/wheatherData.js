@@ -1,22 +1,21 @@
-import { call, put, select, fork, take } from "redux-saga/effects";
+import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
-import unzipChannel from "../sagas/unzipChannel";
-import unpackChannel from "../sagas/unpackChannel";
+import unpack from "../sagas/unpack";
 import { req } from "../../helpers/binaryRequest";
 import { generateDateCode, packHoursIntoChunks } from "../../helpers/general";
 
 /** ACTION TYPES **/
-export const NAME = "regnkartan/smhi/ZIP";
+export const NAME = "regnkartan/smhi/PACK";
 export const FETCH_CHUNK = `${NAME}/FETCH_CHUNK`;
 export const FETCH_CHUNK_SUCCESS = `${NAME}/FETCH_CHUNK_SUCCESS`;
 export const FETCH_CHUNK_FAIL = `${NAME}/FETCH_CHUNK_FAIL`;
-export const UNZIPPING_CHUNK = `${NAME}/UNZIPPING_CHUNK`;
-export const UNZIPPING_CHUNK_FAIL = `${NAME}/UNZIPPING_CHUNK_FAIL`;
-export const UNZIPPING_CHUNK_SUCCESS = `${NAME}/UNZIPPING_CHUNK_SUCCESS`;
-export const UNZIPPING_FILE_FAIL = `${NAME}/UNZIPPING_FILE_FAIL`;
-export const UNZIPPING_FILE_SUCCESS = `${NAME}/UNZIPPING_FILE_SUCCESS`;
+export const UNPACKING_CHUNK = `${NAME}/UNPACKING_CHUNK`;
+export const UNPACKING_CHUNK_FAIL = `${NAME}/UNPACKING_CHUNK_FAIL`;
+export const UNPACKING_CHUNK_SUCCESS = `${NAME}/UNPACKING_CHUNK_SUCCESS`;
+export const UNPACKING_FILE_FAIL = `${NAME}/UNPACKING_FILE_FAIL`;
+export const UNPACKING_FILE_SUCCESS = `${NAME}/UNPACKING_FILE_SUCCESS`;
 export const FETCH_QUED_SUCCESS = `${NAME}/FETCH_QUED_SUCCESS`;
 export const FETCH_QUED_FAIL = `${NAME}/FETCH_QUED_FAIL`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
@@ -26,7 +25,7 @@ const API_URL = "http://regn.rickisen.com/zip/v1/";
 // const API_URL = "http://desktop.lan:8000/v1/";
 
 /** SAGAS **/
-/** @generator clearCache - saga that clears all zip and png files in our cache
+/** @generator clearCache - saga that clears all pack and png files in our cache
  * directory */
 export function* clearCache() {
   let files = [];
@@ -43,7 +42,7 @@ export function* clearCache() {
 
   for (var i = 0, len = files.length; i < len; i++) {
     const file = files[i];
-    if (file.includes("zip") || file.includes("png")) {
+    if (file.includes("pack") || file.includes("png")) {
       try {
         yield call(FileSystem.deleteAsync, FileSystem.cacheDirectory + file);
       } catch (e) {
@@ -60,7 +59,9 @@ export function* clearCache() {
  * qued, designed to be run from a takeAll triggered by REGISTER_CHUNKS
  */
 export function* fetchQued() {
-  const registeredChunks = yield select(({ zip: { chunks } }) => chunks);
+  const registeredChunks = yield select(
+    ({ wheatherData: { chunks } }) => chunks
+  );
   const quedChunks = Object.keys(registeredChunks).reduce(
     (acc, chunkKey) =>
       registeredChunks[chunkKey].status === "qued"
@@ -91,31 +92,7 @@ export function* fetchQued() {
   yield put({ type: FETCH_QUED_SUCCESS });
 }
 
-/**
- * @generator unzipSaga - Unzips data to disk, and fires an action with the uri
- * to the unzipped file
- * @param {ArrayBuffer} zipData - zip file as array buffer
- * @param {number} time - timestamp to be used as chunkKey in action
- * */
-export function* unzipSaga(zipData, time) {
-  const chan = yield call(unzipChannel, zipData);
-  try {
-    // while (true) loops work in a non blocking way inside generators don't
-    // panic!
-    while (true) {
-      // take(END) will cause the saga to terminate by jumping to the finally block
-      const { uri } = yield take(chan);
-      yield put({ type: UNZIPPING_FILE_SUCCESS, uri, time });
-    }
-  } catch (e) {
-    console.warn("Error occurred when unzipping a file", e);
-    yield put({ type: UNZIPPING_FILE_FAIL, time });
-  } finally {
-    yield put({ type: UNZIPPING_CHUNK_SUCCESS, time }); // will this always succeed?
-  }
-}
-
-/** @generator fetchChunk - saga that fetches a zipped 'chunk' from the api.
+/** @generator fetchChunk - saga that fetches a packed 'chunk' from the api.
  * @param {object} Chunk - Qued 'chunk' object that implements chunkSize
  * @param {number} time - key for the chunk
  */
@@ -135,80 +112,46 @@ export function* fetchChunk({ chunkSize }, time) {
   const url = `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
   yield put({ type: FETCH_CHUNK, time, url });
   try {
-    res = yield call(req, url, "text");
+    res = yield call(req, url);
   } catch (e) {
-    console.warn("Error occured when fetching zip", e, time, url);
+    console.warn("Error occured when fetching pack", e, time, url);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
     return;
   }
 
   if (!res) {
-    console.error("Failed to get zip chunk from api", time);
+    console.error("Failed to get pack chunk from api", time);
     yield put({ type: FETCH_CHUNK_FAIL, error: "unknown", time });
     return;
   }
 
   yield put({ type: FETCH_CHUNK_SUCCESS, time });
 
-  yield put({ type: UNZIPPING_CHUNK, time });
+  yield put({ type: UNPACKING_CHUNK, time });
   try {
-    yield call(unpack, res, time);
+    yield call(unpack, res, time, [
+      FETCH_CHUNK_FAIL,
+      FETCH_CHUNK_SUCCESS,
+      UNPACKING_CHUNK,
+      UNPACKING_CHUNK_FAIL,
+      UNPACKING_CHUNK_SUCCESS,
+      UNPACKING_FILE_FAIL,
+      UNPACKING_FILE_SUCCESS,
+    ]);
   } catch (e) {
-    console.warn("Error occured when unzipping chunk files", e, time);
-    yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
+    console.warn("Error occured when unpacking chunk files", e, time);
+    yield put({ type: UNPACKING_CHUNK_FAIL, error: e, time });
     return;
   }
 }
 
-export function* unpack(res, time) {
-  // const callTime = new Date().getTime();
-  let data = null;
-  try {
-    data = JSON.parse(res);
-  } catch (e) {
-    console.warn("Error occured when unpacking data", e);
-    yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
-    return;
-  }
-  yield put({ type: FETCH_CHUNK_SUCCESS, time });
-
-  yield put({ type: UNZIPPING_CHUNK, time });
-  try {
-    yield call(unpackWatcher, data, time);
-  } catch (e) {
-    console.warn("Error occured when unzipping chunk files", e, time);
-    yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
-    return;
-  }
-
-  return;
-}
-
-export function* unpackWatcher(data, time) {
-  const chan = yield call(unpackChannel, data);
-  try {
-    // while (true) loops work in a non blocking way inside generators don't
-    // panic!
-    while (true) {
-      // take(END) will cause the saga to terminate by jumping to the finally block
-      const { uri } = yield take(chan);
-      yield put({ type: UNZIPPING_FILE_SUCCESS, uri, time });
-    }
-  } catch (e) {
-    console.warn("Error occurred when unpacking a file", e);
-    yield put({ type: UNZIPPING_FILE_FAIL, time });
-  } finally {
-    yield put({ type: UNZIPPING_CHUNK_SUCCESS, time }); // will this always succeed?
-  }
-}
-
-/** @generator queRequestedHours - saga that puts new chunks into state.zip
+/** @generator queRequestedHours - saga that puts new chunks into state.pack
  * that contains the hours listed as required in state.radarSelection.
  * meant to be called from a saga watching for SELECT_HOUR.
  */
 export function* queRequestedHours() {
   const [requestedHours, chunks] = yield select(
-    ({ radarSelection: { requestedHours }, zip: { chunks } }) => [
+    ({ radarSelection: { requestedHours }, wheatherData: { chunks } }) => [
       requestedHours,
       chunks,
     ]
@@ -224,19 +167,20 @@ export function* queRequestedHours() {
 /** PropTypes **/
 export const propTypes = {
   error: PropTypes.bool,
-  loadingZip: PropTypes.bool,
-  unzipping: PropTypes.bool,
+  loadingPack: PropTypes.bool,
+
+  unpacking: PropTypes.bool,
   chunks: PropTypes.shape({
     [PropTypes.string]: PropTypes.shape({
       status: PropTypes.oneOf([
         "loading",
         "loaded",
         "failed",
-        "unzipping",
-        "unzip-fail",
-        "unzipped",
+        "unpacking",
+        "unpack-fail",
+        "unpacked",
       ]),
-      unzippedFiles: PropTypes.arrayOf(PropTypes.string),
+      unpackedFiles: PropTypes.arrayOf(PropTypes.string),
       chunkSize: PropTypes.number,
     }),
   }),
@@ -245,13 +189,13 @@ export const propTypes = {
 /** REDUCER **/
 const initialState = {
   error: null,
-  loadingZip: false,
-  unzipping: false,
+  loadingPack: false,
+  unpacking: false,
   chunks: {},
 };
 
 export default function reducer(state = initialState, action) {
-  console.log("action", action.type, action.time || "");
+  // console.log("action", action.type, action.time || "");
   switch (action.type) {
     case REGISTER_CHUNKS:
       return {
@@ -291,29 +235,29 @@ export default function reducer(state = initialState, action) {
           },
         },
       };
-    case UNZIPPING_CHUNK:
+    case UNPACKING_CHUNK:
       return {
         ...state,
         chunks: {
           ...state.chunks,
           [action.time]: {
             ...state.chunks[action.time],
-            ...{ status: "unzipping" },
+            ...{ status: "unpacking" },
           },
         },
       };
-    case UNZIPPING_CHUNK_FAIL:
+    case UNPACKING_CHUNK_FAIL:
       return {
         ...state,
         chunks: {
           ...state.chunks,
           [action.time]: {
             ...state.chunks[action.time],
-            ...{ status: "unzip-fail" },
+            ...{ status: "unpack-fail" },
           },
         },
       };
-    case UNZIPPING_FILE_SUCCESS:
+    case UNPACKING_FILE_SUCCESS:
       return {
         ...state,
         chunks: {
@@ -321,22 +265,22 @@ export default function reducer(state = initialState, action) {
           [action.time]: {
             ...state.chunks[action.time],
             ...{
-              unzippedFiles: [
-                ...state.chunks[action.time].unzippedFiles,
+              unpackedFiles: [
+                ...state.chunks[action.time].unpackedFiles,
                 action.uri,
               ],
             },
           },
         },
       };
-    case UNZIPPING_CHUNK_SUCCESS:
+    case UNPACKING_CHUNK_SUCCESS:
       return {
         ...state,
         chunks: {
           ...state.chunks,
           [action.time]: {
             ...state.chunks[action.time],
-            ...{ status: "unzipped" },
+            ...{ status: "unpacked" },
           },
         },
       };

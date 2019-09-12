@@ -6,7 +6,7 @@ import {
   fetchQued,
   clearCache,
   queRequestedHours,
-} from "../modules/zip";
+} from "../modules/wheatherData";
 
 export default function* rootSaga() {
   yield takeEvery(REGISTER_CHUNKS, fetchQued);

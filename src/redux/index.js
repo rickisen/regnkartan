@@ -2,11 +2,11 @@ import { createStore, applyMiddleware, combineReducers, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
-import zip from "./modules/zip";
+import wheatherData from "./modules/wheatherData";
 import radarSelection from "./modules/radarSelection";
 
 const reducer = combineReducers({
-  zip,
+  wheatherData,
   radarSelection,
 });
 

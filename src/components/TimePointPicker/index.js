@@ -3,10 +3,10 @@ import { PropTypes } from "prop-types";
 import { FlatList, View, Text } from "react-native";
 import { Svg, Line } from "react-native-svg";
 
-import { propTypes as zipTypes } from "../../redux/modules/zip";
+import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
 import Footer from "./Footer";
-import { pad } from "../../helpers/general";
+import { pad, hourRangeFrom } from "../../helpers/general";
 
 function TimePointPicker({
   chunks,
@@ -161,29 +161,13 @@ TimePointPicker.defaultProps = {
 };
 
 TimePointPicker.propTypes = {
-  chunks: zipTypes.chunks,
+  chunks: chunkTypes.chunks,
   range: PropTypes.arrayOf(PropTypes.number),
   initialHour: PropTypes.number,
   onSelected: PropTypes.func,
   onSelectedHour: PropTypes.func,
   refreshing: PropTypes.bool,
 };
-
-export function hourRangeFrom(start = new Date().getTime(), size = 100) {
-  const now = new Date(start);
-  now.setUTCMinutes(0);
-  now.setUTCSeconds(0);
-  now.setUTCMilliseconds(0);
-  const endOfThisHour = now.getTime() + 1000 * 60 * 60;
-  const startStamp = endOfThisHour - 1000 * 60 * 60 * (size - 1);
-  const range = [];
-
-  for (var hour = 0; hour < size; hour++) {
-    range[hour] = startStamp + hour * 1000 * 60 * 60;
-  }
-
-  return range;
-}
 
 /** @function chunkStatusForHour
  * @param {number} hour - timestamp of the hour to check

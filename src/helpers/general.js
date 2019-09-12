@@ -185,11 +185,27 @@ export function packHoursIntoChunks(
     ...chunks,
     ["" + chunkKey]: {
       status: "qued",
-      unzippedFiles: [],
+      unpackedFiles: [],
       chunkSize,
     },
   };
 
   // recurse
   return packHoursIntoChunks(hoursNotInAChunk, newChunks, chunkSize, ++depth);
+}
+
+export function hourRangeFrom(start = new Date().getTime(), size = 100) {
+  const now = new Date(start);
+  now.setUTCMinutes(0);
+  now.setUTCSeconds(0);
+  now.setUTCMilliseconds(0);
+  const endOfThisHour = now.getTime() + 1000 * 60 * 60;
+  const startStamp = endOfThisHour - 1000 * 60 * 60 * (size - 1);
+  const range = [];
+
+  for (var hour = 0; hour < size; hour++) {
+    range[hour] = startStamp + hour * 1000 * 60 * 60;
+  }
+
+  return range;
 }

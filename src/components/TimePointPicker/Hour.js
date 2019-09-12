@@ -58,11 +58,11 @@ function statusToColor(status) {
       return "#222";
     case "failed":
       return "#a00";
-    case "unzipping":
+    case "unpacking":
       return "#111";
-    case "unzipped":
+    case "unpacked":
       return "#000";
-    case "unzip-fail":
+    case "unpack-fail":
       return "#a0a";
     case "future":
       return "#aaa";

@@ -5,7 +5,7 @@ import { StyleSheet, View } from "react-native";
 
 import Ui from "./Ui";
 import RadarMap from "./RadarMap";
-import { CLEAR_CACHE } from "../../redux/modules/zip";
+import { CLEAR_CACHE } from "../../redux/modules/wheatherData";
 
 const styles = StyleSheet.create({
   container: {

@@ -50,18 +50,18 @@ function registerTime(chunks, stamp, dispatch) {
     const chunkEnd = parseInt(hour) + chunk.chunkSize;
 
     if (
-      chunk.status === "unzipped" &&
+      chunk.status === "unpacked" &&
       stamp >= chunkBegin &&
       stamp < chunkEnd
     ) {
-      uri = chunk.unzippedFiles.find(p => p.includes(dateCode));
+      uri = chunk.unpackedFiles.find(p => p.includes(dateCode));
     }
   }
   dispatch({ type: SELECT_FILE, uri, stamp, dateCode });
 }
 
 function UI() {
-  const chunks = useSelector(({ zip: { chunks } }) => chunks);
+  const chunks = useSelector(({ wheatherData: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
@@ -92,8 +92,8 @@ function UI() {
 function allChunksDone(chunks) {
   for (var stamp in chunks) {
     if (
-      chunks[stamp].status !== "unzipped" &&
-      chunks[stamp].status !== "unzip-fail" &&
+      chunks[stamp].status !== "unpacked" &&
+      chunks[stamp].status !== "unpack-fail" &&
       chunks[stamp].status !== "failed"
     ) {
       return false;
