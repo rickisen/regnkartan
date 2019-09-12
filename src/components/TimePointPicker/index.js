@@ -66,7 +66,7 @@ function TimePointPicker({
       clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         onSelectedHour(selectedHour);
-      }, 1000);
+      }, 400);
     }
   }, [selectedHour, timer, over, under]);
 

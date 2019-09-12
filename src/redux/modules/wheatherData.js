@@ -21,6 +21,7 @@ export const FETCH_QUED_FAIL = `${NAME}/FETCH_QUED_FAIL`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 
+const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
 const API_URL = "http://regn.rickisen.com/zip/v1/";
 // const API_URL = "http://desktop.lan:8000/v1/";
 
@@ -159,7 +160,7 @@ export function* queRequestedHours() {
   const packedChunks = packHoursIntoChunks(
     requestedHours,
     chunks,
-    1000 * 60 * 60 * 3
+    DEFAULT_CHUNKSIZE
   );
   yield put({ type: REGISTER_CHUNKS, chunks: packedChunks });
 }
