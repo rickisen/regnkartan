@@ -3,6 +3,7 @@ import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
 import unzipChannel from "../sagas/unzipChannel";
+import unpackChannel from "../sagas/unpackChannel";
 import { req } from "../../helpers/binaryRequest";
 import { generateDateCode, packHoursIntoChunks } from "../../helpers/general";
 
@@ -131,10 +132,10 @@ export function* fetchChunk({ chunkSize }, time) {
   const chunkSizeQuery = `?end=${generateDateCode(time + chunkSize, true)}`;
 
   let res = null;
-  const url = `${API_URL}radar_${dateCode}.zip${chunkSizeQuery || ""}`;
+  const url = `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
   yield put({ type: FETCH_CHUNK, time, url });
   try {
-    res = yield call(req, url, "arraybuffer");
+    res = yield call(req, url, "text");
   } catch (e) {
     console.warn("Error occured when fetching zip", e, time, url);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
@@ -142,7 +143,8 @@ export function* fetchChunk({ chunkSize }, time) {
   }
 
   if (!res) {
-    console.error("Failed to get zip chunk from api, res: ", res, time);
+    console.error("Failed to get zip chunk from api", time);
+    yield put({ type: FETCH_CHUNK_FAIL, error: "unknown", time });
     return;
   }
 
@@ -150,11 +152,53 @@ export function* fetchChunk({ chunkSize }, time) {
 
   yield put({ type: UNZIPPING_CHUNK, time });
   try {
-    yield call(unzipSaga, res, time);
+    yield call(unpack, res, time);
   } catch (e) {
     console.warn("Error occured when unzipping chunk files", e, time);
     yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
     return;
+  }
+}
+
+export function* unpack(res, time) {
+  // const callTime = new Date().getTime();
+  let data = null;
+  try {
+    data = JSON.parse(res);
+  } catch (e) {
+    console.warn("Error occured when unpacking data", e);
+    yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
+    return;
+  }
+  yield put({ type: FETCH_CHUNK_SUCCESS, time });
+
+  yield put({ type: UNZIPPING_CHUNK, time });
+  try {
+    yield call(unpackWatcher, data, time);
+  } catch (e) {
+    console.warn("Error occured when unzipping chunk files", e, time);
+    yield put({ type: UNZIPPING_CHUNK_FAIL, error: e, time });
+    return;
+  }
+
+  return;
+}
+
+export function* unpackWatcher(data, time) {
+  const chan = yield call(unpackChannel, data);
+  try {
+    // while (true) loops work in a non blocking way inside generators don't
+    // panic!
+    while (true) {
+      // take(END) will cause the saga to terminate by jumping to the finally block
+      const { uri } = yield take(chan);
+      yield put({ type: UNZIPPING_FILE_SUCCESS, uri, time });
+    }
+  } catch (e) {
+    console.warn("Error occurred when unpacking a file", e);
+    yield put({ type: UNZIPPING_FILE_FAIL, time });
+  } finally {
+    yield put({ type: UNZIPPING_CHUNK_SUCCESS, time }); // will this always succeed?
   }
 }
 
@@ -172,7 +216,7 @@ export function* queRequestedHours() {
   const packedChunks = packHoursIntoChunks(
     requestedHours,
     chunks,
-    1000 * 60 * 60 * 8
+    1000 * 60 * 60 * 3
   );
   yield put({ type: REGISTER_CHUNKS, chunks: packedChunks });
 }
@@ -207,7 +251,7 @@ const initialState = {
 };
 
 export default function reducer(state = initialState, action) {
-  // console.log("action.type", action.type, action.time || "");
+  console.log("action", action.type, action.time || "");
   switch (action.type) {
     case REGISTER_CHUNKS:
       return {
