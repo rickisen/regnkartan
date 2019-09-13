@@ -6,6 +6,7 @@ import { StyleSheet, View } from "react-native";
 import Ui from "./Ui";
 import RadarMap from "./RadarMap";
 import { CLEAR_CACHE } from "../../redux/modules/wheatherData";
+import { ASSERT_LOCATION } from "../../redux/modules/permissions";
 
 const styles = StyleSheet.create({
   container: {
@@ -26,6 +27,7 @@ function Radar() {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch({ type: CLEAR_CACHE });
+    dispatch({ type: ASSERT_LOCATION });
   }, []);
   return (
     <View style={styles.container}>

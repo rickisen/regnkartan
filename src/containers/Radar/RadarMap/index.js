@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useSelector } from "react-redux";
 import { StyleSheet } from "react-native";
 import MapView from "react-native-maps";
 
@@ -33,6 +34,10 @@ function bounceBackMap(newRegion, mapRef) {
 // Also gets a navigation prop
 function RadarMap() {
   const mapRef = useRef(null);
+  const locationGranted = useSelector(
+    ({ permissions: { granted } }) =>
+      granted.findIndex(v => v === "LOCATION") >= 0
+  );
   const onRegionChangeComplete = newRegion => bounceBackMap(newRegion, mapRef);
 
   return (
@@ -41,7 +46,7 @@ function RadarMap() {
       onRegionChange={onRegionChangeComplete}
       onRegionChangeComplete={onRegionChangeComplete}
       provider="google"
-      showUserLocation={true} // need to get permissions too
+      showsUserLocation={locationGranted}
       rotateEnabled={false}
       minZoomLevel={4.5}
       maxZoomLevel={9}
