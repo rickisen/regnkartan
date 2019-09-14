@@ -8,6 +8,7 @@ import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
 import Footer from "./Footer";
 import { pad, hourRangeFrom, begginingOfHour } from "../../helpers/general";
+import { chunkStatusForHour } from "./helpers";
 
 function TimePointPicker({
   chunks,
@@ -180,25 +181,5 @@ TimePointPicker.propTypes = {
   onSelectedHour: PropTypes.func,
   refreshing: PropTypes.bool,
 };
-
-/** @function chunkStatusForHour
- * @param {number} hour - timestamp of the hour to check
- * @param {object} chunks - object holding the chunks to test against
- * @return {string} status, might be empty string
- */
-export function chunkStatusForHour(hour, chunks) {
-  if (!hour && !chunks) {
-    return "";
-  }
-
-  for (var stamp in chunks) {
-    const beginingOfChunk = parseInt(stamp);
-    const endOfChunk = beginingOfChunk + chunks[stamp].chunkSize;
-    if (hour >= beginingOfChunk && hour < endOfChunk) {
-      return chunks[stamp].status;
-    }
-  }
-  return "";
-}
 
 export default TimePointPicker;

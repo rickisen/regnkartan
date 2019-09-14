@@ -64,22 +64,13 @@ export function generateDateCode(time, hour = false, minute = false) {
   return dateCode;
 }
 
-export function generateDateCodeRange(start, end) {
+/** @function generateDateCodeRange
+ * @param {number} startStamp - timestamp
+ * @param {number} endStamp - timestamp
+ * @return {[string]} dateCode
+ */
+export function generateDateCodeRange(startStamp, endStamp) {
   let ret = [];
-  let startStamp = 0;
-  let endStamp = 0;
-
-  try {
-    startStamp = start.getTime();
-    endStamp = end.getTime();
-  } catch (e) {
-    console.error(
-      "Both start and end must be valid Date object got: ",
-      start,
-      end,
-      e
-    );
-  }
 
   if (startStamp && endStamp && startStamp < endStamp) {
     while (startStamp < endStamp) {
@@ -161,11 +152,8 @@ export function packHoursIntoChunks(
 
   // key for new chunk to add, default to end at the begining of the current
   // hour if there are no present chunks
-  const beginingOfCurrentHour = new Date();
-  beginingOfCurrentHour.setMinutes(0);
-  beginingOfCurrentHour.setSeconds(0);
-  beginingOfCurrentHour.setMilliseconds(0);
-  let chunkKey = beginingOfCurrentHour.getTime() - chunkSize;
+  const beginingOfCurrentHour = begginingOfHour();
+  let chunkKey = beginingOfCurrentHour - chunkSize;
   // Do we need to schedule a future chunk, or a past chunk
   if (
     sortedChunkKeys.length > 0 &&
@@ -195,12 +183,9 @@ export function packHoursIntoChunks(
 }
 
 export function hourRangeFrom(start = new Date().getTime(), size = 100) {
-  const now = new Date(start);
-  now.setUTCMinutes(0);
-  now.setUTCSeconds(0);
-  now.setUTCMilliseconds(0);
-  const endOfThisHour = now.getTime() + 1000 * 60 * 60;
-  const startStamp = endOfThisHour - 1000 * 60 * 60 * (size - 1);
+  const begginingOfThatHour = begginingOfHour(new Date(start));
+  const endOfThatHour = begginingOfThatHour + 1000 * 60 * 60;
+  const startStamp = endOfThatHour - 1000 * 60 * 60 * (size - 1);
   const range = [];
 
   for (var hour = 0; hour < size; hour++) {

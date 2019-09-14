@@ -3,15 +3,13 @@ import { Svg, Text } from "react-native-svg";
 
 import Lines from "./Lines.js";
 import { pad } from "../../helpers/general";
+import { statusToColor } from "./helpers";
 
-function Hour({ status, stamp, hourWidth, index }) {
+function Hour({ status, stamp, hourWidth }) {
   const date = new Date(stamp);
   const isStartOfDay = date.getHours() === 0;
   const statusColor = statusToColor(status);
   let opacity = 1;
-  if (status === "future" && index) {
-    opacity = 0.33333 * (1 / index);
-  }
   return (
     <Svg
       key={"" + stamp}
@@ -20,11 +18,7 @@ function Hour({ status, stamp, hourWidth, index }) {
       width={hourWidth}
       viewBox={`0 0 ${hourWidth} 100`}
     >
-      <Lines
-        color={statusColor}
-        isStartOfDay={isStartOfDay}
-        hourWidth={hourWidth}
-      />
+      <Lines stamp={stamp} status={status} hourWidth={hourWidth} />
       <Text
         textAnchor="middle"
         x={`${hourWidth / 2 + 1}`}
@@ -46,29 +40,6 @@ function Hour({ status, stamp, hourWidth, index }) {
       )}
     </Svg>
   );
-}
-
-function statusToColor(status) {
-  switch (status) {
-    case "qued":
-      return "#777";
-    case "loading":
-      return "#555";
-    case "loaded":
-      return "#222";
-    case "failed":
-      return "#a00";
-    case "unpacking":
-      return "#111";
-    case "unpacked":
-      return "#000";
-    case "unpack-fail":
-      return "#a0a";
-    case "future":
-      return "#aaa";
-    default:
-      return "#aaa";
-  }
 }
 
 export default memo(Hour);

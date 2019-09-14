@@ -12,11 +12,13 @@ function Footer({ pickerWidth, hourWidth, range, refreshing }) {
       (refreshing ? 1 : 0),
     amountOfFutureHours
   );
+  const currentHourCompleted = new Date().getUTCMinutes() / 60;
+  const hourPad = (1 - currentHourCompleted) * hourWidth;
 
   return (
     <View
       style={{
-        width: pickerWidth / 2,
+        maxWidth: pickerWidth / 2 - hourWidth / 2 - hourPad,
         flexDirection: "row",
       }}
     >

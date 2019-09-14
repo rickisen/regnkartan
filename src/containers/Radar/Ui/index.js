@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { BlurView } from "expo-blur";
 
-import { generateDateCode } from "../../../helpers/general";
+import { generateDateCode, hourRangeFrom } from "../../../helpers/general";
 
 import {
   SELECT_FILE,
@@ -69,11 +69,17 @@ function UI() {
   const chunks = useSelector(({ wheatherData: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
+
+  let timePointRange = hourRangeFrom();
+  const refreshRangeInterval = useRef(null);
   useEffect(() => {
-    setTimeout(() => {
-      console.log("auto refreshing");
-      refreshLatest(0, dispatch);
-    }, 10000);
+    clearInterval(refreshRangeInterval.current);
+    refreshRangeInterval.current = setInterval(() => {
+      timePointRange = hourRangeFrom();
+    }, 1000 * 60);
+    return () => {
+      clearInterval(refreshRangeInterval.current);
+    };
   }, []);
 
   return (
@@ -82,6 +88,7 @@ function UI() {
         <Text>{chunksDone ? "" : "loading data..."}</Text>
         <TimePointPicker
           chunks={chunks}
+          range={timePointRange}
           onSelectedHour={hourStamp => {
             registerHour(hourStamp, dispatch);
           }}
