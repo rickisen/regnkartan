@@ -2,9 +2,16 @@ import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
+import { SELECT_HOUR } from "./radarSelection.js";
 import unpack from "../sagas/unpack";
 import { req } from "../../helpers/binaryRequest";
-import { generateDateCode, packHoursIntoChunks } from "../../helpers/general";
+import {
+  generateDateCode,
+  packHoursIntoChunks,
+  timeFromDateCode,
+  begginingOfHour,
+  timeFromFilePath,
+} from "../../helpers/general";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/PACK";
@@ -20,6 +27,9 @@ export const FETCH_QUED_SUCCESS = `${NAME}/FETCH_QUED_SUCCESS`;
 export const FETCH_QUED_FAIL = `${NAME}/FETCH_QUED_FAIL`;
 export const REGISTER_CHUNKS = `${NAME}/REGISTER_CHUNKS`;
 export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
+export const REFRESH_LATEST = `${NAME}/REFRESH_LATEST`;
+export const REFRESH_LATEST_FAIL = `${NAME}/REFRESH_LATEST_FAIL`;
+export const RESET_CHUNK_STATUS = `${NAME}/RESET_CHUNK_STATUS`;
 
 const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
 const API_URL = "http://regn.rickisen.com/zip/v1/";
@@ -165,6 +175,46 @@ export function* queRequestedHours() {
   yield put({ type: REGISTER_CHUNKS, chunks: packedChunks });
 }
 
+export function* refreshLatest() {
+  // change the size of the last chunk to be at the begining of its last image hour.
+  try {
+    const chunks = yield select(({ wheatherData: { chunks } }) => chunks);
+    const keys = Object.keys(chunks).sort();
+    const lastChunkKey = keys[keys.length - 1];
+    const lastChunk = chunks[lastChunkKey];
+    if (!lastChunk.unpackedFiles || lastChunk.unpackedFiles.length === 0) {
+      yield put({ type: RESET_CHUNK_STATUS, time: lastChunkKey });
+      return;
+    }
+
+    const lastFileName = lastChunk.unpackedFiles.sort()[
+      lastChunk.unpackedFiles.length - 1
+    ];
+    const lastFileStamp = timeFromFilePath(lastFileName);
+    const beginingOfHourOfLastFile = begginingOfHour(new Date(lastFileStamp));
+    const lastChunksNewSize = beginingOfHourOfLastFile - parseInt(lastChunkKey);
+
+    const newChunks = {
+      ...chunks,
+      [lastChunkKey]: {
+        ...lastChunk,
+        chunkSize: lastChunksNewSize,
+      },
+    };
+
+    yield put({ type: REGISTER_CHUNKS, chunks: newChunks });
+    // add a new requestedHour (this hour)
+
+    yield put({ type: SELECT_HOUR, hourStamp: beginingOfHourOfLastFile });
+  } catch (e) {
+    console.warn(
+      "Something went wrong when trying to figure out where to refresh from"
+    );
+    yield put({ type: REFRESH_LATEST_FAIL });
+    return;
+  }
+}
+
 /** PropTypes **/
 export const propTypes = {
   error: PropTypes.bool,
@@ -197,6 +247,7 @@ const initialState = {
 
 export default function reducer(state = initialState, action) {
   // console.log("action", action.type, action.time || "");
+  // console.log("state", state);
   switch (action.type) {
     case REGISTER_CHUNKS:
       return {
@@ -251,11 +302,12 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         chunks: {
-          ...state.chunks,
-          [action.time]: {
-            ...state.chunks[action.time],
-            ...{ status: "unpack-fail" },
-          },
+          ...Object.keys(state.chunks)
+            .filter(k => parseInt(k) !== action.time)
+            .reduce((acc, k) => {
+              acc[k] = state.chunks[k];
+              return acc;
+            }, {}),
         },
       };
     case UNPACKING_FILE_SUCCESS:
@@ -282,6 +334,17 @@ export default function reducer(state = initialState, action) {
           [action.time]: {
             ...state.chunks[action.time],
             ...{ status: "unpacked" },
+          },
+        },
+      };
+    case RESET_CHUNK_STATUS:
+      return {
+        ...state,
+        chunks: {
+          ...state.chunks,
+          [action.time]: {
+            ...state.chunks[action.time],
+            ...{ status: "qued" },
           },
         },
       };

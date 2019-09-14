@@ -6,6 +6,13 @@ import { hourRangeFrom } from "../../helpers/general";
 
 function Footer({ pickerWidth, hourWidth, range, refreshing }) {
   const amountOfFutureHours = Math.floor(pickerWidth / 2 / hourWidth);
+  const hours = hourRangeFrom(
+    range[range.length - 2] +
+      amountOfFutureHours * 1000 * 60 * 60 -
+      (refreshing ? 1 : 0),
+    amountOfFutureHours
+  );
+
   return (
     <View
       style={{
@@ -13,10 +20,7 @@ function Footer({ pickerWidth, hourWidth, range, refreshing }) {
         flexDirection: "row",
       }}
     >
-      {hourRangeFrom(
-        range[range.length - 2] + amountOfFutureHours * 1000 * 60 * 60,
-        amountOfFutureHours
-      ).map((item, index) => {
+      {hours.map((item, index) => {
         return (
           <Hour
             key={"" + item}
@@ -27,12 +31,15 @@ function Footer({ pickerWidth, hourWidth, range, refreshing }) {
           />
         );
       })}
-      <View
-        syle={{
-          opacity: 1,
-          width: hourWidth,
-        }}
-      ></View>
+      {refreshing && (
+        <View
+          syle={{
+            width: hourWidth,
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      )}
     </View>
   );
 }

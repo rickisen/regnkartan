@@ -209,3 +209,28 @@ export function hourRangeFrom(start = new Date().getTime(), size = 100) {
 
   return range;
 }
+
+/** @function begginingOfHour
+ * @param {Date} date - Date object representing the time we will find an hour for
+ * @return {number} timestamp for that dates begining hour
+ */
+export function begginingOfHour(d = new Date()) {
+  const date = new Date(d.getTime());
+
+  date.setUTCMinutes(0);
+  date.setUTCSeconds(0);
+  date.setUTCMilliseconds(0);
+
+  return date.getTime();
+}
+
+/** @function timeFromFilePath
+ * @param {string} path - file path that has a radar_datecode.pack file at the end
+ * @return {number} - timestamp corresponding to the files name
+ */
+export function timeFromFilePath(path) {
+  const fileName = path.substring(path.length - 20, path.length);
+  return timeFromDateCode(
+    fileName.match(/\d+/g).reduce((acc, char) => (acc += char), "")
+  ).getTime();
+}

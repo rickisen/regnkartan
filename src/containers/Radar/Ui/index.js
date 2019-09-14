@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { BlurView } from "expo-blur";
@@ -9,6 +9,7 @@ import {
   SELECT_FILE,
   SELECT_HOUR,
 } from "../../../redux/modules/radarSelection";
+import { REFRESH_LATEST } from "../../../redux/modules/wheatherData";
 import TimePointPicker from "../../../components/TimePointPicker";
 
 const styles = StyleSheet.create({
@@ -37,6 +38,10 @@ const styles = StyleSheet.create({
   },
 });
 
+function refreshLatest(hourStamp, dispatch) {
+  dispatch({ type: REFRESH_LATEST });
+}
+
 function registerHour(hourStamp, dispatch) {
   dispatch({ type: SELECT_HOUR, hourStamp });
 }
@@ -64,7 +69,12 @@ function UI() {
   const chunks = useSelector(({ wheatherData: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
-  const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("auto refreshing");
+      refreshLatest(0, dispatch);
+    }, 10000);
+  }, []);
 
   return (
     <BlurView tint="light" intensity={80} style={styles.uiContainer}>
@@ -78,11 +88,10 @@ function UI() {
           onSelected={stamp => {
             registerTime(chunks, stamp, dispatch);
           }}
-          onRefresh={() => {
-            setRefreshing(true);
-            setTimeout(() => setRefreshing(false), 1000);
+          onRefresh={hourStamp => {
+            refreshLatest(hourStamp, dispatch);
           }}
-          refreshing={refreshing}
+          refreshing={!chunksDone}
         />
       </View>
     </BlurView>

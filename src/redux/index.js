@@ -5,6 +5,7 @@ import rootSaga from "./sagas/rootSaga";
 import wheatherData from "./modules/wheatherData";
 import radarSelection from "./modules/radarSelection";
 import permissions from "./modules/permissions";
+// import { logger } from "./middleware/logger.js";
 
 const reducer = combineReducers({
   wheatherData,
@@ -13,7 +14,11 @@ const reducer = combineReducers({
 });
 
 const sagaMiddleware = createSagaMiddleware();
-const middleware = applyMiddleware(sagaMiddleware);
+const middleware = applyMiddleware(
+  //
+  sagaMiddleware
+  // logger
+);
 
 export default function createAppStore(initialValue = {}) {
   let store;

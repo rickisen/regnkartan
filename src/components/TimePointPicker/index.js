@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import * as Haptics from "expo-haptics";
 import { PropTypes } from "prop-types";
 import { FlatList, View, Text } from "react-native";
 import { Svg, Line } from "react-native-svg";
@@ -6,7 +7,7 @@ import { Svg, Line } from "react-native-svg";
 import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
 import Footer from "./Footer";
-import { pad, hourRangeFrom } from "../../helpers/general";
+import { pad, hourRangeFrom, begginingOfHour } from "../../helpers/general";
 
 function TimePointPicker({
   chunks,
@@ -58,17 +59,30 @@ function TimePointPicker({
     minutes,
   ]);
 
-  // Run a callback for every hour touched (with a timer to prevent excess
+  // Run a callback for every hour touched (with a timer to prevent accidental
   // loading)
-  const timer = useRef(null);
+  const selectHourTimer = useRef(null);
   useEffect(() => {
     if (!over && !under) {
-      clearTimeout(timer.current);
-      timer.current = setTimeout(() => {
+      // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      clearTimeout(selectHourTimer.current);
+      selectHourTimer.current = setTimeout(() => {
         onSelectedHour(selectedHour);
       }, 400);
     }
-  }, [selectedHour, timer, over, under]);
+  }, [selectedHour, selectHourTimer, over, under]);
+
+  const refreshTimer = useRef(null);
+  useEffect(() => {
+    if (over && !refreshing) {
+      clearTimeout(refreshTimer.current);
+      refreshTimer.current = setTimeout(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).then(() => {
+          onRefresh(begginingOfHour());
+        });
+      }, 400);
+    }
+  }, [over, refreshing, refreshTimer]);
 
   const flatList = useRef(null);
   useEffect(() => {
@@ -112,8 +126,6 @@ function TimePointPicker({
       </Svg>
       <FlatList
         ref={flatList}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
         style={{ height: 100 }}
         contentContainerStyle={{ height: 100 }}
         data={range}
