@@ -14,9 +14,9 @@ function Hour({ status, stamp, hourWidth }) {
     <Svg
       key={"" + stamp}
       opacity={opacity}
-      height="100"
+      height="65"
       width={hourWidth}
-      viewBox={`0 0 ${hourWidth} 100`}
+      viewBox={`0 0 ${hourWidth} 65`}
     >
       <Lines stamp={stamp} status={status} hourWidth={hourWidth} />
       <Text

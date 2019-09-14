@@ -45,7 +45,7 @@ function TimePointPicker({
   const selectedIndex = Math.floor(middleOfPicker / hourWidth);
   if (range[selectedIndex]) {
     selectedHour = range[selectedIndex];
-  } else if (selectedIndex > range.length - 1) {
+  } else if (selectedIndex >= range.length - 1) {
     over = true;
   } else {
     under = true;
@@ -105,7 +105,6 @@ function TimePointPicker({
       style={{
         justifyContent: "center",
         alignItems: "center",
-        height: 150,
       }}
     >
       <View>
@@ -127,8 +126,6 @@ function TimePointPicker({
       </Svg>
       <FlatList
         ref={flatList}
-        style={{ height: 100 }}
-        contentContainerStyle={{ height: 100 }}
         data={range}
         initialScrollIndex={initialHour}
         ListFooterComponent={
