@@ -1,27 +1,19 @@
 import React from "react";
 import { Provider } from "react-redux";
-import {
-  createDrawerNavigator,
-  createStackNavigator,
-  createAppContainer,
-} from "react-navigation";
+import { createStackNavigator, createAppContainer } from "react-navigation";
 import createAppStore from "./redux"; // pun intended
 
-import Drawer from "./components/Drawer";
 import Radar from "./containers/Radar";
 import About from "./containers/About";
 
 const RootNavigator = createAppContainer(
-  createDrawerNavigator(
+  createStackNavigator(
     {
-      Home: createStackNavigator(
-        { Radar, About },
-        { initialRouteName: "Radar" }
-      ),
+      Home: Radar,
+      About: About,
     },
     {
       initialRouteName: "Home",
-      contentComponent: Drawer,
     }
   )
 );

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { PropTypes } from "prop-types";
 import { FlatList, View, Text } from "react-native";
-import { Svg, Line } from "react-native-svg";
+import { Svg, Path, G } from "react-native-svg";
 
 import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
@@ -103,27 +103,25 @@ function TimePointPicker({
     <View
       onLayout={onLayout}
       style={{
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
       }}
     >
-      <View>
-        <Text style={{ textAlign: "center" }}>
-          {!over && !under
-            ? `${pad(new Date(selectedHour).getHours())}:${pad(minutes)}`
-            : " "}
-        </Text>
+      <View style={{ alignItems: "center" }}>
+        <Svg
+          width={pickerWidth}
+          height="20"
+          viewBox={`0 0 5.2916665 5.2916665`}
+        >
+          <G transform="translate(0,-291.70833)" id="layer1">
+            <Path
+              id="rect4518"
+              d="M 2.38125,291.70833 H 2.9104167 L 2.6458333,297 Z"
+              fill="#666"
+            />
+          </G>
+        </Svg>
       </View>
-      <Svg width={pickerWidth} height="10" viewBox={`0 0 ${pickerWidth} 10`}>
-        <Line
-          stroke="black"
-          x1={pickerWidth / 2}
-          y1="0"
-          x2={pickerWidth / 2}
-          y2="10"
-          strokeWidth="1"
-        />
-      </Svg>
       <FlatList
         ref={flatList}
         data={range}

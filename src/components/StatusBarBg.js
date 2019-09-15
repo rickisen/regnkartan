@@ -1,12 +1,12 @@
 import React from "react";
-import { PropTypes } from "prop-types";
-import { StatusBar, StyleSheet, View } from "react-native";
-import Constants from 'expo-constants';
-import { BlurView } from 'expo-blur';
+import { StatusBar, StyleSheet } from "react-native";
+import Constants from "expo-constants";
+import { BlurView } from "./BlurView";
 
 export default class StatusBarHandler extends React.Component {
   styles = StyleSheet.create({
     container: {
+      backgroundColor: "#fafafa", // android only
       height: Constants.statusBarHeight,
       position: "absolute",
       top: 0,

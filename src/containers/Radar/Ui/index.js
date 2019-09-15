@@ -1,9 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { BlurView } from "expo-blur";
 
-import { generateDateCode, hourRangeFrom } from "../../../helpers/general";
+import { pad, generateDateCode, hourRangeFrom } from "../../../helpers/general";
 
 import {
   SELECT_FILE,
@@ -11,11 +10,12 @@ import {
 } from "../../../redux/modules/radarSelection";
 import { REFRESH_LATEST } from "../../../redux/modules/wheatherData";
 import TimePointPicker from "../../../components/TimePointPicker";
+import BottomSheet from "../../../components/BottomSheet";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 10,
     justifyContent: "flex-start",
     alignItems: "stretch",
   },
@@ -69,6 +69,7 @@ function UI() {
   const chunks = useSelector(({ wheatherData: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
+  const [time, setTime] = useState("");
 
   let timePointRange = hourRangeFrom();
   const refreshRangeInterval = useRef(null);
@@ -83,9 +84,29 @@ function UI() {
   }, []);
 
   return (
-    <BlurView tint="light" intensity={80} style={styles.uiContainer}>
+    <BottomSheet
+      headerComponent={
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ flexGrow: 1, flexBasis: 0 }}>
+            <Text>{chunksDone ? "" : "loading data..."}</Text>
+          </View>
+          <View style={{ flexGrow: 1, flexBasis: 0 }}>
+            <Text style={{ textAlign: "center", fontSize: 20 }}>{time}</Text>
+          </View>
+          <View style={{ flexGrow: 1, flexBasis: 0 }}>
+            <Text>{""}</Text>
+          </View>
+        </View>
+      }
+    >
       <View style={styles.container}>
-        <Text>{chunksDone ? "" : "loading data..."}</Text>
         <TimePointPicker
           chunks={chunks}
           range={timePointRange}
@@ -94,6 +115,8 @@ function UI() {
           }}
           onSelected={stamp => {
             registerTime(chunks, stamp, dispatch);
+            const d = new Date(stamp);
+            setTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
           }}
           onRefresh={hourStamp => {
             refreshLatest(hourStamp, dispatch);
@@ -101,7 +124,7 @@ function UI() {
           refreshing={!chunksDone}
         />
       </View>
-    </BlurView>
+    </BottomSheet>
   );
 }
 
