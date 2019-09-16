@@ -29,6 +29,7 @@ function Radar() {
     dispatch({ type: CLEAR_CACHE });
     dispatch({ type: ASSERT_LOCATION });
   }, []);
+
   return (
     <View style={styles.container}>
       <RadarMap />
