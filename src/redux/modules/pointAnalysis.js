@@ -3,6 +3,7 @@ import { call, put, select } from "redux-saga/effects";
 import * as Location from "expo-location";
 
 import { req } from "../../helpers/binaryRequest";
+
 /** ACTION TYPES **/
 export const NAME = "regnkartan/pointAnalysis";
 export const POINT_ANALYSIS = `${NAME}/POINT_ANALYSIS`;

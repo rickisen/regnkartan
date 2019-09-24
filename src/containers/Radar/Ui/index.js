@@ -15,11 +15,12 @@ import {
 } from "../../../redux/modules/radarSelection";
 import { REFRESH_LATEST } from "../../../redux/modules/wheatherData";
 import TimePointPicker from "../../../components/TimePointPicker";
+import Thermometer from "../../../components/Thermometer";
 import BottomSheet from "../../../components/BottomSheet";
+import WindDirection from "../../../components/WindDirection";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingHorizontal: 10,
     justifyContent: "flex-start",
     alignItems: "stretch",
@@ -86,7 +87,7 @@ function selectTemperature({
     ) {
       const temp = dataForHour.parameters.find(p => p.name === "t");
       if (temp && temp.values && temp.values.length > 0) {
-        return temp.values[0] + "°C";
+        return temp.values[0];
       }
     }
   }
@@ -99,6 +100,7 @@ function UI() {
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const selectedTemperature = useSelector(selectTemperature);
+  const temp = selectedTemperature + "°C";
 
   let timePointRange = hourRangeFrom();
   const refreshRangeInterval = useRef(null);
@@ -130,7 +132,7 @@ function UI() {
             <Text style={{ textAlign: "center", fontSize: 20 }}>{time}</Text>
           </View>
           <View style={{ flexGrow: 1, flexBasis: 0 }}>
-            <Text style={{ textAlign: "right" }}>{selectedTemperature}</Text>
+            <Text style={{ textAlign: "right" }}>{temp}</Text>
           </View>
         </View>
       }
@@ -152,6 +154,13 @@ function UI() {
           }}
           refreshing={!chunksDone}
         />
+      </View>
+      <View style={{ flexDirection: "row", margin: 10 }}>
+        <Thermometer degrees={selectedTemperature} />
+        <Text style={{ fontSize: 25, marginTop: 30, margin: 10, width: 85 }}>
+          {temp}
+        </Text>
+        <WindDirection />
       </View>
     </BottomSheet>
   );
