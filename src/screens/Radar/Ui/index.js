@@ -48,6 +48,18 @@ function UI() {
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
 
+  const onSelectedHour = hourStamp => {
+    dispatch(registerHour(hourStamp));
+  };
+  const onSelected = stamp => {
+    dispatch(registerTime(chunks, stamp));
+    const d = new Date(stamp);
+    setTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
+  };
+  const onRefresh = () => {
+    dispatch({ type: REFRESH_LATEST });
+  };
+
   return (
     <BottomSheet
       headerComponent={
@@ -58,17 +70,9 @@ function UI() {
         <TimePointPicker
           chunks={chunks}
           range={timePointRange}
-          onSelectedHour={hourStamp => {
-            dispatch(registerHour(hourStamp));
-          }}
-          onSelected={stamp => {
-            dispatch(registerTime(chunks, stamp));
-            const d = new Date(stamp);
-            setTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
-          }}
-          onRefresh={() => {
-            dispatch({ type: REFRESH_LATEST });
-          }}
+          onSelectedHour={onSelectedHour}
+          onSelected={onSelected}
+          onRefresh={onRefresh}
           refreshing={!chunksDone}
         />
       </View>

@@ -2,16 +2,16 @@ import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
-import unpack from "../sagas/unpack";
-import { req } from "../../helpers/binaryRequest";
+import unpack from "../../sagas/unpack";
+import { req } from "../../../helpers/binaryRequest";
 import {
   generateDateCode,
   packHoursIntoChunks,
   timeFromDateCode,
   begginingOfHour,
   timeFromFilePath,
-} from "../../helpers/general";
-import { SELECT_FILE, SELECT_HOUR } from "./radarSelection";
+} from "../../../helpers/general";
+import { SELECT_FILE, SELECT_HOUR } from "../radarSelection";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/PACK";

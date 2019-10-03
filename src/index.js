@@ -3,8 +3,8 @@ import { Provider } from "react-redux";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import createAppStore from "./redux"; // pun intended
 
-import Radar from "./containers/Radar";
-import About from "./containers/About";
+import Radar from "./screens/Radar";
+import About from "./screens/About";
 
 const RootNavigator = createAppContainer(
   createStackNavigator(

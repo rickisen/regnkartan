@@ -1,4 +1,4 @@
-import { begginingOfHour } from "../../helpers/general";
+import { begginingOfHour } from "../../../helpers/general";
 
 export const parameters = [
   //Parameter   Unit     Description                           Value range

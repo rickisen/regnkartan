@@ -2,7 +2,8 @@ import { PropTypes } from "prop-types";
 import { call, put, select } from "redux-saga/effects";
 import * as Location from "expo-location";
 
-import { req } from "../../helpers/binaryRequest";
+import { req } from "../../../helpers/binaryRequest";
+export * from "./selectors";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/pointAnalysis";

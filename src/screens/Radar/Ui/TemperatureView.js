@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 import Thermometer from "../../../components/Thermometer";
-import { selectTemperature } from "../../../redux/selectors/pointAnalysis.js";
+import { selectTemperature } from "../../../redux/modules/pointAnalysis";
 
 const styles = StyleSheet.create({
   container: {

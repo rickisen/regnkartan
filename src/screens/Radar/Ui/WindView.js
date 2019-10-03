@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 import WindDirection from "../../../components/WindDirection";
-import { selectWindDirection } from "../../../redux/selectors/pointAnalysis";
+import { selectWindDirection } from "../../../redux/modules/pointAnalysis";
 
 const styles = StyleSheet.create({
   container: {
