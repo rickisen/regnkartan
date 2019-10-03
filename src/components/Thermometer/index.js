@@ -1,392 +1,112 @@
 import React, { memo } from "react";
 import { PropTypes } from "prop-types";
-import { Svg, Rect, Path, Text, G, Line } from "react-native-svg";
+import { Svg, Path, Text, G, Line } from "react-native-svg";
 
 function Thermometer({ degrees }) {
   let showFluid = false;
-  let fluidHeight = 532;
-  if (degrees && typeof degrees === "number") {
-    fluidHeight = 532 + degrees * 10;
+  let fluidHeight = 300;
+  let viewBox = `-65 100 150 200`;
+  if (typeof degrees === "number") {
+    fluidHeight = 300 - degrees * 10;
     showFluid = true;
+    const d10 = Math.round(degrees / 10) * 100;
+    viewBox = `-65 ${d10 * -1 + 200} 150 200`;
   }
 
   return (
-    <Svg version="1.1" height="300" width="50" viewBox="0 0 215 1195">
+    <Svg width="75" height="100" version="1.1" viewBox={viewBox}>
       {showFluid && (
-        <Rect
-          y="1177"
-          x="61"
-          height={fluidHeight * -1}
-          width="94"
-          fill="red"
-          stroke="black"
-          strokeWidth="4"
+        <Path
+          d={`M 0.5,${fluidHeight} H 16.521306 V 601.27839 H 0.5 Z`}
+          fill="#ff0000"
+          stroke="#000000"
+          strokeWidth="1"
         />
       )}
-      <Path
-        fill="white"
-        d="m 107.6166,2 c 58.51159,0 105.61659,49.24122 105.61659,110.40632 v 970.81988 c 0,61.1651 -47.105,110.4063 -105.61659,110.4063 C 49.104999,1193.6325 2,1144.3913 2,1083.2262 V 112.40632 C 2,51.24122 49.104999,2 107.6166,2 Z m 0.0102,128.9219 c -5.60409,0 -10.125001,4.6274 -10.125001,10.40625 v 882.03115 c -14.40906,4.1843 -24.84375,17.0991 -24.84375,32.4688 v 34.2812 c 0,18.7797 15.60223,33.9062 34.968751,33.9062 19.36652,0 34.9375,-15.1265 34.9375,-33.9062 v -34.2812 c 0,-15.3697 -10.43469,-28.2845 -24.84375,-32.4688 V 141.32815 c 0,-5.77885 -4.48966,-10.40625 -10.09375,-10.40625 z"
-        stroke="black"
-        strokeWidth="4"
-      />
-      <Text fill="black" y="99.788719" x="102.6291"></Text>
-      <G fontSize="25" transform="translate(189.34995,-354.29904)">
-        <Line
-          stroke="black"
+      <G transform="translate(-99.339296,-345.4034)">
+        <G
+          transform="translate(0,-0.79758877)"
+          stroke="#000000"
           strokeWidth="1"
-          y2="1300"
-          x2="-150"
-          y1="1300"
-          x1="-100"
-        />
-        <Text fill="black" y="1315" x="-30" font-size="40px">
-          30
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1280"
-          x2="-120"
-          y1="1280"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1260"
-          x2="-120"
-          y1="1260"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1240"
-          x2="-120"
-          y1="1240"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1220"
-          x2="-120"
-          y1="1220"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1200"
-          x2="-150"
-          y1="1200"
-          x1="-100"
-        />
-        <Text y="1215" x="-30" font-size="40px">
-          20
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1180"
-          x2="-120"
-          y1="1180"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1160"
-          x2="-120"
-          y1="1160"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1140"
-          x2="-120"
-          y1="1140"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1120"
-          x2="-120"
-          y1="1120"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1100"
-          x2="-150"
-          y1="1100"
-          x1="-100"
-        />
-        <Text y="1115" x="-30" font-size="40px">
-          10
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1080"
-          x2="-120"
-          y1="1080"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1060"
-          x2="-120"
-          y1="1060"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1040"
-          x2="-120"
-          y1="1040"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1020"
-          x2="-120"
-          y1="1020"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="1000"
-          x2="-150"
-          y1="1000"
-          x1="-100"
-        />
-        <Text y="1015" x="-30" font-size="40px">
-          0
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="980"
-          x2="-120"
-          y1="980"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="960"
-          x2="-120"
-          y1="960"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="940"
-          x2="-120"
-          y1="940"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="920"
-          x2="-120"
-          y1="920"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="900"
-          x2="-150"
-          y1="900"
-          x1="-100"
-        />
-        <Text y="915" x="-30" font-size="40px">
-          10
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="880"
-          x2="-120"
-          y1="880"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="860"
-          x2="-120"
-          y1="860"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="840"
-          x2="-120"
-          y1="840"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="820"
-          x2="-120"
-          y1="820"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="800"
-          x2="-150"
-          y1="800"
-          x1="-100"
-        />
-        <Text y="815" x="-30" font-size="40px">
-          20
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="780"
-          x2="-120"
-          y1="780"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="760"
-          x2="-120"
-          y1="760"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="740"
-          x2="-120"
-          y1="740"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="720"
-          x2="-120"
-          y1="720"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="700"
-          x2="-150"
-          y1="700"
-          x1="-100"
-        />
-        <Text y="715" x="-30" font-size="40px">
-          30
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="680"
-          x2="-120"
-          y1="680"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="660"
-          x2="-120"
-          y1="660"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="640"
-          x2="-120"
-          y1="640"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="620"
-          x2="-120"
-          y1="620"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="600"
-          x2="-150"
-          y1="600"
-          x1="-100"
-        />
-        <Text y="615" x="-30" font-size="40px">
-          40
-        </Text>
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="580"
-          x2="-120"
-          y1="580"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="560"
-          x2="-120"
-          y1="560"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="540"
-          x2="-120"
-          y1="540"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="520"
-          x2="-120"
-          y1="520"
-          x1="-100"
-        />
-        <Line
-          stroke="black"
-          strokeWidth="1"
-          y2="500"
-          x2="-150"
-          y1="500"
-          x1="-100"
-        />
-        <Text y="515" x="-30" font-size="40px">
-          50
-        </Text>
+        >
+          <Line y2="945.70099" x2="39.349949" y1="945.70099" x1="89.349953" />
+          <Line y2="925.70099" x2="69.349953" y1="925.70099" x1="89.349953" />
+          <Line y2="905.70099" x2="69.349953" y1="905.70099" x1="89.349953" />
+          <Line y2="885.70099" x2="69.349953" y1="885.70099" x1="89.349953" />
+          <Line y2="865.70099" x2="69.349953" y1="865.70099" x1="89.349953" />
+          <Line y2="845.70099" x2="39.349949" y1="845.70099" x1="89.349953" />
+          <Line y2="825.70099" x2="69.349953" y1="825.70099" x1="89.349953" />
+          <Line y2="805.70099" x2="69.349953" y1="805.70099" x1="89.349953" />
+          <Line y2="785.70099" x2="69.349953" y1="785.70099" x1="89.349953" />
+          <Line y2="765.70099" x2="69.349953" y1="765.70099" x1="89.349953" />
+          <Line y2="745.70099" x2="39.349949" y1="745.70099" x1="89.349953" />
+          <Line y2="725.70099" x2="69.349953" y1="725.70099" x1="89.349953" />
+          <Line y2="705.70099" x2="69.349953" y1="705.70099" x1="89.349953" />
+          <Line y2="685.70099" x2="69.349953" y1="685.70099" x1="89.349953" />
+          <Line y2="665.70099" x2="69.349953" y1="665.70099" x1="89.349953" />
+          <Line y2="645.70099" x2="39.349949" y1="645.70099" x1="89.349953" />
+          <Line y2="625.70099" x2="69.349953" y1="625.70099" x1="89.349953" />
+          <Line y2="605.70099" x2="69.349953" y1="605.70099" x1="89.349953" />
+          <Line y2="585.70099" x2="69.349953" y1="585.70099" x1="89.349953" />
+          <Line y2="565.70099" x2="69.349953" y1="565.70099" x1="89.349953" />
+          <Line y2="545.70099" x2="39.349949" y1="545.70099" x1="89.349953" />
+          <Line y2="525.70099" x2="69.349953" y1="525.70099" x1="89.349953" />
+          <Line y2="505.70096" x2="69.349953" y1="505.70096" x1="89.349953" />
+          <Line y2="485.70096" x2="69.349953" y1="485.70096" x1="89.349953" />
+          <Line y2="465.70096" x2="69.349953" y1="465.70096" x1="89.349953" />
+          <Line y2="445.70096" x2="39.349949" y1="445.70096" x1="89.349953" />
+          <Line y2="425.70096" x2="69.349953" y1="425.70096" x1="89.349953" />
+          <Line y2="405.70096" x2="69.349953" y1="405.70096" x1="89.349953" />
+          <Line y2="385.70096" x2="69.349953" y1="385.70096" x1="89.349953" />
+          <Line y2="365.70096" x2="69.349953" y1="365.70096" x1="89.349953" />
+          <Line y2="345.70096" x2="39.349949" y1="345.70096" x1="89.349953" />
+          <Line y2="325.70096" x2="69.349953" y1="325.70096" x1="89.349953" />
+          <Line y2="305.70096" x2="69.349953" y1="305.70096" x1="89.349953" />
+          <Line y2="285.70096" x2="69.349953" y1="285.70096" x1="89.349953" />
+          <Line y2="265.70096" x2="69.349953" y1="265.70096" x1="89.349953" />
+          <Line y2="245.70096" x2="39.349949" y1="245.70096" x1="89.349953" />
+          <Line y2="225.70096" x2="69.349953" y1="225.70096" x1="89.349953" />
+          <Line y2="205.70096" x2="69.349953" y1="205.70096" x1="89.349953" />
+          <Line y2="185.70096" x2="69.349953" y1="185.70096" x1="89.349953" />
+          <Line y2="165.70096" x2="69.349953" y1="165.70096" x1="89.349953" />
+          <Line y2="145.70096" x2="39.349949" y1="145.70096" x1="89.349953" />
+        </G>
+        <G fontSize="40px" textAnchor="middle" fill="#000000">
+          <Text fill="#ff0000" y="960.70099" x="159.34995" font-size="40px">
+            -30
+          </Text>
+          <Text fill="#ff0000" y="860.70099" x="159.34995" font-size="40px">
+            -20
+          </Text>
+          <Text fill="#ff0000" y="760.70099" x="159.34995" font-size="40px">
+            -10
+          </Text>
+          <Text y="660.70099" x="159.34995" font-size="40px">
+            0
+          </Text>
+          <Text y="560.70099" x="159.34995" font-size="40px">
+            10
+          </Text>
+          <Text y="460.70096" x="159.34995" font-size="40px">
+            20
+          </Text>
+          <Text y="360.70096" x="159.34995" font-size="40px">
+            30
+          </Text>
+          <Text y="260.70096" x="159.34995" font-size="40px">
+            40
+          </Text>
+          <Text y="160.70096" x="159.34995" font-size="40px">
+            50
+          </Text>
+        </G>
       </G>
+      <Path
+        d="M 0.510984,-199.951 H 16.510322 V 601.29949 H 0.510984 Z"
+        stroke="#000000"
+        strokeWidth="1"
+        fill="transparent"
+      />
     </Svg>
   );
 }
