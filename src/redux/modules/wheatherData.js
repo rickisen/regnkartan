@@ -2,7 +2,6 @@ import { call, put, select, fork } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
-import { SELECT_HOUR } from "./radarSelection.js";
 import unpack from "../sagas/unpack";
 import { req } from "../../helpers/binaryRequest";
 import {
@@ -12,6 +11,7 @@ import {
   begginingOfHour,
   timeFromFilePath,
 } from "../../helpers/general";
+import { SELECT_FILE, SELECT_HOUR } from "./radarSelection";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/PACK";
@@ -213,6 +213,48 @@ export function* refreshLatest() {
     yield put({ type: REFRESH_LATEST_FAIL });
     return;
   }
+}
+
+/** ActionCreators **/
+export function registerHour(hourStamp) {
+  return { type: SELECT_HOUR, hourStamp };
+}
+
+export function registerTime(chunks, stamp) {
+  let uri = null;
+  const dateCode = generateDateCode(stamp, true, true);
+  for (var hour in chunks) {
+    const chunk = chunks[hour];
+    const chunkBegin = parseInt(hour);
+    const chunkEnd = parseInt(hour) + chunk.chunkSize;
+
+    if (
+      chunk.status === "unpacked" &&
+      stamp >= chunkBegin &&
+      stamp < chunkEnd
+    ) {
+      uri = chunk.unpackedFiles.find(p => p.includes(dateCode));
+    }
+  }
+  return { type: SELECT_FILE, uri, stamp, dateCode };
+}
+
+/** Selectors **/
+export function allChunks({ wheatherData: { chunks } }) {
+  return chunks;
+}
+
+export function allChunksDone({ wheatherData: { chunks } }) {
+  for (var stamp in chunks) {
+    if (
+      chunks[stamp].status !== "unpacked" &&
+      chunks[stamp].status !== "unpack-fail" &&
+      chunks[stamp].status !== "failed"
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /** PropTypes **/

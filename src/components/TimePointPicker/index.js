@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { PropTypes } from "prop-types";
-import { FlatList, View, Text } from "react-native";
+import { FlatList, View } from "react-native";
 import { Svg, Path, G } from "react-native-svg";
 
 import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
 import Footer from "./Footer";
-import { pad, hourRangeFrom, begginingOfHour } from "../../helpers/general";
+import { hourRangeFrom } from "../../helpers/general";
 import { chunkStatusForHour } from "./helpers";
 
 function TimePointPicker({
@@ -79,7 +79,7 @@ function TimePointPicker({
       clearTimeout(refreshTimer.current);
       refreshTimer.current = setTimeout(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).then(() => {
-          onRefresh(begginingOfHour());
+          onRefresh();
         });
       }, 400);
     }

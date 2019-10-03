@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { useSelector } from "react-redux";
 import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-navigation";
 import MapView from "react-native-maps";
 
 import RadarOverlay from "./RadarOverlay";

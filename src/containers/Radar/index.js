@@ -26,7 +26,7 @@ Radar.propTypes = {
 function Radar() {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch({ type: CLEAR_CACHE });
+    dispatch({ type: CLEAR_CACHE }); //TODO: Do this on real app load
     dispatch({ type: ASSERT_LOCATION });
   }, []);
 
