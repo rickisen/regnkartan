@@ -2,45 +2,22 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 
-import {
-  pad,
-  generateDateCode,
-  hourRangeFrom,
-  begginingOfHour,
-} from "../../../helpers/general";
-
+import { pad, generateDateCode, hourRangeFrom } from "../../../helpers/general";
+import TimePointPicker from "../../../components/TimePointPicker";
+import BottomSheet from "../../../components/BottomSheet";
+import TemperatureView from "./TemperatureView";
+import WindView from "./WindView";
+import { REFRESH_LATEST } from "../../../redux/modules/wheatherData";
 import {
   SELECT_FILE,
   SELECT_HOUR,
 } from "../../../redux/modules/radarSelection";
-import { REFRESH_LATEST } from "../../../redux/modules/wheatherData";
-import TimePointPicker from "../../../components/TimePointPicker";
-import Thermometer from "../../../components/Thermometer";
-import BottomSheet from "../../../components/BottomSheet";
-import WindDirection from "../../../components/WindDirection";
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     justifyContent: "flex-start",
     alignItems: "stretch",
-  },
-  uiContainer: {
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderRadius: 10,
-    position: "absolute",
-    marginHorizontal: 10,
-    borderTopRightRadius: 5,
-    borderTopLeftRadius: 5,
-  },
-  ui: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    margin: 20,
-    minHeight: 75,
   },
 });
 
@@ -71,36 +48,11 @@ function registerTime(chunks, stamp, dispatch) {
   dispatch({ type: SELECT_FILE, uri, stamp, dateCode });
 }
 
-function selectTemperature({
-  radarSelection: { stamp },
-  pointAnalysis: { data },
-}) {
-  if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
-    const relevantHour = begginingOfHour(new Date(stamp));
-    const dataForHour = data.timeSeries.find(
-      ({ validTime }) => new Date(validTime).getTime() === relevantHour
-    );
-    if (
-      dataForHour &&
-      dataForHour.parameters &&
-      dataForHour.parameters.length > 0
-    ) {
-      const temp = dataForHour.parameters.find(p => p.name === "t");
-      if (temp && temp.values && temp.values.length > 0) {
-        return temp.values[0];
-      }
-    }
-  }
-  return "";
-}
-
 function UI() {
   const chunks = useSelector(({ wheatherData: { chunks } }) => chunks);
   const chunksDone = allChunksDone(chunks);
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
-  const selectedTemperature = useSelector(selectTemperature);
-  const temp = selectedTemperature + "°C";
 
   let timePointRange = hourRangeFrom();
   const refreshRangeInterval = useRef(null);
@@ -132,7 +84,7 @@ function UI() {
             <Text style={{ textAlign: "center", fontSize: 20 }}>{time}</Text>
           </View>
           <View style={{ flexGrow: 1, flexBasis: 0 }}>
-            <Text style={{ textAlign: "right" }}>{temp}</Text>
+            <Text style={{ textAlign: "right" }}>{"hej"}</Text>
           </View>
         </View>
       }
@@ -155,13 +107,8 @@ function UI() {
           refreshing={!chunksDone}
         />
       </View>
-      <View style={{ flexDirection: "row", margin: 10 }}>
-        <Thermometer degrees={selectedTemperature} />
-        <Text style={{ fontSize: 25, marginTop: 30, margin: 10, width: 85 }}>
-          {temp}
-        </Text>
-        <WindDirection />
-      </View>
+      <TemperatureView />
+      <WindView />
     </BottomSheet>
   );
 }

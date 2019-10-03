@@ -114,3 +114,26 @@ export function selectParameter(
   }
   return "";
 }
+
+export function selectTemperature({
+  radarSelection: { stamp },
+  pointAnalysis: { data },
+}) {
+  if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
+    const relevantHour = begginingOfHour(new Date(stamp));
+    const dataForHour = data.timeSeries.find(
+      ({ validTime }) => new Date(validTime).getTime() === relevantHour
+    );
+    if (
+      dataForHour &&
+      dataForHour.parameters &&
+      dataForHour.parameters.length > 0
+    ) {
+      const temp = dataForHour.parameters.find(p => p.name === "t");
+      if (temp && temp.values && temp.values.length > 0) {
+        return temp.values[0];
+      }
+    }
+  }
+  return undefined;
+}

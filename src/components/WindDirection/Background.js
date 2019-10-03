@@ -7,12 +7,7 @@ function Background({ size }) {
   const color = "rgba(0,0,0,0.2)";
   return (
     <View>
-      <Svg
-        version="1.1"
-        viewBox="0 0 26.458333 26.458333"
-        height={size}
-        width={size}
-      >
+      <Svg version="1.1" viewBox="0 -1 27 28" height={size} width={size}>
         <G transform="translate(6.944337,6.6460468)">
           <G
             stroke={color}

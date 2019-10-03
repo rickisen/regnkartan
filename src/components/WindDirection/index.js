@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Animated, Text } from "react-native";
-import { useSelector } from "react-redux";
+import { View, Animated } from "react-native";
 import PropTypes from "prop-types";
 
 import Arrow from "./Arrow";
 import Background from "./Background";
-import { selectWindDirection } from "../../redux/selectors/pointAnalysis";
 
 export const useAnimation = ({ degrees, duration }) => {
   const [animation] = useState(new Animated.Value(0));
@@ -20,9 +18,7 @@ export const useAnimation = ({ degrees, duration }) => {
   return animation;
 };
 
-function WindDirection({ size }) {
-  const degrees = useSelector(selectWindDirection);
-  const disabled = typeof degrees !== "number";
+function WindDirection({ size, degrees, disabled }) {
   const animation = useAnimation({
     degrees: (degrees || 0) - 90,
     duration: 400,
@@ -48,9 +44,6 @@ function WindDirection({ size }) {
       >
         {!disabled && <Arrow size={size} />}
       </Animated.View>
-      <Text>
-        {disabled ? "Wind Direction unknown" : `Wind Direction: ${degrees}°`}
-      </Text>
     </View>
   );
 }
