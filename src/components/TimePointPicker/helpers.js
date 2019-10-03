@@ -1,4 +1,4 @@
-import { generateDateCodeRange, timeFromDateCode } from "../../helpers/general";
+import { generateDateCodeRange, timeFromDateCode } from "../../helpers";
 
 export function statusToColor(status) {
   switch (status) {

@@ -2,7 +2,7 @@ import React from "react";
 import { View, ActivityIndicator } from "react-native";
 
 import Hour from "./Hour";
-import { hourRangeFrom } from "../../helpers/general";
+import { hourRangeFrom } from "../../helpers";
 
 function Footer({ pickerWidth, hourWidth, range, refreshing }) {
   const amountOfFutureHours = Math.floor(pickerWidth / 2 / hourWidth);

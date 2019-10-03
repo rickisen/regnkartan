@@ -7,7 +7,7 @@ import { Svg, Path, G } from "react-native-svg";
 import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
 import Hour from "./Hour";
 import Footer from "./Footer";
-import { hourRangeFrom } from "../../helpers/general";
+import { hourRangeFrom } from "../../helpers";
 import { chunkStatusForHour } from "./helpers";
 
 function TimePointPicker({

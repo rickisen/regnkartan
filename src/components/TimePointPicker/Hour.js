@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Svg, Text } from "react-native-svg";
 
 import Lines from "./Lines.js";
-import { pad } from "../../helpers/general";
+import { pad } from "../../helpers";
 import { statusToColor } from "./helpers";
 
 function Hour({ status, stamp, hourWidth }) {

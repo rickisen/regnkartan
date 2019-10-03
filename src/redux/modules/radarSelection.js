@@ -1,7 +1,7 @@
 // import { call, put, select, all } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 
-import { sort_unique } from "../../helpers/general";
+import { sort_unique } from "../../helpers";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/radarSelection";

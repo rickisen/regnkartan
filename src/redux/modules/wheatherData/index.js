@@ -3,14 +3,13 @@ import { PropTypes } from "prop-types";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
-import { req } from "../../../helpers/binaryRequest";
 import {
+  req,
   generateDateCode,
   packHoursIntoChunks,
-  timeFromDateCode,
   begginingOfHour,
   timeFromFilePath,
-} from "../../../helpers/general";
+} from "../../../helpers";
 import { SELECT_FILE, SELECT_HOUR } from "../radarSelection";
 
 /** ACTION TYPES **/

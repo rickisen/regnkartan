@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 
-import { pad, hourRangeFrom } from "../../../helpers/general";
+import { pad, hourRangeFrom } from "../../../helpers";
 import TimePointPicker from "../../../components/TimePointPicker";
 import BottomSheet from "../../../components/BottomSheet";
 import TemperatureView from "./TemperatureView";
