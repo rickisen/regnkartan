@@ -1,20 +1,55 @@
-import React, { memo } from "react";
+import React, { memo, useRef, useState, useEffect } from "react";
 import { PropTypes } from "prop-types";
+import { Animated } from "react-native";
 import { Svg, Path, Text, G, Line } from "react-native-svg";
+
+const AnimatedSvg = Animated.createAnimatedComponent(Svg);
+
+function animationListener(animation) {
+  const d10 = parseInt(animation.value.toString()); //TODO: find better way of accessing
+  let viewBox = `-65 100 150 200`;
+  if (typeof d10 === "number") {
+    viewBox = `-65 ${d10 * -1 + 200} 150 200`;
+  }
+  // this.ref.current.setNativeProps({ viewBox });
+  this.setViewBox(viewBox);
+}
+
+function useAnimation({ d10, duration }) {
+  const [animation] = useState(new Animated.Value(0));
+  const [viewBox, setViewBox] = useState("-65 100 150 200");
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: d10,
+      duration,
+    }).start();
+  }, [d10]);
+
+  animation.addListener(animationListener.bind({ setViewBox }));
+
+  return viewBox;
+}
 
 function Thermometer({ degrees }) {
   let showFluid = false;
   let fluidHeight = 300;
-  let viewBox = `-65 100 150 200`;
+  // let viewBox = `-65 100 150 200`;
+  let d10 = 100;
   if (typeof degrees === "number") {
     fluidHeight = 300 - degrees * 10;
     showFluid = true;
-    const d10 = Math.round(degrees / 10) * 100;
-    viewBox = `-65 ${d10 * -1 + 200} 150 200`;
+    d10 = Math.round(degrees / 10) * 100;
+    // viewBox = `-65 ${d10 * -1 + 200} 150 200`;
   }
 
+  const viewBox = useAnimation({
+    d10,
+    duration: 200,
+  });
+
   return (
-    <Svg width="75" height="100" version="1.1" viewBox={viewBox}>
+    <AnimatedSvg viewBox={viewBox} width="75" height="100" version="1.1">
       {showFluid && (
         <Path
           d={`M 0.5,${fluidHeight} H 16.521306 V 601.27839 H 0.5 Z`}
@@ -107,7 +142,7 @@ function Thermometer({ degrees }) {
         strokeWidth="1"
         fill="transparent"
       />
-    </Svg>
+    </AnimatedSvg>
   );
 }
 
