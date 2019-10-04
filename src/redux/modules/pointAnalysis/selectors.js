@@ -88,6 +88,10 @@ export function selectWindDirection(state) {
   return selectParameter(state, "wd");
 }
 
+export function selectWeatherSymbol(state) {
+  return selectParameter(state, "Wsymb2");
+}
+
 export function selectParameter(
   { radarSelection: { stamp }, pointAnalysis: { data } },
   parameter

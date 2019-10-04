@@ -10,6 +10,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   textContainer: { flexGrow: 1, flexBasis: 0 },
+  iconContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    flexGrow: 1,
+    flexBasis: 0,
+  },
 });
 
 function Header({ title, loading, Icon }) {
@@ -21,9 +27,7 @@ function Header({ title, loading, Icon }) {
       <View style={styles.textContainer}>
         <Text style={{ textAlign: "center", fontSize: 20 }}>{title}</Text>
       </View>
-      <View style={styles.textContainer}>
-        <Text style={{ textAlign: "right" }}>{Icon}</Text>
-      </View>
+      <View style={styles.iconContainer}>{Icon}</View>
     </View>
   );
 }
