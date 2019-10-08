@@ -18,12 +18,12 @@ const styles = StyleSheet.create({
 
 function TemperatureView() {
   const selectedTemperature = useSelector(selectTemperature);
-  const temp =
-    typeof selectedTemperature === "number" ? selectedTemperature + "°C" : null;
+  const showFluid = typeof selectedTemperature === "number";
+  const temp = showFluid ? selectedTemperature + "°C" : null;
 
   return (
     <View style={styles.container}>
-      <Thermometer degrees={selectedTemperature} />
+      <Thermometer degrees={selectedTemperature} showFluid={showFluid} />
       <Text style={styles.text}>{temp}</Text>
     </View>
   );
