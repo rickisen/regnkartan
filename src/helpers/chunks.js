@@ -1,6 +1,6 @@
 import { begginingOfHour } from "./time";
 
-/** @function packHoursIntoChunks
+/** packHoursIntoChunks
  * @param {Array} requestedHours - hours to put in the chunks, (should be an array of timestamps for begining at an hour)
  * @param {Object} chunks - chunks object, with timestamp for key [chunks={}]
  * @param {Number} chunkSize - Size in ms of newly created chunks

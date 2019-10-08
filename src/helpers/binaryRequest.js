@@ -1,4 +1,4 @@
-/** @function req - Makes a new XMLHttpRequest with supplied responseType
+/** req - Makes a new XMLHttpRequest with supplied responseType
  * @param {string} url - url of the request
  * @param {string} responseType - the type of responceData you need, "text", "blob" etc [responseType="text"]
  * @return {Promise} Promise - that resolves on successful response
