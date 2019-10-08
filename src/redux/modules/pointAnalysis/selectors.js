@@ -92,6 +92,17 @@ export function selectWeatherSymbol(state) {
   return selectParameter(state, "Wsymb2");
 }
 
+export function selectTemperature(state) {
+  return selectParameter(state, "t");
+}
+
+function getRelevantHour(stamp) {
+  if (begginingOfHour() <= stamp) {
+    return begginingOfHour(new Date(Date.now() - 1000 * 60 * 60));
+  }
+  return begginingOfHour(new Date(stamp));
+}
+
 export function selectParameter(
   { radarSelection: { stamp }, pointAnalysis: { data } },
   parameter
@@ -101,7 +112,7 @@ export function selectParameter(
     return "";
   }
   if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
-    const relevantHour = begginingOfHour(new Date(stamp));
+    const relevantHour = getRelevantHour(stamp);
     const dataForHour = data.timeSeries.find(
       ({ validTime }) => new Date(validTime).getTime() === relevantHour
     );
@@ -110,34 +121,11 @@ export function selectParameter(
       dataForHour.parameters &&
       dataForHour.parameters.length > 0
     ) {
-      const temp = dataForHour.parameters.find(p => p.name === parameter);
-      if (temp && temp.values && temp.values.length > 0) {
-        return temp.values[0];
+      const point = dataForHour.parameters.find(p => p.name === parameter);
+      if (point && point.values && point.values.length > 0) {
+        return point.values[0];
       }
     }
   }
   return "";
-}
-
-export function selectTemperature({
-  radarSelection: { stamp },
-  pointAnalysis: { data },
-}) {
-  if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
-    const relevantHour = begginingOfHour(new Date(stamp));
-    const dataForHour = data.timeSeries.find(
-      ({ validTime }) => new Date(validTime).getTime() === relevantHour
-    );
-    if (
-      dataForHour &&
-      dataForHour.parameters &&
-      dataForHour.parameters.length > 0
-    ) {
-      const temp = dataForHour.parameters.find(p => p.name === "t");
-      if (temp && temp.values && temp.values.length > 0) {
-        return temp.values[0];
-      }
-    }
-  }
-  return undefined;
 }
