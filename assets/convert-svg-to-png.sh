@@ -20,9 +20,9 @@ for FILE_PATH in $(find $ASSETS_FOLDER -name '*.svg'); do
   # DIRNAME="$(dirname $PATH_NO_EXT)"
   # FILENAME="$(basename $PATH_NO_EXT)"
   # rsvg-convert $FILE_PATH -o "${PATH_NO_EXT}.png"
-  rsvg-convert $FILE_PATH -w 32 -a -o "${PATH_NO_EXT}.png"
+  rsvg-convert $FILE_PATH -w 64 -a -o "${PATH_NO_EXT}.png"
   # rsvg-convert $FILE_PATH -x 2 -y 2 -o "${PATH_NO_EXT}@2x.png"
-  rsvg-convert $FILE_PATH -w 64 -a -o "${PATH_NO_EXT}@2x.png"
+  rsvg-convert $FILE_PATH -w 128 -a -o "${PATH_NO_EXT}@2x.png"
   # rsvg-convert $FILE_PATH -x 3 -y 3 -o "${PATH_NO_EXT}@3x.png"
-  rsvg-convert $FILE_PATH -w 96 -a -o "${PATH_NO_EXT}@3x.png"
+  rsvg-convert $FILE_PATH -w 192 -a -o "${PATH_NO_EXT}@3x.png"
 done
