@@ -59,15 +59,36 @@ function Overview() {
     cloudCoverage,
   } = useSelector(getPointAnalysis);
 
+  let disabled = false;
+  if (
+    visibility == undefined ||
+    humidity == undefined ||
+    precipitation == undefined ||
+    icon == undefined ||
+    cloudCoverage == undefined
+  ) {
+    disabled = true;
+  }
+
   return (
     <View style={styles.container}>
       <WeatherIcon size={75} Wsymb2={icon} />
       <View>
-        <Text style={styles.topic}>{Wsymb2Desc[icon]}</Text>
-        <Text style={styles.text}>{`Humidity: ${humidity}%`}</Text>
-        <Text style={styles.text}>{`Visibility: ${visibility}km`}</Text>
-        <Text style={styles.text}>{`Cloud Coverage: ${cloudCoverage}%`}</Text>
-        <Text style={styles.text}>{`Precipitation: ${precipitation}mm`}</Text>
+        <Text style={styles.topic}>
+          {disabled ? "Unknown" : Wsymb2Desc[icon]}
+        </Text>
+        {!disabled && (
+          <>
+            <Text style={styles.text}>{`Humidity: ${humidity}%`}</Text>
+            <Text style={styles.text}>{`Visibility: ${visibility}km`}</Text>
+            <Text
+              style={styles.text}
+            >{`Cloud Coverage: ${cloudCoverage}%`}</Text>
+            <Text
+              style={styles.text}
+            >{`Precipitation: ${precipitation}mm`}</Text>
+          </>
+        )}
       </View>
     </View>
   );

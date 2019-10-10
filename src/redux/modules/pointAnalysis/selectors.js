@@ -114,7 +114,6 @@ export function selectParameter(
 ) {
   if (!parameters.includes(parameter)) {
     console.warn("parameters must be one of: ", parameters);
-    return "";
   }
   if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
     const relevantHour = getRelevantHour(stamp);
@@ -132,5 +131,4 @@ export function selectParameter(
       }
     }
   }
-  return "";
 }
