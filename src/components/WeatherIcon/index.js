@@ -1,9 +1,9 @@
 import React, { memo } from "react";
-import { Image, View } from "react-native";
+import { Image } from "react-native";
 import PropTypes from "prop-types";
 
+/* eslint-disable no-undef */
 const symb2uri = [
-  /* eslint-disable no-undef */
   require("../../../assets/icons/weatherSymbols/1_ClearSky.png"), // Wsymb2 api starts at 1, could have a default icon here
   require("../../../assets/icons/weatherSymbols/1_ClearSky.png"),
   require("../../../assets/icons/weatherSymbols/2_NearlyClearSky.png"),
@@ -33,19 +33,16 @@ const symb2uri = [
   require("../../../assets/icons/weatherSymbols/26_ModerateSnow.png"),
   require("../../../assets/icons/weatherSymbols/27_HeavySnow.png"),
 ];
+/* eslint-enable no-undef */
 
 function WeatherIcon({ Wsymb2, size, opacity }) {
-  let disabled = true;
-  let uri = "";
+  const style = { width: size, height: size, opacity };
+  let uri = symb2uri[0];
   if (typeof Wsymb2 === "number" && symb2uri.length >= Wsymb2 && Wsymb2 >= 0) {
-    disabled = false;
     uri = symb2uri[Wsymb2];
   }
-  return (
-    <View style={{ width: size, alignItems: "middle", opacity }}>
-      {!disabled && <Image source={uri} />}
-    </View>
-  );
+
+  return <Image style={style} source={uri} />;
 }
 
 WeatherIcon.propTypes = {

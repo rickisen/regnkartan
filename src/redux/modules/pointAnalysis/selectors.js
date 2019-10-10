@@ -3,7 +3,7 @@ import { begginingOfHour } from "../../../helpers";
 export const parameters = [
   //Parameter   Unit     Description                           Value range
   "t", //       C        Air temperature                       Decimal number, one decimal
-  "tiw", //     C        Wet bulb temperature                  Decimal number, one decimal
+  "Tiw", //     C        Wet bulb temperature                  Decimal number, one decimal
   "gust", //    m/s      Wind gust speed                       Decimal number, one decimal
   "wd", //      degree   Wind direction                        Integer
   "ws", //      m/s      Wind speed                            Decimal number, one decimal
@@ -74,18 +74,20 @@ export const parameters = [
 
 export function getPointAnalysis(state) {
   return {
-    temperature: selectParameter(state, "t"),
-    windSpeed: selectParameter(state, "ws"),
-    windDirection: selectParameter(state, "wd"),
-    precipitation: selectParameter(state, "perc1h"),
-    snow: selectParameter(state, "frsn1h"),
+    humidity: selectParameter(state, "r"),
+    precipitation: selectParameter(state, "prec1h"),
+    visibility: selectParameter(state, "vis"),
     icon: selectParameter(state, "Wsymb2"),
     cloudCoverage: selectParameter(state, "tcc"),
   };
 }
 
 export function selectWindDirection(state) {
-  return selectParameter(state, "wd");
+  return {
+    degrees: selectParameter(state, "wd"),
+    speed: selectParameter(state, "ws"),
+    gust: selectParameter(state, "gust"),
+  };
 }
 
 export function selectWeatherSymbol(state) {
@@ -93,7 +95,10 @@ export function selectWeatherSymbol(state) {
 }
 
 export function selectTemperature(state) {
-  return selectParameter(state, "t");
+  return {
+    temperature: selectParameter(state, "t"),
+    wetBulb: selectParameter(state, "Tiw"),
+  };
 }
 
 function getRelevantHour(stamp) {

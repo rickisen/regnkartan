@@ -10,22 +10,30 @@ const styles = StyleSheet.create({
     margin: 10,
     flexDirection: "row",
   },
+  topic: {
+    fontSize: 20,
+    paddingHorizontal: 10,
+  },
   text: {
-    fontSize: 25,
     paddingHorizontal: 10,
   },
 });
 
 function WindView() {
-  const degrees = useSelector(selectWindDirection);
+  const { degrees, speed, gust } = useSelector(selectWindDirection);
   const disabled = typeof degrees !== "number";
 
   return (
     <View style={styles.container}>
       <WindDirection size={75} degrees={degrees} disabled={disabled} />
       <View>
+        <Text style={styles.topic}>Wind</Text>
         <Text style={styles.text}>
-          {disabled ? "" : `Wind Direction: ${degrees}°`}
+          {disabled ? "" : `Direction: ${degrees}°`}
+        </Text>
+        <Text style={styles.text}>{disabled ? "" : `Speed: ${speed}m/s`}</Text>
+        <Text style={styles.text}>
+          {disabled ? "" : `Gust Speed: ${gust}m/s`}{" "}
         </Text>
       </View>
     </View>

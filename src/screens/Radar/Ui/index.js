@@ -8,6 +8,7 @@ import BottomSheet from "../../../components/BottomSheet";
 import WeatherIcon from "../../../components/WeatherIcon";
 import TemperatureView from "./TemperatureView";
 import WindView from "./WindView";
+import Overview from "./Overview";
 import Header from "./Header";
 import { selectWeatherSymbol } from "../../../redux/modules/pointAnalysis";
 import {
@@ -83,6 +84,7 @@ function UI() {
           refreshing={!chunksDone}
         />
       </View>
+      <Overview />
       <TemperatureView />
       <WindView />
     </BottomSheet>

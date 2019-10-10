@@ -10,21 +10,31 @@ const styles = StyleSheet.create({
     margin: 10,
     flexDirection: "row",
   },
+  topic: {
+    fontSize: 20,
+    paddingHorizontal: 10,
+  },
   text: {
-    fontSize: 25,
     paddingHorizontal: 10,
   },
 });
 
 function TemperatureView() {
-  const selectedTemperature = useSelector(selectTemperature);
-  const showFluid = typeof selectedTemperature === "number";
-  const temp = showFluid ? selectedTemperature + "°C" : null;
+  const { temperature, wetBulb } = useSelector(selectTemperature);
+  const showFluid = typeof temperature === "number";
 
   return (
     <View style={styles.container}>
-      <Thermometer degrees={selectedTemperature} showFluid={showFluid} />
-      <Text style={styles.text}>{temp}</Text>
+      <Thermometer degrees={temperature} showFluid={showFluid} />
+      <View>
+        <Text style={styles.topic}>Temperature</Text>
+        {showFluid && (
+          <>
+            <Text style={styles.text}>{`Temperature: ${temperature}°C`}</Text>
+            <Text style={styles.text}>{`Wet Bulb: ${wetBulb}°C`}</Text>
+          </>
+        )}
+      </View>
     </View>
   );
 }
