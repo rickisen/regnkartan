@@ -10,7 +10,10 @@ import TemperatureView from "./TemperatureView";
 import WindView from "./WindView";
 import Overview from "./Overview";
 import Header from "./Header";
-import { selectWeatherSymbol } from "../../../redux/modules/pointAnalysis";
+import {
+  EXTENDED_DATA_VISIBLE,
+  selectWeatherSymbol,
+} from "../../../redux/modules/pointAnalysis";
 import {
   allChunks,
   allChunksDone,
@@ -44,6 +47,18 @@ function useNewRangeEveryMinute() {
   return timePointRange;
 }
 
+function useVisibilityCallback() {
+  const dispatch = useDispatch();
+
+  const setVisibility = v => {
+    dispatch({ type: EXTENDED_DATA_VISIBLE, visible: !!v });
+  };
+
+  const visible = useSelector(({ pointAnalysis: { visible } }) => visible);
+
+  return [visible, setVisibility];
+}
+
 function UI() {
   const chunks = useSelector(allChunks);
   const chunksDone = useSelector(allChunksDone);
@@ -51,7 +66,7 @@ function UI() {
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
-  const [showExtendedUi, setShowExtendedUi] = useState(false);
+  const [showExtendedUi, visibilityCallBack] = useVisibilityCallback();
 
   const onSelectedHour = hourStamp => {
     dispatch(registerHour(hourStamp));
@@ -67,7 +82,7 @@ function UI() {
 
   return (
     <BottomSheet
-      visibilityCallBack={setShowExtendedUi}
+      visibilityCallBack={visibilityCallBack}
       headerComponent={
         <Header
           loading={!chunksDone}

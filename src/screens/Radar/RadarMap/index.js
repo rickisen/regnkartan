@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import MapView from "react-native-maps";
 
 import RadarOverlay from "./RadarOverlay";
@@ -31,6 +31,32 @@ function bounceBackMap(newRegion, mapRef) {
   }
 }
 
+function useReZoomOnExtendedData(mapRef) {
+  const extendedDataVisible = useSelector(
+    ({ pointAnalysis: { visible } }) => visible
+  );
+  const lastCam = useRef(null);
+  useEffect(() => {
+    const { height, width } = Dimensions.get("window");
+
+    if (extendedDataVisible) {
+      mapRef.current.getCamera().then(cam => {
+        lastCam.current = cam;
+        mapRef.current
+          .coordinateForPoint({
+            x: width / 2,
+            y: height * 0.8,
+          })
+          .then(zoomTo => {
+            mapRef.current.animateCamera({ center: zoomTo }, { duration: 200 });
+          });
+      });
+    } else if (lastCam.current) {
+      mapRef.current.animateCamera(lastCam.current, { duration: 200 });
+    }
+  }, [extendedDataVisible, mapRef]);
+}
+
 // Also gets a navigation prop
 function RadarMap() {
   const mapRef = useRef(null);
@@ -39,12 +65,14 @@ function RadarMap() {
       granted.findIndex(v => v === "LOCATION") >= 0
   );
   const onRegionChangeComplete = newRegion => bounceBackMap(newRegion, mapRef);
+  useReZoomOnExtendedData(mapRef);
 
   return (
     <MapView
       ref={mapRef}
       onRegionChange={onRegionChangeComplete}
       onRegionChangeComplete={onRegionChangeComplete}
+      pitchEnabled={false}
       provider="google"
       showsUserLocation={locationGranted}
       rotateEnabled={false}

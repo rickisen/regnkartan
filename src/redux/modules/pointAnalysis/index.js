@@ -11,6 +11,7 @@ export const POINT_ANALYSIS = `${NAME}/POINT_ANALYSIS`;
 export const POINT_ANALYSIS_SUCCES = `${NAME}/POINT_ANALYSIS_SUCCES`;
 export const POINT_ANALYSIS_FAIL = `${NAME}/POINT_ANALYSIS_FAIL`;
 export const SET_LAT_LON = `${NAME}/SET_LAT_LON`;
+export const EXTENDED_DATA_VISIBLE = `${NAME}/EXTENDED_DATA_VISIBLE`;
 
 const API = "https://opendata-download-metanalys.smhi.se";
 
@@ -89,6 +90,7 @@ const initialState = {
   lat: 0,
   long: 0,
   data: null,
+  visible: false,
 };
 
 export default function reducer(state = initialState, action) {
@@ -114,6 +116,11 @@ export default function reducer(state = initialState, action) {
         ...state,
         lat: action.lat,
         lon: action.lon,
+      };
+    case EXTENDED_DATA_VISIBLE:
+      return {
+        ...state,
+        visible: action.visible,
       };
     default:
       return state;
