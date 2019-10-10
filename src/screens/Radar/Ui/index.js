@@ -51,6 +51,7 @@ function UI() {
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
+  const [showExtendedUi, setShowExtendedUi] = useState(false);
 
   const onSelectedHour = hourStamp => {
     dispatch(registerHour(hourStamp));
@@ -66,6 +67,7 @@ function UI() {
 
   return (
     <BottomSheet
+      visibilityCallBack={setShowExtendedUi}
       headerComponent={
         <Header
           loading={!chunksDone}
@@ -84,9 +86,13 @@ function UI() {
           refreshing={!chunksDone}
         />
       </View>
-      <Overview />
-      <TemperatureView />
-      <WindView />
+      {showExtendedUi && (
+        <>
+          <Overview />
+          <TemperatureView />
+          <WindView />
+        </>
+      )}
     </BottomSheet>
   );
 }

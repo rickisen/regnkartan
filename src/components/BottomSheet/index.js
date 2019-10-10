@@ -18,6 +18,10 @@ const SNAP_POINTS_FROM_TOP = [
 ];
 
 export default class BottomSheet extends Component {
+  static defaultProps = {
+    visibilityCallBack: () => {},
+  };
+
   masterdrawer = React.createRef();
   drawer = React.createRef();
   drawerheader = React.createRef();
@@ -87,6 +91,9 @@ export default class BottomSheet extends Component {
         }
       }
 
+      const END = SNAP_POINTS_FROM_TOP[SNAP_POINTS_FROM_TOP.length - 1];
+      setTimeout(() => this.props.visibilityCallBack(destSnapPoint !== END), 0);
+
       this.setState({ lastSnap: destSnapPoint });
       this._translateYOffset.extractOffset();
       this._translateYOffset.setValue(translationY);
@@ -101,6 +108,7 @@ export default class BottomSheet extends Component {
       }).start();
     }
   };
+
   render() {
     return (
       <TapGestureHandler
