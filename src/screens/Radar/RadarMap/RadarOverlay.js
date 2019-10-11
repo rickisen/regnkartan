@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useSelector } from "react-redux";
 import MapView from "react-native-maps";
 
@@ -10,4 +10,4 @@ function RadarOverlay() {
   return <MapView.Overlay image={{ uri }} bounds={BOUNDS} />;
 }
 
-export default RadarOverlay;
+export default memo(RadarOverlay);
