@@ -61,14 +61,14 @@ export function* fetchPoint() {
   try {
     res = yield call(req, url);
   } catch (e) {
-    console.warn("Error when fetching point analysis", url, res, e);
+    console.warn("Error when fetching point analysis", url, e);
     yield put({ type: POINT_ANALYSIS_FAIL });
     return;
   }
 
   let data = null;
   try {
-    data = JSON.parse(res);
+    data = JSON.parse(res.data);
   } catch (e) {
     console.warn("Error when parsing point analysis as json", e);
     yield put({ type: POINT_ANALYSIS_FAIL });

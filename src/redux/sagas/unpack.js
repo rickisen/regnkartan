@@ -6,8 +6,14 @@ import {
   EncodingType,
 } from "expo-file-system";
 
+/** unpack - saga that unpacks a packed chunk (a pack) onto the file system
+ * @param {string} pack from response
+ * @param {number} time identifier for this chunk
+ * @param {[FETCH_CHUNK_FAIL, FETCH_CHUNK_SUCCESS, UNPACKING_CHUNK, UNPACKING_CHUNK_FAIL, UNPACKING_CHUNK_SUCCESS, UNPACKING_FILE_FAIL, UNPACKING_FILE_SUCCESS]}
+ * @return {void}
+ */
 export default function* unpack(
-  res,
+  pack,
   time,
   [
     FETCH_CHUNK_FAIL,
@@ -22,7 +28,7 @@ export default function* unpack(
   // const callTime = new Date().getTime();
   let data = null;
   try {
-    data = JSON.parse(res);
+    data = JSON.parse(pack);
   } catch (e) {
     console.warn("Error occured when unpacking data", e);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });

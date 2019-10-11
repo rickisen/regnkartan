@@ -9,6 +9,7 @@ import {
   packHoursIntoChunks,
   begginingOfHour,
   timeFromFilePath,
+  filterOutChunk,
 } from "../../../helpers";
 import { SELECT_FILE, SELECT_HOUR } from "../radarSelection";
 
@@ -29,6 +30,7 @@ export const CLEAR_CACHE = `${NAME}/CLEAR_CACHE`;
 export const REFRESH_LATEST = `${NAME}/REFRESH_LATEST`;
 export const REFRESH_LATEST_FAIL = `${NAME}/REFRESH_LATEST_FAIL`;
 export const RESET_CHUNK_STATUS = `${NAME}/RESET_CHUNK_STATUS`;
+export const CLEAR_CHUNK = `${NAME}/CLEAR_CHUNK`;
 
 const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
 const API_URL = "http://regn.rickisen.com/zip/v1/";
@@ -118,20 +120,24 @@ export function* fetchChunk({ chunkSize }, time) {
 
   const chunkSizeQuery = `?end=${generateDateCode(time + chunkSize, true)}`;
 
-  let res = null;
+  let status = null;
+  let data = null;
   const url = `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
   yield put({ type: FETCH_CHUNK, time, url });
   try {
-    res = yield call(req, url);
+    const response = yield call(req, url);
+    status = response.status;
+    data = response.data;
   } catch (e) {
-    console.warn("Error occured when fetching pack", e, time, url);
-    yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
-    return;
-  }
-
-  if (!res) {
-    console.error("Failed to get pack chunk from api", time);
-    yield put({ type: FETCH_CHUNK_FAIL, error: "unknown", time });
+    if (
+      e.data ==
+      "Found no smhi data in that time range, maybe it has not been published yet?"
+    ) {
+      yield put({ type: CLEAR_CHUNK, time });
+      return;
+    }
+    console.warn("Error occured when fetching pack", time, url, e);
+    yield put({ type: FETCH_CHUNK_FAIL, error: status, time });
     return;
   }
 
@@ -139,7 +145,7 @@ export function* fetchChunk({ chunkSize }, time) {
 
   yield put({ type: UNPACKING_CHUNK, time });
   try {
-    yield call(unpack, res, time, [
+    yield call(unpack, data, time, [
       FETCH_CHUNK_FAIL,
       FETCH_CHUNK_SUCCESS,
       UNPACKING_CHUNK,
@@ -304,6 +310,13 @@ export default function reducer(state = initialState, action) {
             ...state.chunks[action.time],
             ...{ status: "loading" },
           },
+        },
+      };
+    case CLEAR_CHUNK:
+      return {
+        ...state,
+        chunks: {
+          ...filterOutChunk(state.chunks, action.time),
         },
       };
     case FETCH_CHUNK_SUCCESS:

@@ -65,3 +65,16 @@ export function packHoursIntoChunks(
   // recurse
   return packHoursIntoChunks(hoursNotInAChunk, newChunks, chunkSize, ++depth);
 }
+
+/** filterOutChunk - removes one chunk from chunks
+ * @param {object} chunks
+ * @param {string} key - key of chunk to remove
+ * @return {object} reduced chunks
+ */
+export function filterOutChunk(chunks, key) {
+  let ret = {};
+  for (var chunk in chunks) {
+    if (chunk !== key) ret = { ...ret, [chunk]: chunks[chunk] };
+  }
+  return ret;
+}

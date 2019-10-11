@@ -10,9 +10,9 @@ export function req(url, responseType = "text") {
     xhr.ontimeout = reject;
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status > 199 && xhr.status < 300) {
-        resolve(xhr.response);
+        resolve({ status: xhr.status, data: xhr.response });
       } else if (xhr.readyState === 4) {
-        reject(xhr.status);
+        reject({ status: xhr.status, data: xhr.response });
       }
     };
     xhr.open("GET", url);
