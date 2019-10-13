@@ -101,6 +101,11 @@ export function selectTemperature(state) {
   };
 }
 
+/** getRelevantHour - returns beggining of hour corresponding to supplied stamp, or if stamp is
+ * in the future, its previous hour.
+ * @param {number} stamp - stamp in hour to find
+ * @return {number} stamp pointing to beggining of relevant hour
+ */
 function getRelevantHour(stamp) {
   if (begginingOfHour() <= stamp) {
     return begginingOfHour(new Date(Date.now() - 1000 * 60 * 60));
