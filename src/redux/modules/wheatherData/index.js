@@ -129,13 +129,13 @@ export function* fetchChunk({ chunkSize }, time) {
     status = response.status;
     data = response.data;
   } catch (e) {
-    if (
-      e.data ==
-      "Found no smhi data in that time range, maybe it has not been published yet?"
-    ) {
-      yield put({ type: CLEAR_CHUNK, time });
-      return;
-    }
+    // if (
+    //   e.data ==
+    //   "Found no smhi data in that time range, maybe it has not been published yet?\n"
+    // ) {
+    //   yield put({ type: CLEAR_CHUNK, time });
+    //   return;
+    // }
     console.warn("Error occured when fetching pack", time, url, e);
     yield put({ type: FETCH_CHUNK_FAIL, error: status, time });
     return;

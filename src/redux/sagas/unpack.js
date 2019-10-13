@@ -72,7 +72,7 @@ export function unpackChannel(packedData) {
         });
     }
 
-    return () => {}; //TODO: we are done delete pack-file maybe?
+    return () => {};
   });
 }
 
