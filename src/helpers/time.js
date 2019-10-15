@@ -14,7 +14,7 @@ export function midpointInRange({ start, end }) {
   return new Date(start + diff / 2);
 }
 
-export function hourRangeFrom(start = new Date().getTime(), size = 100) {
+export function hourRangeFrom(start = new Date().getTime(), size = 24) {
   const begginingOfThatHour = begginingOfHour(new Date(start));
   const endOfThatHour = begginingOfThatHour + 1000 * 60 * 60;
   const startStamp = endOfThatHour - 1000 * 60 * 60 * (size - 1);

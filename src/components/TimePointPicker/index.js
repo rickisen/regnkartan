@@ -161,7 +161,7 @@ function TimePointPicker({
 TimePointPicker.defaultProps = {
   chunks: {},
   range: hourRangeFrom(),
-  initialHour: 99,
+  initialHour: hourRangeFrom().length - 1,
   onSelected: () => {},
   onSelectedHour: () => {},
   onRefresh: () => {},
