@@ -2,19 +2,19 @@
 
 ![](/video.gif)
 
+## About
 This is a weather App that visualizes data from the SMHI open data Api.
 It's intended to be "map based" and to implement a more smart phone based UX
 than other weather apps usually do.
 
-The current version will only display historical and up to date data (Varying
+Currently it will only display historical and up to date data (Varying
 from 5 to 60 minutes old data). So no future predictions in the weather yet.
-Those APIs tend to cost a lot of money :'(
+But I'm adding that soon.
 
-However this gives you the ability to train a intuition on how the
+However currently this gives you the ability to train a intuition on how the
 weather is likely to change during the day. And it gives a lot more
-details on how the weather is right now than many other apps.
-
-Which could be very useful for practitioners of most outdoor activities.
+details on how the weather is right now than many other apps. Which could be very
+useful for practitioners of most outdoor activities.
 
 ## Purpose of sharing this project on GitHub
 
