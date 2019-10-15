@@ -6,12 +6,14 @@ import MapView from "react-native-maps";
 
 import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
+import LightningStrikes from "../../../components/LightningStrikes";
 import StatusBarBg from "../../../components/StatusBarBg";
 import {
   LOCATION_GRANTED,
   selectLocationGranted,
 } from "../../../redux/modules/permissions";
 import { SET_LAT_LON } from "../../../redux/modules/pointAnalysis";
+import { selectStrikesAndStamp } from "../../../redux/modules/lightning";
 
 function useReZoomOnExtendedData() {
   const mapRef = useRef(null);
@@ -101,6 +103,7 @@ function RadarMap() {
   const onRegionChangeComplete = useBounceBackMap(mapRef);
   const [marker, handlePress, handleLongPress] = useMarker();
   const locationGranted = useSelector(selectLocationGranted);
+  const [strikes, stamp] = useSelector(selectStrikesAndStamp);
 
   return (
     <MapView
@@ -121,6 +124,7 @@ function RadarMap() {
       {marker && <MapView.Marker coordinate={marker} pinColor="#fff" />}
       <RadarOverlay />
       <StatusBarBg />
+      <LightningStrikes strikes={strikes} stamp={stamp} />
     </MapView>
   );
 }

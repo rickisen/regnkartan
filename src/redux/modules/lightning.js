@@ -45,8 +45,18 @@ export const propTypes = {
   ),
 };
 
-/** Sagas **/
+/** selectors **/
+export function selectStrikesAndStamp({
+  lightning: { strikes },
+  radarSelection: { stamp },
+}) {
+  return [strikes, stamp];
+}
 
+/** Sagas **/
+/**
+ * @param {{hourStamp: number}} timestamp on hour for which to evaluate
+ */
 export function* fetchLightningIfNeeded({ hourStamp }) {
   const day = new Date(begginingOfHour(new Date(hourStamp)));
   day.setUTCHours(0);
@@ -60,7 +70,7 @@ export function* fetchLightningIfNeeded({ hourStamp }) {
 }
 
 /**
- * @param {{stamp: number}} number - timestamp on day for which to fetch
+ * @param {{stamp: number}} timestamp on day for which to fetch
  */
 export function* fetchLightning({ stamp }) {
   const day = new Date(begginingOfHour(new Date(stamp)));
