@@ -6,6 +6,7 @@ import wheatherData from "./modules/wheatherData";
 import radarSelection from "./modules/radarSelection";
 import permissions from "./modules/permissions";
 import pointAnalysis from "./modules/pointAnalysis";
+import lightning from "./modules/lightning";
 // import { logger } from "./middleware/logger.js";
 
 const reducer = combineReducers({
@@ -13,13 +14,14 @@ const reducer = combineReducers({
   radarSelection,
   permissions,
   pointAnalysis,
+  lightning,
 });
 
 const sagaMiddleware = createSagaMiddleware();
 const middleware = applyMiddleware(
   //
   sagaMiddleware
-  // ,logger
+  // logger
 );
 
 export default function createAppStore(initialValue = {}) {

@@ -6,6 +6,7 @@ import {
   assertLocationPermission,
 } from "../modules/permissions";
 import { SELECT_HOUR } from "../modules/radarSelection";
+import { fetchLightningIfNeeded } from "../modules/lightning";
 import {
   REFRESH_LATEST,
   CLEAR_CACHE,
@@ -21,6 +22,7 @@ export default function* rootSaga() {
   yield takeEvery(REGISTER_CHUNKS, fetchQued);
   yield takeEvery(CLEAR_CACHE, clearCache);
   yield takeEvery(SELECT_HOUR, queRequestedHours);
+  yield takeEvery(SELECT_HOUR, fetchLightningIfNeeded);
   yield takeEvery(ASSERT_LOCATION, assertLocationPermission);
   yield takeEvery(REFRESH_LATEST, refreshLatest);
   yield takeEvery(REGISTER_CHUNKS, fetchQued);
