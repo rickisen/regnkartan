@@ -1,37 +1,20 @@
-import React, { useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useRef, useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { StyleSheet, Dimensions } from "react-native";
+import * as Haptics from "expo-haptics";
 import MapView from "react-native-maps";
 
 import RadarOverlay from "./RadarOverlay";
 import mapStyle from "./mapStyle";
 import StatusBarBg from "../../../components/StatusBarBg";
+import {
+  LOCATION_GRANTED,
+  selectLocationGranted,
+} from "../../../redux/modules/permissions";
+import { SET_LAT_LON } from "../../../redux/modules/pointAnalysis";
 
-const INITIAL_REGION = {
-  latitude: 59.364109178579795,
-  latitudeDelta: 26.738496058255087,
-  longitude: 17.24189467728138,
-  longitudeDelta: 25.90066082775593,
-};
-
-const styles = StyleSheet.create({
-  map: {
-    flex: 1,
-  },
-});
-
-function bounceBackMap(newRegion, mapRef) {
-  const longDiff = newRegion.longitude - INITIAL_REGION.longitude;
-  const latDiff = newRegion.latitude - INITIAL_REGION.latitude;
-  if (
-    mapRef.current &&
-    (longDiff > 15 || longDiff < -15 || latDiff > 15 || latDiff < -10)
-  ) {
-    mapRef.current.animateToRegion(INITIAL_REGION);
-  }
-}
-
-function useReZoomOnExtendedData(mapRef) {
+function useReZoomOnExtendedData() {
+  const mapRef = useRef(null);
   const extendedDataVisible = useSelector(
     ({ pointAnalysis: { visible } }) => visible
   );
@@ -55,26 +38,79 @@ function useReZoomOnExtendedData(mapRef) {
       mapRef.current.animateCamera(lastCam.current, { duration: 200 });
     }
   }, [extendedDataVisible, mapRef]);
+  return mapRef;
 }
+
+function useBounceBackMap(mapRef) {
+  return newRegion => {
+    const longDiff = newRegion.longitude - INITIAL_REGION.longitude;
+    const latDiff = newRegion.latitude - INITIAL_REGION.latitude;
+    if (
+      mapRef.current &&
+      (longDiff > 15 || longDiff < -15 || latDiff > 15 || latDiff < -10)
+    ) {
+      mapRef.current.animateToRegion(INITIAL_REGION);
+    }
+  };
+}
+
+function useMarker() {
+  const [marker, setMarker] = useState(null);
+  const dispatch = useDispatch();
+  const handlePress = ({
+    nativeEvent: {
+      coordinate: { latitude, longitude },
+    },
+  }) => {
+    dispatch({ type: SET_LAT_LON, lat: latitude, lon: longitude });
+    setMarker({ latitude, longitude });
+  };
+  const handleLongPress = ({
+    nativeEvent: {
+      coordinate: { latitude, longitude },
+    },
+  }) => {
+    if (marker) {
+      dispatch({ type: LOCATION_GRANTED }); //TODO: don't do this if no perm
+      setMarker(null);
+    } else {
+      dispatch({ type: SET_LAT_LON, lat: latitude, lon: longitude });
+      setMarker({ latitude, longitude });
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  };
+  return [marker, handlePress, handleLongPress];
+}
+
+const INITIAL_REGION = {
+  latitude: 59.364109178579795,
+  latitudeDelta: 26.738496058255087,
+  longitude: 17.24189467728138,
+  longitudeDelta: 25.90066082775593,
+};
+
+const styles = StyleSheet.create({
+  map: {
+    flex: 1,
+  },
+});
 
 // Also gets a navigation prop
 function RadarMap() {
-  const mapRef = useRef(null);
-  const locationGranted = useSelector(
-    ({ permissions: { granted } }) =>
-      granted.findIndex(v => v === "LOCATION") >= 0
-  );
-  const onRegionChangeComplete = newRegion => bounceBackMap(newRegion, mapRef);
-  useReZoomOnExtendedData(mapRef);
+  const mapRef = useReZoomOnExtendedData();
+  const onRegionChangeComplete = useBounceBackMap(mapRef);
+  const [marker, handlePress, handleLongPress] = useMarker();
+  const locationGranted = useSelector(selectLocationGranted);
 
   return (
     <MapView
       ref={mapRef}
-      onRegionChange={onRegionChangeComplete}
       onRegionChangeComplete={onRegionChangeComplete}
+      onLongPress={handleLongPress}
+      onPress={handlePress}
       pitchEnabled={false}
       provider="google"
-      showsUserLocation={locationGranted}
+      showsUserLocation={locationGranted && !marker}
       rotateEnabled={false}
       minZoomLevel={4.5}
       maxZoomLevel={9}
@@ -82,6 +118,7 @@ function RadarMap() {
       customMapStyle={mapStyle}
       initialRegion={INITIAL_REGION}
     >
+      {marker && <MapView.Marker coordinate={marker} pinColor="#fff" />}
       <RadarOverlay />
       <StatusBarBg />
     </MapView>

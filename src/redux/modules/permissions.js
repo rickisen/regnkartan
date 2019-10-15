@@ -33,6 +33,10 @@ export const propTypes = {
   denied: PropTypes.arrayOf(PropTypes.oneOf(["LOCATION"])),
 };
 
+/** Selectors **/
+export const selectLocationGranted = ({ permissions: { granted } }) =>
+  granted.findIndex(v => v === "LOCATION") >= 0;
+
 /** REDUCER **/
 const initialState = {
   granted: [],
