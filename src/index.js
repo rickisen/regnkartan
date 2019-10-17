@@ -1,6 +1,7 @@
 import React from "react";
 import { Provider } from "react-redux";
-import { createStackNavigator, createAppContainer } from "react-navigation";
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 import createAppStore from "./redux"; // pun intended
 
 import Radar from "./screens/Radar";
