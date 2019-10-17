@@ -1,5 +1,5 @@
 import { generateDateCode } from "../../../helpers";
-import { SELECT_FILE, SELECT_HOUR } from "../radarSelection";
+import { SELECT_FILE, SELECT_HOUR } from "../timeSelection";
 
 export function registerHour(hourStamp) {
   return { type: SELECT_HOUR, hourStamp };

@@ -5,7 +5,7 @@ import {
   ASSERT_LOCATION,
   assertLocationPermission,
 } from "../modules/permissions";
-import { SELECT_HOUR } from "../modules/radarSelection";
+import { SELECT_HOUR } from "../modules/timeSelection";
 import { fetchLightningIfNeeded } from "../modules/lightning";
 import {
   REFRESH_LATEST,

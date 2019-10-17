@@ -6,7 +6,7 @@ import MapView from "react-native-maps";
 const BOUNDS = [[70.3891859, 5.090008], [53.1219345, 30.1889371]];
 
 function RadarOverlay() {
-  const uri = useSelector(({ radarSelection: { uri } }) => uri);
+  const uri = useSelector(({ timeSelection: { uri } }) => uri);
   return <MapView.Overlay image={{ uri }} bounds={BOUNDS} />;
 }
 

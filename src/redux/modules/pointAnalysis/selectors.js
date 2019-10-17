@@ -114,7 +114,7 @@ function getRelevantHour(stamp) {
 }
 
 export function selectParameter(
-  { radarSelection: { stamp }, pointAnalysis: { data } },
+  { timeSelection: { stamp }, pointAnalysis: { data } },
   parameter
 ) {
   if (!parameters.includes(parameter)) {

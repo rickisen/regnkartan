@@ -3,7 +3,7 @@ import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
 import rainRadar from "./modules/rainRadar";
-import radarSelection from "./modules/radarSelection";
+import timeSelection from "./modules/timeSelection";
 import permissions from "./modules/permissions";
 import pointAnalysis from "./modules/pointAnalysis";
 import lightning from "./modules/lightning";
@@ -11,7 +11,7 @@ import lightning from "./modules/lightning";
 
 const reducer = combineReducers({
   rainRadar,
-  radarSelection,
+  timeSelection,
   permissions,
   pointAnalysis,
   lightning,

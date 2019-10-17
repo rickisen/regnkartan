@@ -9,7 +9,7 @@ import {
   begginingOfHour,
   timeFromFilePath,
 } from "../../../helpers";
-import { SELECT_HOUR } from "../radarSelection";
+import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
 
 const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
@@ -138,12 +138,12 @@ export function* fetchChunk({ chunkSize }, time) {
 }
 
 /** @generator queRequestedHours - saga that puts new chunks into state.pack
- * that contains the hours listed as required in state.radarSelection.
+ * that contains the hours listed as required in state.timeSelection.
  * meant to be called from a saga watching for SELECT_HOUR.
  */
 export function* queRequestedHours() {
   const [requestedHours, chunks] = yield select(
-    ({ radarSelection: { requestedHours }, rainRadar: { chunks } }) => [
+    ({ timeSelection: { requestedHours }, rainRadar: { chunks } }) => [
       requestedHours,
       chunks,
     ]

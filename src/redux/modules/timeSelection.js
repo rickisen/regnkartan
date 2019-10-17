@@ -1,10 +1,9 @@
-// import { call, put, select, all } from "redux-saga/effects";
 import { PropTypes } from "prop-types";
 
 import { sort_unique } from "../../helpers";
 
 /** ACTION TYPES **/
-export const NAME = "regnkartan/smhi/radarSelection";
+export const NAME = "regnkartan/smhi/timeSelection";
 export const SELECT_FILE = `${NAME}/SELECT_FILE`;
 export const SELECT_HOUR = `${NAME}/SELECT_HOUR`;
 

@@ -48,7 +48,7 @@ export const propTypes = {
 /** selectors **/
 export function selectStrikesAndStamp({
   lightning: { strikes },
-  radarSelection: { stamp },
+  timeSelection: { stamp },
 }) {
   return [strikes, stamp];
 }
