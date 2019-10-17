@@ -16,7 +16,7 @@ import {
   fetchQued,
   clearCache,
   queRequestedHours,
-} from "../modules/wheatherData";
+} from "../modules/rainRadar";
 
 export default function* rootSaga() {
   yield takeEvery(REGISTER_CHUNKS, fetchQued);

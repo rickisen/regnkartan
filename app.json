@@ -21,7 +21,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This App uses the current location to show relevant wheather information"
+        "NSLocationWhenInUseUsageDescription": "This App uses the current location to show local weather information"
       }
     },
     "android": {

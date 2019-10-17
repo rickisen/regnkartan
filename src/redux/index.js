@@ -2,7 +2,7 @@ import { createStore, applyMiddleware, combineReducers, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
-import wheatherData from "./modules/wheatherData";
+import rainRadar from "./modules/rainRadar";
 import radarSelection from "./modules/radarSelection";
 import permissions from "./modules/permissions";
 import pointAnalysis from "./modules/pointAnalysis";
@@ -10,7 +10,7 @@ import lightning from "./modules/lightning";
 // import { logger } from "./middleware/logger.js";
 
 const reducer = combineReducers({
-  wheatherData,
+  rainRadar,
   radarSelection,
   permissions,
   pointAnalysis,

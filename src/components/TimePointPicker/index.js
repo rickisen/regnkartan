@@ -4,7 +4,7 @@ import { PropTypes } from "prop-types";
 import { FlatList, View } from "react-native";
 import { Svg, Path, G } from "react-native-svg";
 
-import { propTypes as chunkTypes } from "../../redux/modules/wheatherData";
+import { propTypes as chunkTypes } from "../../redux/modules/rainRadar";
 import Hour from "./Hour";
 import Footer from "./Footer";
 import { hourRangeFrom } from "../../helpers";

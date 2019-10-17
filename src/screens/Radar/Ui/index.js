@@ -20,7 +20,7 @@ import {
   registerHour,
   registerTime,
   REFRESH_LATEST,
-} from "../../../redux/modules/wheatherData";
+} from "../../../redux/modules/rainRadar";
 
 const styles = StyleSheet.create({
   pickerContainer: {
