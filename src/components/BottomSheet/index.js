@@ -12,8 +12,8 @@ const HEADER_HEIGHT = 50;
 
 const windowHeight = Dimensions.get("window").height;
 const SNAP_POINTS_FROM_TOP = [
-  HEADER_HEIGHT,
   windowHeight * 0.4,
+  windowHeight * 0.65,
   windowHeight * 0.78,
 ];
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 
 import { pad, hourRangeFrom } from "../../../helpers";
@@ -102,11 +102,11 @@ function UI() {
         />
       </View>
       {showExtendedUi && (
-        <>
+        <ScrollView horizontal={false}>
           <Overview />
           <TemperatureView />
           <WindView />
-        </>
+        </ScrollView>
       )}
     </BottomSheet>
   );
