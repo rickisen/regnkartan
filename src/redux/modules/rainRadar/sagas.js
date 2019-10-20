@@ -36,8 +36,9 @@ export function* scanCachedFiles() {
 }
 
 /** @generator clearCache - saga that clears all pack and png files in our cache
+ * @param {number} - clear everything before this timestamp
  * directory */
-export function* clearCache() {
+export function* clearCache({ keepTil }) {
   let files = [];
   try {
     files = yield call(
@@ -48,11 +49,12 @@ export function* clearCache() {
     console.error("something went wrong when listing cached files: ", e);
   }
 
-  files.sort();
-
   for (var i = 0, len = files.length; i < len; i++) {
     const file = files[i];
-    if (file.includes("pack") || file.includes("png")) {
+    if (
+      file.includes("pack") ||
+      (file.includes("png") && timeFromFilePath(file) < keepTil)
+    ) {
       try {
         yield call(FileSystem.deleteAsync, FileSystem.cacheDirectory + file);
       } catch (e) {

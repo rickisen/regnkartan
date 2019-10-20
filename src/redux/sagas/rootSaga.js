@@ -1,4 +1,4 @@
-import { takeEvery } from "redux-saga/effects";
+import { takeEvery, call } from "redux-saga/effects";
 import { SET_LAT_LON, fetchPoint, getLocation } from "../modules/pointAnalysis";
 import {
   LOCATION_GRANTED,
@@ -31,4 +31,13 @@ export default function* rootSaga() {
   yield takeEvery(RESET_CHUNK_STATUS, fetchQued);
   yield takeEvery(LOCATION_GRANTED, getLocation);
   yield takeEvery(SET_LAT_LON, fetchPoint);
+  yield call(Initialize);
+}
+
+function* Initialize() {
+  yield call(clearCache, {
+    keepTil: new Date().getTime() - 1000 * 60 * 60 * 24,
+  });
+  yield call(scanCachedFiles);
+  yield call(assertLocationPermission);
 }
