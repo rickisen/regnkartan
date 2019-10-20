@@ -8,12 +8,32 @@ import {
   packHoursIntoChunks,
   begginingOfHour,
   timeFromFilePath,
+  chunksFromFiles,
 } from "../../../helpers";
 import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
 
 const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
 const API_URL = "http://regn.rickisen.com/zip/v1/";
+
+export function* scanCachedFiles() {
+  let files = [];
+  try {
+    files = yield call(
+      FileSystem.readDirectoryAsync,
+      FileSystem.cacheDirectory
+    );
+  } catch (e) {
+    console.error("something went wrong when listing cached files: ", e);
+  }
+
+  const pngFiles = files
+    .filter(file => file.includes(".png"))
+    .map(f => FileSystem.cacheDirectory + f);
+
+  const chunks = chunksFromFiles(pngFiles);
+  yield put({ type: T.REGISTER_CHUNKS, chunks });
+}
 
 /** @generator clearCache - saga that clears all pack and png files in our cache
  * directory */

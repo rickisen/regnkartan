@@ -5,7 +5,7 @@ import { StyleSheet, View } from "react-native";
 
 import Ui from "./Ui";
 import RadarMap from "./RadarMap";
-import { CLEAR_CACHE } from "../../redux/modules/rainRadar";
+import { SCAN_CACHE } from "../../redux/modules/rainRadar";
 import { ASSERT_LOCATION } from "../../redux/modules/permissions";
 
 const styles = StyleSheet.create({
@@ -26,7 +26,7 @@ Radar.propTypes = {
 function Radar() {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch({ type: CLEAR_CACHE }); //TODO: Do this on real app load
+    dispatch({ type: SCAN_CACHE }); //TODO: Do this on real app load
     dispatch({ type: ASSERT_LOCATION });
   }, []);
 

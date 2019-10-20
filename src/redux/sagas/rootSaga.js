@@ -11,21 +11,23 @@ import {
   REFRESH_LATEST,
   CLEAR_CACHE,
   REGISTER_CHUNKS,
+  SCAN_CACHE,
   RESET_CHUNK_STATUS,
   refreshLatest,
   fetchQued,
   clearCache,
+  scanCachedFiles,
   queRequestedHours,
 } from "../modules/rainRadar";
 
 export default function* rootSaga() {
   yield takeEvery(REGISTER_CHUNKS, fetchQued);
   yield takeEvery(CLEAR_CACHE, clearCache);
+  yield takeEvery(SCAN_CACHE, scanCachedFiles);
   yield takeEvery(SELECT_HOUR, queRequestedHours);
   yield takeEvery(SELECT_HOUR, fetchLightningIfNeeded);
   yield takeEvery(ASSERT_LOCATION, assertLocationPermission);
   yield takeEvery(REFRESH_LATEST, refreshLatest);
-  yield takeEvery(REGISTER_CHUNKS, fetchQued);
   yield takeEvery(RESET_CHUNK_STATUS, fetchQued);
   yield takeEvery(LOCATION_GRANTED, getLocation);
   yield takeEvery(SET_LAT_LON, fetchPoint);

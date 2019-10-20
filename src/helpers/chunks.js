@@ -1,4 +1,5 @@
 import { begginingOfHour } from "./time";
+import { timeFromFilePath, generateDateCode } from "./dateCode";
 
 /** packHoursIntoChunks
  * @param {Array} requestedHours - hours to put in the chunks, (should be an array of timestamps for begining at an hour)
@@ -77,4 +78,32 @@ export function filterOutChunk(chunks, key) {
     if (chunk !== key) ret = { ...ret, [chunk]: chunks[chunk] };
   }
   return ret;
+}
+
+/** chunksFromFiles - Used to generate tracked chunks from cached files, has a hardcoded chunkSize of 1 hour
+ * @param {array[string]} files, array of filepaths, should only contain .png entries with datecodes in name
+ */
+export function chunksFromFiles(files = []) {
+  return files
+    .sort()
+    .map(f => ({
+      key: begginingOfHour(new Date(timeFromFilePath(f))) + "",
+      unpackedFiles: [f],
+    }))
+    .reduce(
+      (acc, next) => ({
+        ...acc,
+        [next.key]: {
+          ...acc[next.key],
+          status: "unpacked",
+          chunkSize: 1000 * 60 * 60,
+          complete: acc[next.key] && acc[next.key].unpackedFiles.length == 11, // since chunkSize is hardcoded we know how many should fit (12)
+          unpackedFiles: [
+            ...(acc[next.key] ? acc[next.key].unpackedFiles : []),
+            ...next.unpackedFiles,
+          ],
+        },
+      }),
+      {}
+    );
 }

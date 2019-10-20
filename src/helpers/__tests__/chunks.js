@@ -1,7 +1,9 @@
-import { packHoursIntoChunks, filterOutChunk } from "../chunks";
-
-const testStamp = 1561114500000;
-const testCode = "1906211055";
+/* eslint-disable no-undef */
+import {
+  packHoursIntoChunks,
+  filterOutChunk,
+  chunksFromFiles,
+} from "../chunks";
 
 const testChunks = {
   "1906211000": {
@@ -27,6 +29,71 @@ describe(filterOutChunk, () => {
   it("Should filter out supplied chunkKey", () => {
     expect(filterOutChunk(testChunks, "1906211500")).toStrictEqual({
       1906211000: { status: "qued" },
+    });
+  });
+});
+
+const files1 = [
+  "file/path/radar_1906211000.png",
+  "file/path/radar_1906211005.png",
+  "file/path/radar_1906211010.png",
+  "file/path/radar_1906211015.png",
+  "file/path/radar_1906211020.png",
+  "file/path/radar_1906211025.png",
+  "file/path/radar_1906211030.png",
+  "file/path/radar_1906211035.png",
+  "file/path/radar_1906211040.png",
+  "file/path/radar_1906211045.png",
+  "file/path/radar_1906211050.png",
+  "file/path/radar_1906211055.png",
+];
+
+const files2 = [
+  "file/path/radar_1906212000.png",
+  "file/path/radar_1906212005.png",
+];
+
+describe(chunksFromFiles, () => {
+  it("Should create empty chunks object with no files", () => {
+    expect(chunksFromFiles([])).toStrictEqual({});
+  });
+
+  it("Should create viable chunks object from complete hour", () => {
+    expect(chunksFromFiles(files1)).toStrictEqual({
+      1561111200000: {
+        chunkSize: 1000 * 60 * 60,
+        status: "unpacked",
+        unpackedFiles: files1,
+        complete: true,
+      },
+    });
+  });
+
+  it("Should create viable chunks object from incomplete hour", () => {
+    expect(chunksFromFiles(files2)).toStrictEqual({
+      1561147200000: {
+        chunkSize: 1000 * 60 * 60,
+        status: "unpacked",
+        unpackedFiles: files2,
+        complete: false,
+      },
+    });
+  });
+
+  it("Should create viable chunks object with mixed sizes", () => {
+    expect(chunksFromFiles([...files1, ...files2])).toStrictEqual({
+      1561111200000: {
+        chunkSize: 1000 * 60 * 60,
+        status: "unpacked",
+        unpackedFiles: files1,
+        complete: true,
+      },
+      1561147200000: {
+        chunkSize: 1000 * 60 * 60,
+        status: "unpacked",
+        unpackedFiles: files2,
+        complete: false,
+      },
     });
   });
 });
