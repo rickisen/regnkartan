@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import * as Haptics from "expo-haptics";
+import React, { useEffect } from "react";
 import { PropTypes } from "prop-types";
 import { FlatList, View } from "react-native";
 import { Svg, Path, G } from "react-native-svg";
@@ -9,6 +8,13 @@ import Hour from "./Hour";
 import Footer from "./Footer";
 import { hourRangeFrom } from "../../helpers";
 import { chunkStatusForHour } from "./helpers";
+import {
+  usePickerWidth,
+  useScrollBasedSelection,
+  useDelayedCallback,
+  useDelayedRefreshOnOver,
+  useScrollToNow,
+} from "./hooks";
 
 function TimePointPicker({
   chunks,
@@ -21,39 +27,14 @@ function TimePointPicker({
   symbols,
 }) {
   const hourWidth = 60;
-
-  const [pickerWidth, setPickerWidth] = useState(375); // maybe initialize with styled value?
-  const onLayout = ({
-    nativeEvent: {
-      layout: { width },
-    },
-  }) => setPickerWidth(width);
-
-  const [scrolled, setScrolled] = useState(initialHour);
-  const onScroll = ({
-    nativeEvent: {
-      contentOffset: { x },
-    },
-  }) => {
-    setScrolled(x);
-  };
-  // Includes offsets so we get what's at the center of the list, instead of
-  // the left most part of the screen
-  const middleOfPicker = scrolled + pickerWidth / 2 - hourWidth / 2;
-  let over = false;
-  let under = false;
-  let selectedHour = range[0];
-  const selectedIndex = Math.floor(middleOfPicker / hourWidth);
-  if (range[selectedIndex]) {
-    selectedHour = range[selectedIndex];
-  } else if (selectedIndex >= range.length - 1) {
-    over = true;
-  } else {
-    under = true;
-  }
-  const minutes = Math.floor(
-    ((middleOfPicker - selectedIndex * hourWidth) / hourWidth) * 60
-  );
+  const [pickerWidth, onLayout] = usePickerWidth(375);
+  const [
+    over,
+    under,
+    minutes,
+    selectedHour,
+    onScroll,
+  ] = useScrollBasedSelection(initialHour, pickerWidth, hourWidth, range);
 
   // Run the callback and pass the selected timestamp, if selection changed
   useEffect(() => onSelected(selectedHour + minutes * 1000 * 60), [
@@ -61,54 +42,19 @@ function TimePointPicker({
     minutes,
   ]);
 
-  // Run a callback for every hour touched (with a timer to prevent accidental
-  // loading)
-  const selectHourTimer = useRef(null);
-  useEffect(() => {
-    if (!over && !under) {
-      // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      clearTimeout(selectHourTimer.current);
-      selectHourTimer.current = setTimeout(() => {
-        onSelectedHour(selectedHour);
-      }, 400);
-    }
-  }, [selectedHour, selectHourTimer, over, under]);
+  // Runs the callback for every hour touched (with a timer to prevent
+  // accidental loading)
+  useDelayedCallback(onSelectedHour, over, under, selectedHour);
 
-  const refreshTimer = useRef(null);
-  useEffect(() => {
-    if (over && !refreshing) {
-      clearTimeout(refreshTimer.current);
-      refreshTimer.current = setTimeout(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).then(() => {
-          onRefresh();
-        });
-      }, 400);
-    }
-  }, [over, refreshing, refreshTimer]);
+  // Runs onRefresh when paused above "over" threshold for a while;
+  // TODO: make this work ok on android
+  useDelayedRefreshOnOver(onRefresh, over, refreshing);
 
-  const flatList = useRef(null);
-  useEffect(() => {
-    const offsetInMinutes = (new Date().getTime() - range[0]) / 1000 / 60;
-    const minutesPerPx = hourWidth / 60;
-    const offsetToNow =
-      offsetInMinutes * minutesPerPx - pickerWidth / 2 + hourWidth;
-
-    setTimeout(() => {
-      flatList.current.scrollToOffset({
-        animated: true,
-        offset: offsetToNow,
-      });
-    }, 10);
-  }, []);
+  // Directly scrolls the list to "now" on first load
+  const flatListRef = useScrollToNow(range, hourWidth, pickerWidth);
 
   return (
-    <View
-      onLayout={onLayout}
-      style={{
-        justifyContent: "flex-start",
-        alignItems: "center",
-      }}
-    >
+    <View onLayout={onLayout}>
       <View style={{ alignItems: "center" }}>
         <Svg
           width={pickerWidth}
@@ -125,7 +71,7 @@ function TimePointPicker({
         </Svg>
       </View>
       <FlatList
-        ref={flatList}
+        ref={flatListRef}
         data={range}
         initialScrollIndex={initialHour}
         ListFooterComponent={
