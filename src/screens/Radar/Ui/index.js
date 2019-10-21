@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { pad, hourRangeFrom } from "../../../helpers";
 import TimePointPicker from "../../../components/TimePointPicker";
 import BottomSheet from "../../../components/BottomSheet";
-import WeatherIcon from "../../../components/WeatherIcon";
+import PlayButton from "../../../components/PlayButton";
 import TemperatureView from "./TemperatureView";
 import WindView from "./WindView";
 import Overview from "./Overview";
@@ -63,12 +63,12 @@ function useVisibilityCallback() {
 function UI() {
   const chunks = useSelector(allChunks);
   const chunksDone = useSelector(allChunksDone);
-  const Wsymb2 = useSelector(selectWeatherSymbol);
   const symbols = useSelector(selectWeatherSymbols);
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
   const [showExtendedUi, visibilityCallBack] = useVisibilityCallback();
+  const [playing, setPlaying] = useState(false);
 
   const onSelectedHour = hourStamp => {
     dispatch(registerHour(hourStamp));
@@ -89,7 +89,12 @@ function UI() {
         <Header
           loading={!chunksDone}
           title={time}
-          Icon={<WeatherIcon Wsymb2={Wsymb2} />}
+          Icon={
+            <PlayButton
+              onPress={() => setPlaying(!playing)}
+              playing={playing}
+            />
+          }
         />
       }
     >
@@ -102,6 +107,8 @@ function UI() {
           onRefresh={onRefresh}
           refreshing={!chunksDone}
           symbols={symbols}
+          setPlaying={setPlaying}
+          playing={playing}
         />
       </View>
       {showExtendedUi && (

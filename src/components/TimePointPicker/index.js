@@ -25,6 +25,8 @@ function TimePointPicker({
   refreshing,
   onRefresh,
   symbols,
+  setPlaying,
+  playing,
 }) {
   const hourWidth = 60;
   const [pickerWidth, onLayout] = usePickerWidth(375);
@@ -34,7 +36,15 @@ function TimePointPicker({
     minutes,
     selectedHour,
     onScroll,
-  ] = useScrollBasedSelection(initialHour, pickerWidth, hourWidth, range);
+    flatListRef,
+  ] = useScrollBasedSelection(
+    initialHour,
+    pickerWidth,
+    hourWidth,
+    range,
+    playing,
+    setPlaying
+  );
 
   // Run the callback and pass the selected timestamp, if selection changed
   useEffect(() => onSelected(selectedHour + minutes * 1000 * 60), [
@@ -51,7 +61,7 @@ function TimePointPicker({
   useDelayedRefreshOnOver(onRefresh, over, refreshing);
 
   // Directly scrolls the list to "now" on first load
-  const flatListRef = useScrollToNow(range, hourWidth, pickerWidth);
+  useScrollToNow(range, hourWidth, pickerWidth, flatListRef);
 
   return (
     <View onLayout={onLayout}>
@@ -98,6 +108,7 @@ function TimePointPicker({
         }}
         keyExtractor={stamp => "" + stamp}
         onScroll={onScroll}
+        onScrollBeginDrag={() => setPlaying(false)}
         getItemLayout={(data, index) => ({
           length: hourWidth,
           offset: hourWidth * index,
@@ -117,6 +128,8 @@ TimePointPicker.defaultProps = {
   onRefresh: () => {},
   refreshing: false,
   symbols: [],
+  setPlaying: () => {},
+  playing: false,
 };
 
 TimePointPicker.propTypes = {
@@ -132,6 +145,8 @@ TimePointPicker.propTypes = {
       Wsymb2: PropTypes.number,
     })
   ),
+  setPlaying: PropTypes.func,
+  playing: PropTypes.bool,
 };
 
 export default TimePointPicker;

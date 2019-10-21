@@ -15,8 +15,10 @@ export function useScrollBasedSelection(
   initialHour,
   pickerWidth,
   hourWidth,
-  range
+  range,
+  playing
 ) {
+  const flatListRef = useRef();
   const [scrolled, setScrolled] = useState(initialHour);
   const onScroll = ({
     nativeEvent: {
@@ -25,6 +27,20 @@ export function useScrollBasedSelection(
   }) => {
     setScrolled(x);
   };
+
+  // TODO: Figureout delta for smoother playing
+  const playingTimeout = useRef(null);
+  useEffect(() => {
+    clearTimeout(playingTimeout.current);
+    if (playing) {
+      playingTimeout.current = setTimeout(() => {
+        flatListRef.current.scrollToOffset({
+          offset: scrolled + hourWidth / 12,
+          animated: false,
+        });
+      }, 20);
+    }
+  }, [playing, flatListRef, scrolled]);
 
   // Includes offsets so we get what's at the center of the list, instead of
   // the left most part of the screen
@@ -44,7 +60,7 @@ export function useScrollBasedSelection(
     ((middleOfPicker - selectedIndex * hourWidth) / hourWidth) * 60
   );
 
-  return [over, under, minutes, selectedHour, onScroll];
+  return [over, under, minutes, selectedHour, onScroll, flatListRef];
 }
 
 export function useDelayedCallback(onSelectedHour, over, under, selectedHour) {
@@ -73,9 +89,7 @@ export function useDelayedRefreshOnOver(onRefresh, over, refreshing) {
   }, [over, refreshing, refreshTimer]);
 }
 
-export function useScrollToNow(range, hourWidth, pickerWidth) {
-  const flatList = useRef(null);
-
+export function useScrollToNow(range, hourWidth, pickerWidth, flatList) {
   useEffect(() => {
     const offsetInMinutes = (new Date().getTime() - range[0]) / 1000 / 60;
     const minutesPerPx = hourWidth / 60;
