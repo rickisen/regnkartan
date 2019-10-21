@@ -18,6 +18,7 @@ function TimePointPicker({
   onSelectedHour,
   refreshing,
   onRefresh,
+  symbols,
 }) {
   const hourWidth = 60;
 
@@ -99,6 +100,7 @@ function TimePointPicker({
       });
     }, 10);
   }, []);
+
   return (
     <View
       onLayout={onLayout}
@@ -137,12 +139,14 @@ function TimePointPicker({
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item, index }) => {
+          const symbol = symbols.find(({ hour }) => hour === item);
           return (
             <Hour
               status={chunkStatusForHour(item, chunks)}
               stamp={item}
               hourWidth={hourWidth}
               index={index}
+              Wsymb2={symbol && symbol.Wsymb2}
             />
           );
         }}
@@ -166,6 +170,7 @@ TimePointPicker.defaultProps = {
   onSelectedHour: () => {},
   onRefresh: () => {},
   refreshing: false,
+  symbols: [],
 };
 
 TimePointPicker.propTypes = {
@@ -175,6 +180,12 @@ TimePointPicker.propTypes = {
   onSelected: PropTypes.func,
   onSelectedHour: PropTypes.func,
   refreshing: PropTypes.bool,
+  symbols: PropTypes.arrayOf(
+    PropTypes.shape({
+      hour: PropTypes.number,
+      Wsymb2: PropTypes.number,
+    })
+  ),
 };
 
 export default TimePointPicker;

@@ -13,6 +13,7 @@ import Header from "./Header";
 import {
   EXTENDED_DATA_VISIBLE,
   selectWeatherSymbol,
+  selectWeatherSymbols,
 } from "../../../redux/modules/pointAnalysis";
 import {
   allChunks,
@@ -63,6 +64,7 @@ function UI() {
   const chunks = useSelector(allChunks);
   const chunksDone = useSelector(allChunksDone);
   const Wsymb2 = useSelector(selectWeatherSymbol);
+  const symbols = useSelector(selectWeatherSymbols);
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
@@ -99,6 +101,7 @@ function UI() {
           onSelected={onSelected}
           onRefresh={onRefresh}
           refreshing={!chunksDone}
+          symbols={symbols}
         />
       </View>
       {showExtendedUi && (

@@ -53,6 +53,25 @@ export function selectWeatherSymbol(state) {
   return selectParameter(state, "Wsymb2");
 }
 
+export function selectWeatherSymbols({ pointAnalysis: { data } }) {
+  let ret = [];
+
+  if (data && data.timeSeries) {
+    try {
+      ret = data.timeSeries.map(s => ({
+        hour: begginingOfHour(new Date(s.validTime)),
+        Wsymb2: s.parameters.find(p => p.name === "Wsymb2").values[0],
+      }));
+    } catch (e) {
+      console.warn(
+        "Something went wrong when trying to select Wsymb2 entries in data",
+        e
+      );
+    }
+  }
+  return ret;
+}
+
 export function selectTemperature(state) {
   return {
     temperature: selectParameter(state, "t"),

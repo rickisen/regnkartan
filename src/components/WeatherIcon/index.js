@@ -3,8 +3,8 @@ import { Image } from "react-native";
 import PropTypes from "prop-types";
 
 /* eslint-disable no-undef */
-const symb2uri = [
-  require("../../../assets/icons/weatherSymbols/1_ClearSky.png"), // Wsymb2 api starts at 1, could have a default icon here
+export const symb2uri = [
+  require("../../../assets/icons/weatherSymbols/0_Default.png"),
   require("../../../assets/icons/weatherSymbols/1_ClearSky.png"),
   require("../../../assets/icons/weatherSymbols/2_NearlyClearSky.png"),
   require("../../../assets/icons/weatherSymbols/3_VariableCloudiness.png"),
