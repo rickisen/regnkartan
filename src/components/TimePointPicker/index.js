@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { PropTypes } from "prop-types";
 import { FlatList, View } from "react-native";
-import { Svg, Path, G } from "react-native-svg";
+import { Svg, Path, G, Line } from "react-native-svg";
 
 import { propTypes as chunkTypes } from "../../redux/modules/rainRadar";
 import Hour from "./Hour";
@@ -72,10 +72,13 @@ function TimePointPicker({
           viewBox={`0 0 5.2916665 5.2916665`}
         >
           <G transform="translate(0,-291.70833)" id="layer1">
-            <Path
-              id="rect4518"
-              d="M 2.38125,291.70833 H 2.9104167 L 2.6458333,297 Z"
-              fill="#666"
+            <Line
+              x1="2.7"
+              y1="292"
+              x2="2.7"
+              y2="296"
+              stroke="#222"
+              strokeWidth="0.3333"
             />
           </G>
         </Svg>
