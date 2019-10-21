@@ -91,7 +91,7 @@ export function useDelayedRefreshOnOver(onRefresh, over, refreshing) {
 
 export function useScrollToNow(range, hourWidth, pickerWidth, flatList) {
   useEffect(() => {
-    const offsetInMinutes = (new Date().getTime() - range[0]) / 1000 / 60;
+    const offsetInMinutes = (Date.now() - range[0]) / 1000 / 60;
     const minutesPerPx = hourWidth / 60;
     const offsetToNow =
       offsetInMinutes * minutesPerPx - pickerWidth / 2 + hourWidth;

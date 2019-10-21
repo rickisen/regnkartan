@@ -8,7 +8,7 @@ function RulerLines({ status, stamp, hourWidth }) {
   const everyHalf = hourWidth / 2;
   const minutes = Array.from(Array(hourWidth), (v, i) => i);
   const color = statusToColor(status);
-  const nowStamp = new Date().getTime();
+  const nowStamp = Date.now();
   const hourStamp = parseInt(stamp);
 
   // Have to pad with +1px because the first line will be half cropped from

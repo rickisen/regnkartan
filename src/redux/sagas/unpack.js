@@ -25,7 +25,6 @@ export default function* unpack(
     UNPACKING_FILE_SUCCESS,
   ]
 ) {
-  // const callTime = new Date().getTime();
   let data = null;
   try {
     data = JSON.parse(pack);

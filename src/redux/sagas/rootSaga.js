@@ -36,8 +36,8 @@ export default function* rootSaga() {
 
 function* Initialize() {
   yield call(clearCache, {
-    keepTil: new Date().getTime() - 1000 * 60 * 60 * 24,
-    // keepTil: new Date().getTime(), // clears all
+    keepTil: Date.now() - 1000 * 60 * 60 * 24,
+    // keepTil: new Date.now(), // clears all
   });
   yield call(scanCachedFiles);
   yield call(assertLocationPermission);
