@@ -101,7 +101,8 @@ export default function reducer(state = initialState, action) {
           ...state.chunks,
           [action.time]: {
             ...state.chunks[action.time],
-            ...{ status: "unpacked" },
+            status: "unpacked",
+            complete: !action.unfinished,
           },
         },
       };

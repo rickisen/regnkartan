@@ -127,13 +127,6 @@ export function* fetchChunk({ chunkSize }, time) {
     status = response.status;
     data = response.data;
   } catch (e) {
-    // if (
-    //   e.data ==
-    //   "Found no smhi data in that time range, maybe it has not been published yet?\n"
-    // ) {
-    //   yield put({ type: T.CLEAR_CHUNK, time });
-    //   return;
-    // }
     console.warn("Error occured when fetching pack", time, url, e);
     yield put({ type: T.FETCH_CHUNK_FAIL, error: status, time });
     return;
@@ -185,7 +178,11 @@ export function* refreshLatest() {
     const keys = Object.keys(chunks).sort();
     const lastChunkKey = keys[keys.length - 1];
     const lastChunk = chunks[lastChunkKey];
-    if (!lastChunk.unpackedFiles || lastChunk.unpackedFiles.length === 0) {
+    if (
+      !lastChunk.unpackedFiles ||
+      lastChunk.unpackedFiles.length === 0 ||
+      lastChunk.complete === false
+    ) {
       yield put({ type: T.RESET_CHUNK_STATUS, time: lastChunkKey });
       return;
     }

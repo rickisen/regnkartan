@@ -94,6 +94,10 @@ export function* unpackWatcher(
     console.warn("Error occurred when unpacking a file", e);
     yield put({ type: UNPACKING_FILE_FAIL, time });
   } finally {
-    yield put({ type: UNPACKING_CHUNK_SUCCESS, time });
+    yield put({
+      type: UNPACKING_CHUNK_SUCCESS,
+      time,
+      unfinished: data.unfinished,
+    });
   }
 }

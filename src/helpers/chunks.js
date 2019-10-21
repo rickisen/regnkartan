@@ -1,9 +1,9 @@
 import { begginingOfHour } from "./time";
-import { timeFromFilePath, generateDateCode } from "./dateCode";
+import { timeFromFilePath } from "./dateCode";
 
 /** packHoursIntoChunks
  * @param {Array} requestedHours - hours to put in the chunks, (should be an array of timestamps for begining at an hour)
- * @param {Object} chunks - chunks object, with timestamp for key [chunks={}]
+ * @param {Object} chunks - chunks object, with timestamp for key
  * @param {Number} chunkSize - Size in ms of newly created chunks
  * @return {Object} chunks - chunks object, with timestamp for key
  */
@@ -35,11 +35,8 @@ export function packHoursIntoChunks(
   }
   const sortedChunkKeys = Object.keys(chunks).sort();
 
-  // key for new chunk to add, default to end at the begining of the current
-  // hour if there are no present chunks
-  const beginingOfCurrentHour = begginingOfHour();
-  let chunkKey = beginingOfCurrentHour - chunkSize;
-  // Do we need to schedule a future chunk, or a past chunk
+  let chunkKey = null;
+  const lastChunkKey = sortedChunkKeys[sortedChunkKeys.length - 1];
   if (
     sortedChunkKeys.length > 0 &&
     hoursNotInAChunk[0] < parseInt(sortedChunkKeys[0])
@@ -47,21 +44,24 @@ export function packHoursIntoChunks(
     chunkKey = parseInt(sortedChunkKeys[0]) - chunkSize;
   } else if (
     sortedChunkKeys.length > 0 &&
-    hoursNotInAChunk[0] > parseInt(sortedChunkKeys[0])
+    hoursNotInAChunk[0] > parseInt(lastChunkKey)
   ) {
-    const lastChunkKey = sortedChunkKeys[sortedChunkKeys.length - 1];
-    const lastChunk = chunks[lastChunkKey];
-    chunkKey = parseInt(lastChunkKey) + lastChunk.chunkSize;
+    chunkKey = parseInt(lastChunkKey) + chunks[lastChunkKey].chunkSize;
+  } else if (sortedChunkKeys.length === 0) {
+    chunkKey = begginingOfHour() - chunkSize;
   }
 
-  const newChunks = {
-    ...chunks,
-    ["" + chunkKey]: {
-      status: "qued",
-      unpackedFiles: [],
-      chunkSize,
-    },
-  };
+  let newChunks = {};
+  if (chunkKey) {
+    newChunks = {
+      ...chunks,
+      ["" + chunkKey]: {
+        status: "qued",
+        unpackedFiles: [],
+        chunkSize,
+      },
+    };
+  }
 
   // recurse
   return packHoursIntoChunks(hoursNotInAChunk, newChunks, chunkSize, ++depth);
