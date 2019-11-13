@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { PropTypes } from "prop-types";
 import { FlatList, View } from "react-native";
-import { Svg, Path, G, Line } from "react-native-svg";
+import { Svg, G, Line } from "react-native-svg";
 
 import { propTypes as chunkTypes } from "../../redux/modules/rainRadar";
 import Hour from "./Hour";

@@ -17,12 +17,18 @@ export function midpointInRange({ start, end }) {
 /**
  * @param {Date} start of the range
  * @param {number} size - how many hours it consists of
+ * @param {number} ammountOfBackwards - How much of the genereated hours should distribute backwards from start time
  * @return {array} range
  */
-export function hourRangeFrom(start = Date.now(), size = 30) {
+export function hourRangeFrom(
+  start = Date.now(),
+  size = 72,
+  ammountOfBackwards = 0.4
+) {
   const begginingOfThatHour = begginingOfHour(new Date(start));
   const endOfThatHour = begginingOfThatHour + 1000 * 60 * 60;
-  const startStamp = endOfThatHour - 1000 * 60 * 60 * (size - 1);
+  const startStamp =
+    endOfThatHour - 1000 * 60 * 60 * (size * ammountOfBackwards - 1);
   const range = [];
 
   for (var hour = 0; hour < size; hour++) {
