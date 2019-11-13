@@ -36,6 +36,7 @@ export function hourRangeFrom(start = Date.now(), size = 30) {
  * @param {Date} date - Date object representing the time we will find an hour for
  * @return {number} timestamp for that dates begining hour
  */
+// TODO: fix spelling of "beginning"
 export function begginingOfHour(d = new Date()) {
   const date = new Date(d.getTime());
 

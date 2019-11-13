@@ -21,7 +21,8 @@ const sagaMiddleware = createSagaMiddleware();
 const middleware = applyMiddleware(
   //
   sagaMiddleware
-  // logger
+  //
+  // ,logger
 );
 
 export default function createAppStore(initialValue = {}) {
