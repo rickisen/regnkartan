@@ -25,10 +25,10 @@ export function hourRangeFrom(
   size = 72,
   ammountOfBackwards = 0.4
 ) {
-  const begginingOfThatHour = begginingOfHour(new Date(start));
+  const begginingOfThatHour = beginningOfHour(new Date(start));
   const endOfThatHour = begginingOfThatHour + 1000 * 60 * 60;
   const startStamp =
-    endOfThatHour - 1000 * 60 * 60 * (size * ammountOfBackwards - 1);
+    endOfThatHour - 1000 * 60 * 60 * Math.round(size * ammountOfBackwards - 1);
   const range = [];
 
   for (var hour = 0; hour < size; hour++) {
@@ -38,12 +38,12 @@ export function hourRangeFrom(
   return range;
 }
 
-/** @function begginingOfHour
+/** @function beginningOfHour
  * @param {Date} date - Date object representing the time we will find an hour for
  * @return {number} timestamp for that dates begining hour
  */
 // TODO: fix spelling of "beginning"
-export function begginingOfHour(d = new Date()) {
+export function beginningOfHour(d = new Date()) {
   const date = new Date(d.getTime());
 
   date.setUTCMinutes(0);

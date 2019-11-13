@@ -2,7 +2,7 @@ import { call, put, select, fork } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
-import { req, begginingOfHour, timeFromFilePath } from "../../../helpers";
+import { req, beginningOfHour, timeFromFilePath } from "../../../helpers";
 import { apiUrl, packHoursIntoChunks, chunksFromFiles } from "./helpers.js";
 import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
@@ -184,7 +184,7 @@ export function* refreshLatest() {
       lastChunk.unpackedFiles.length - 1
     ];
     const lastFileStamp = timeFromFilePath(lastFileName);
-    const beginingOfHourOfLastFile = begginingOfHour(new Date(lastFileStamp));
+    const beginingOfHourOfLastFile = beginningOfHour(new Date(lastFileStamp));
     const lastChunksNewSize = beginingOfHourOfLastFile - parseInt(lastChunkKey);
 
     const newChunks = {

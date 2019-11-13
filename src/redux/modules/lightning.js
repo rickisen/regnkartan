@@ -1,7 +1,7 @@
 import { PropTypes } from "prop-types";
 import { call, put, select } from "redux-saga/effects";
 
-import { begginingOfHour } from "../../helpers/time.js";
+import { beginningOfHour } from "../../helpers/time.js";
 import { req } from "../../helpers/binaryRequest";
 
 const API = "https://opendata-download-lightning.smhi.se";
@@ -58,7 +58,7 @@ export function selectStrikesAndStamp({
  * @param {{hourStamp: number}} timestamp on hour for which to evaluate
  */
 export function* fetchLightningIfNeeded({ hourStamp }) {
-  const day = new Date(begginingOfHour(new Date(hourStamp)));
+  const day = new Date(beginningOfHour(new Date(hourStamp)));
   day.setUTCHours(0);
 
   const fetchedDays = yield select(
@@ -73,7 +73,7 @@ export function* fetchLightningIfNeeded({ hourStamp }) {
  * @param {{stamp: number}} timestamp on day for which to fetch
  */
 export function* fetchLightning({ stamp }) {
-  const day = new Date(begginingOfHour(new Date(stamp)));
+  const day = new Date(beginningOfHour(new Date(stamp)));
   day.setUTCHours(0);
 
   const url = `${API}/api/version/latest/year/${day.getUTCFullYear()}/month/${day.getUTCMonth() +

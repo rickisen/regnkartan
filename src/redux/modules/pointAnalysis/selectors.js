@@ -1,4 +1,4 @@
-import { begginingOfHour } from "../../../helpers";
+import { beginningOfHour } from "../../../helpers";
 
 export const parameters = [
   "t",
@@ -59,7 +59,7 @@ export function selectWeatherSymbols({ pointAnalysis: { data } }) {
   if (data && data.timeSeries) {
     try {
       ret = data.timeSeries.map(s => ({
-        hour: begginingOfHour(new Date(s.validTime)),
+        hour: beginningOfHour(new Date(s.validTime)),
         Wsymb2: s.parameters.find(p => p.name === "Wsymb2").values[0],
       }));
     } catch (e) {
@@ -85,10 +85,10 @@ export function selectTemperature(state) {
  * @return {number} stamp pointing to beggining of relevant hour
  */
 function getRelevantHour(stamp) {
-  if (begginingOfHour() <= stamp) {
-    return begginingOfHour(new Date(Date.now() - 1000 * 60 * 60));
+  if (beginningOfHour() <= stamp) {
+    return beginningOfHour(new Date(Date.now() - 1000 * 60 * 60));
   }
-  return begginingOfHour(new Date(stamp));
+  return beginningOfHour(new Date(stamp));
 }
 
 export function selectParameter(

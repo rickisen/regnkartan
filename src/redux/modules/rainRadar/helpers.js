@@ -1,7 +1,7 @@
 import {
   incrementsOfSixHours,
   generateDateCode,
-  begginingOfHour,
+  beginningOfHour,
   timeFromFilePath,
 } from "../../../helpers";
 
@@ -71,7 +71,7 @@ export function packHoursIntoChunks(
   ) {
     chunkKey = parseInt(lastChunkKey) + chunks[lastChunkKey].chunkSize;
   } else if (sortedChunkKeys.length === 0) {
-    chunkKey = begginingOfHour() - chunkSize;
+    chunkKey = beginningOfHour() - chunkSize;
   }
 
   let newChunks = {};
@@ -111,7 +111,7 @@ export function chunksFromFiles(files = []) {
     .sort()
     .map(f => ({
       key:
-        incrementsOfSixHours(begginingOfHour(new Date(timeFromFilePath(f)))) +
+        incrementsOfSixHours(beginningOfHour(new Date(timeFromFilePath(f)))) +
         "",
       unpackedFiles: [f],
     }))

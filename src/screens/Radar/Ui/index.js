@@ -12,7 +12,6 @@ import Overview from "./Overview";
 import Header from "./Header";
 import {
   EXTENDED_DATA_VISIBLE,
-  selectWeatherSymbol,
   selectWeatherSymbols,
 } from "../../../redux/modules/pointAnalysis";
 import {
