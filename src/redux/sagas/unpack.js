@@ -29,7 +29,7 @@ export default function* unpack(
   try {
     data = JSON.parse(pack);
   } catch (e) {
-    console.warn("Error occured when unpacking data", e);
+    console.warn("Error occured when unpacking data", e, time);
     yield put({ type: FETCH_CHUNK_FAIL, error: e, time });
     return;
   }

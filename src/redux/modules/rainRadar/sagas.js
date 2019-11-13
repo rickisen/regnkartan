@@ -2,19 +2,12 @@ import { call, put, select, fork } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
-import {
-  req,
-  generateDateCode,
-  packHoursIntoChunks,
-  begginingOfHour,
-  timeFromFilePath,
-  chunksFromFiles,
-} from "../../../helpers";
+import { req, begginingOfHour, timeFromFilePath } from "../../../helpers";
+import { apiUrl, packHoursIntoChunks, chunksFromFiles } from "./helpers.js";
 import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
 
-const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 8;
-const API_URL = "http://regn.rickisen.com/zip/v1/";
+const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 6;
 
 export function* scanCachedFiles() {
   let files = [];
@@ -72,6 +65,7 @@ export function* clearCache({ keepTil }) {
  */
 export function* fetchQued() {
   const registeredChunks = yield select(({ rainRadar: { chunks } }) => chunks);
+
   const quedChunks = Object.keys(registeredChunks).reduce(
     (acc, chunkKey) =>
       registeredChunks[chunkKey].status === "qued"
@@ -114,13 +108,11 @@ export function* fetchChunk({ chunkSize }, time) {
     );
     return;
   }
-  const dateCode = generateDateCode(time, true);
 
-  const chunkSizeQuery = `?end=${generateDateCode(time + chunkSize, true)}`;
+  const url = apiUrl(time, chunkSize, true); // (time, chunkSize, false) for old api
 
   let status = null;
   let data = null;
-  const url = `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
   yield put({ type: T.FETCH_CHUNK, time, url });
   try {
     const response = yield call(req, url);
@@ -168,6 +160,7 @@ export function* queRequestedHours() {
     chunks,
     DEFAULT_CHUNKSIZE
   );
+
   yield put({ type: T.REGISTER_CHUNKS, chunks: packedChunks });
 }
 

@@ -1,4 +1,4 @@
-import { filterOutChunk } from "../../../helpers";
+import { filterOutChunk } from "./helpers";
 import * as T from "./types";
 
 const initialState = {

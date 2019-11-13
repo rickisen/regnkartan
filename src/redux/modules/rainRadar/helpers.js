@@ -1,5 +1,28 @@
-import { begginingOfHour } from "./time";
-import { timeFromFilePath } from "./dateCode";
+import {
+  incrementsOfSixHours,
+  generateDateCode,
+  begginingOfHour,
+  timeFromFilePath,
+} from "../../../helpers";
+
+const API_URL = "http://regn.rickisen.com/zip/v1/";
+
+/**
+ * @param {number} time
+ * @param {number} chunkSize
+ * @param {boolean} useS3 - use new s3 base api, or old with dynamic chunks
+ * @return {string} url
+ */
+export function apiUrl(time, chunkSize, useS3 = true) {
+  if (useS3) {
+    const dateCode = generateDateCode(incrementsOfSixHours(time), true);
+    return `https://qwert.fra1.digitaloceanspaces.com/radar_${dateCode}.pack`;
+  } else {
+    const dateCode = generateDateCode(time, true);
+    const chunkSizeQuery = `?end=${generateDateCode(time + chunkSize, true)}`;
+    return `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
+  }
+}
 
 /** packHoursIntoChunks
  * @param {Array} requestedHours - hours to put in the chunks, (should be an array of timestamps for begining at an hour)
@@ -10,7 +33,7 @@ import { timeFromFilePath } from "./dateCode";
 export function packHoursIntoChunks(
   requestedHours = [],
   chunks = {},
-  chunkSize = 3 * 1000 * 60 * 60,
+  chunkSize = 1000 * 60 * 60 * 6,
   depth = 0
 ) {
   // Find hours not in chunks

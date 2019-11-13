@@ -1,6 +1,27 @@
+import { begginingOfHour } from "./time.js";
+/** incrementsOfSixHours - round hour to earliest increment of six hours starting at 00:00
+ * @param {number} time - number to be scaled
+ * @return {nubmer} closest increment
+ */
+export function incrementsOfSixHours(time) {
+  const d = new Date(time);
+  d.setUTCHours(0);
+  const beginningOfDay = begginingOfHour(d);
+  const sixHours = 1000 * 60 * 60 * 6;
+
+  for (var i = 3; i >= 0; i--) {
+    const ret = beginningOfDay + i * sixHours;
+    if (time >= ret) {
+      return ret;
+    }
+  }
+
+  return NaN;
+}
+
 /** incrementsOfFive - round number to closest increment of five
  * @param {number} num - number to be rounded
- * @return {nubmer} closes increment
+ * @return {nubmer} closest increment
  */
 export function incrementsOfFive(num) {
   const x = num / 5;

@@ -1,4 +1,19 @@
-import { incrementsOfFive, pad, sort_unique } from "../general";
+import {
+  incrementsOfSixHours,
+  incrementsOfFive,
+  pad,
+  sort_unique,
+} from "../general";
+
+describe(incrementsOfSixHours, () => {
+  it("should round to closest increment of six hours", () => {
+    expect(incrementsOfSixHours(1573573421000)).toBe(1573560000000);
+  });
+
+  it("should return NaN when appropriate", () => {
+    expect(incrementsOfSixHours("hej")).toBe(NaN);
+  });
+});
 
 describe(incrementsOfFive, () => {
   it("should round to closest increment", () => {

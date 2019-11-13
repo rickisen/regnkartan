@@ -1,9 +1,25 @@
-/* eslint-disable no-undef */
 import {
+  apiUrl,
   packHoursIntoChunks,
   filterOutChunk,
   chunksFromFiles,
-} from "../chunks";
+} from "../helpers";
+
+/* eslint-disable no-undef */
+
+describe(apiUrl, () => {
+  it("should round to closest hour increment, and make valid s3 url", () => {
+    expect(apiUrl(1573573421000, 1000 * 60 * 60 * 6)).toBe(
+      "https://qwert.fra1.digitaloceanspaces.com/radar_19111212.pack"
+    );
+  });
+
+  it("make a valid dynamic chunk api url", () => {
+    expect(apiUrl(1573573421000, 1000 * 60 * 60 * 6, false)).toBe(
+      "http://regn.rickisen.com/zip/v1/radar_19111215.pack?end=19111221"
+    );
+  });
+});
 
 const testChunks = {
   "1906211000": {
