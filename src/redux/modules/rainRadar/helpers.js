@@ -110,7 +110,9 @@ export function chunksFromFiles(files = []) {
   return files
     .sort()
     .map(f => ({
-      key: begginingOfHour(new Date(timeFromFilePath(f))) + "",
+      key:
+        incrementsOfSixHours(begginingOfHour(new Date(timeFromFilePath(f)))) +
+        "",
       unpackedFiles: [f],
     }))
     .reduce(
@@ -119,8 +121,9 @@ export function chunksFromFiles(files = []) {
         [next.key]: {
           ...acc[next.key],
           status: "unpacked",
-          chunkSize: 1000 * 60 * 60,
-          complete: acc[next.key] && acc[next.key].unpackedFiles.length == 11, // since chunkSize is hardcoded we know how many should fit (12)
+          chunkSize: 1000 * 60 * 60 * 6,
+          complete:
+            acc[next.key] && acc[next.key].unpackedFiles.length == 12 * 6 - 1, // since chunkSize is hardcoded we know how many should fit (12/h)
           unpackedFiles: [
             ...(acc[next.key] ? acc[next.key].unpackedFiles : []),
             ...next.unpackedFiles,

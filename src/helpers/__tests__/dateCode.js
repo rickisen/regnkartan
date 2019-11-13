@@ -50,4 +50,9 @@ describe(timeFromFilePath, function() {
       timeFromFilePath("/path/to/imaginary/file/radar_1906211055.png")
     ).toEqual(testStamp);
   });
+  it("finds a valid time in a pmean file", function() {
+    expect(
+      timeFromFilePath("/path/to/imaginary/file/pmean_19062110.png")
+    ).toEqual(1561111200000);
+  });
 });

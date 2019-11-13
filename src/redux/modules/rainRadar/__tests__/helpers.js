@@ -50,6 +50,58 @@ describe(filterOutChunk, () => {
 });
 
 const files1 = [
+  "file/path/radar_1906210600.png",
+  "file/path/radar_1906210605.png",
+  "file/path/radar_1906210610.png",
+  "file/path/radar_1906210615.png",
+  "file/path/radar_1906210620.png",
+  "file/path/radar_1906210625.png",
+  "file/path/radar_1906210630.png",
+  "file/path/radar_1906210635.png",
+  "file/path/radar_1906210640.png",
+  "file/path/radar_1906210645.png",
+  "file/path/radar_1906210650.png",
+  "file/path/radar_1906210655.png",
+
+  "file/path/radar_1906210700.png",
+  "file/path/radar_1906210705.png",
+  "file/path/radar_1906210710.png",
+  "file/path/radar_1906210715.png",
+  "file/path/radar_1906210720.png",
+  "file/path/radar_1906210725.png",
+  "file/path/radar_1906210730.png",
+  "file/path/radar_1906210735.png",
+  "file/path/radar_1906210740.png",
+  "file/path/radar_1906210745.png",
+  "file/path/radar_1906210750.png",
+  "file/path/radar_1906210755.png",
+
+  "file/path/radar_1906210800.png",
+  "file/path/radar_1906210805.png",
+  "file/path/radar_1906210810.png",
+  "file/path/radar_1906210815.png",
+  "file/path/radar_1906210820.png",
+  "file/path/radar_1906210825.png",
+  "file/path/radar_1906210830.png",
+  "file/path/radar_1906210835.png",
+  "file/path/radar_1906210840.png",
+  "file/path/radar_1906210845.png",
+  "file/path/radar_1906210850.png",
+  "file/path/radar_1906210855.png",
+
+  "file/path/radar_1906210900.png",
+  "file/path/radar_1906210905.png",
+  "file/path/radar_1906210910.png",
+  "file/path/radar_1906210915.png",
+  "file/path/radar_1906210920.png",
+  "file/path/radar_1906210925.png",
+  "file/path/radar_1906210930.png",
+  "file/path/radar_1906210935.png",
+  "file/path/radar_1906210940.png",
+  "file/path/radar_1906210945.png",
+  "file/path/radar_1906210950.png",
+  "file/path/radar_1906210955.png",
+
   "file/path/radar_1906211000.png",
   "file/path/radar_1906211005.png",
   "file/path/radar_1906211010.png",
@@ -62,6 +114,19 @@ const files1 = [
   "file/path/radar_1906211045.png",
   "file/path/radar_1906211050.png",
   "file/path/radar_1906211055.png",
+
+  "file/path/radar_1906211100.png",
+  "file/path/radar_1906211105.png",
+  "file/path/radar_1906211110.png",
+  "file/path/radar_1906211115.png",
+  "file/path/radar_1906211120.png",
+  "file/path/radar_1906211125.png",
+  "file/path/radar_1906211130.png",
+  "file/path/radar_1906211135.png",
+  "file/path/radar_1906211140.png",
+  "file/path/radar_1906211145.png",
+  "file/path/radar_1906211150.png",
+  "file/path/radar_1906211155.png",
 ];
 
 const files2 = [
@@ -76,8 +141,8 @@ describe(chunksFromFiles, () => {
 
   it("Should create viable chunks object from complete hour", () => {
     expect(chunksFromFiles(files1)).toStrictEqual({
-      1561111200000: {
-        chunkSize: 1000 * 60 * 60,
+      1561096800000: {
+        chunkSize: 1000 * 60 * 60 * 6,
         status: "unpacked",
         unpackedFiles: files1,
         complete: true,
@@ -87,8 +152,8 @@ describe(chunksFromFiles, () => {
 
   it("Should create viable chunks object from incomplete hour", () => {
     expect(chunksFromFiles(files2)).toStrictEqual({
-      1561147200000: {
-        chunkSize: 1000 * 60 * 60,
+      1561140000000: {
+        chunkSize: 1000 * 60 * 60 * 6,
         status: "unpacked",
         unpackedFiles: files2,
         complete: false,
@@ -98,14 +163,14 @@ describe(chunksFromFiles, () => {
 
   it("Should create viable chunks object with mixed sizes", () => {
     expect(chunksFromFiles([...files1, ...files2])).toStrictEqual({
-      1561111200000: {
-        chunkSize: 1000 * 60 * 60,
+      1561096800000: {
+        chunkSize: 1000 * 60 * 60 * 6,
         status: "unpacked",
         unpackedFiles: files1,
         complete: true,
       },
-      1561147200000: {
-        chunkSize: 1000 * 60 * 60,
+      1561140000000: {
+        chunkSize: 1000 * 60 * 60 * 6,
         status: "unpacked",
         unpackedFiles: files2,
         complete: false,
