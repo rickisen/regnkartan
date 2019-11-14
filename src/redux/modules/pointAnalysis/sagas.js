@@ -1,15 +1,9 @@
-import { call, put, select } from "redux-saga/effects";
+import { call, put, select, all } from "redux-saga/effects";
 import * as Location from "expo-location";
 
 import * as T from "./types";
 import { req } from "../../../helpers/binaryRequest";
-
-const API = "https://opendata-download-metanalys.smhi.se";
-function makeUrl(lat, lon) {
-  return `${API}/api/category/mesan1g/version/2/geotype/point/lon/${lon.toFixed(
-    6
-  )}/lat/${lat.toFixed(6)}/data.json`;
-}
+import { makeUrl } from "./helpers";
 
 export function* getLocation() {
   const hasPermission = yield select(({ permissions: { granted } }) =>
@@ -39,14 +33,23 @@ export function* fetchPoint() {
   ]);
 
   if (!lat || !lon) {
-    console.warn("Latitude or Longitude is 0, cannot fetch point analysis");
+    // Note that a lat or lon of exactly 0.000000 is also bad. 0:0 is "Null
+    // Island" in Africa. No smhi data to be found there :)
+    console.warn("Latitude or Longitude is bad, cannot fetch point analysis");
     yield put({ type: T.POINT_ANALYSIS_FAIL });
     return;
   }
 
+  yield all([
+    call(fetchPointAnalysis, lat, lon),
+    call(fetchPointForecast, lat, lon),
+  ]);
+}
+
+export function* fetchPointAnalysis(lat, lon) {
   let res = null;
   yield put({ type: T.POINT_ANALYSIS });
-  const url = makeUrl(lat, lon);
+  const url = makeUrl(lat, lon, false);
   try {
     res = yield call(req, url);
   } catch (e) {
@@ -64,5 +67,29 @@ export function* fetchPoint() {
     return;
   }
 
-  yield put({ type: T.POINT_ANALYSIS_SUCCES, data });
+  yield put({ type: T.POINT_ANALYSIS_SUCCESS, data });
+}
+
+export function* fetchPointForecast(lat, lon) {
+  let res = null;
+  yield put({ type: T.FORECAST_POINT_ANALYSIS });
+  const url = makeUrl(lat, lon, true);
+  try {
+    res = yield call(req, url);
+  } catch (e) {
+    console.warn("Error when fetching point forecast", url, e);
+    yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
+    return;
+  }
+
+  let data = null;
+  try {
+    data = JSON.parse(res.data);
+  } catch (e) {
+    console.warn("Error when parsing point forecast as json", e);
+    yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
+    return;
+  }
+
+  yield put({ type: T.FORECAST_POINT_ANALYSIS_SUCCESS, data });
 }

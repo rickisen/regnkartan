@@ -29,15 +29,20 @@ export const parameters = [
   "prsort",
   "spp",
   "Wsymb2",
+  // forcast params:
+  "pmean",
+  "tcc_mean",
 ];
 
 export function getPointAnalysis(state) {
   return {
     humidity: selectParameter(state, "r"),
     precipitation: selectParameter(state, "prec1h"),
+    pmean: selectParameter(state, "pmean"),
     visibility: selectParameter(state, "vis"),
     icon: selectParameter(state, "Wsymb2"),
     cloudCoverage: selectParameter(state, "tcc"),
+    cloudCoverageMean: selectParameter(state, "tcc_mean"),
   };
 }
 
@@ -53,12 +58,23 @@ export function selectWeatherSymbol(state) {
   return selectParameter(state, "Wsymb2");
 }
 
-export function selectWeatherSymbols({ pointAnalysis: { data } }) {
+export function selectWeatherSymbols({
+  pointAnalysis: { data, forecastData },
+}) {
   let ret = [];
 
+  let timeSeries = [];
   if (data && data.timeSeries) {
+    timeSeries = [...data.timeSeries];
+  }
+
+  if (forecastData && forecastData.timeSeries) {
+    timeSeries = [...timeSeries, ...forecastData.timeSeries];
+  }
+
+  if (timeSeries.length > 0) {
     try {
-      ret = data.timeSeries.map(s => ({
+      ret = timeSeries.map(s => ({
         hour: beginningOfHour(new Date(s.validTime)),
         Wsymb2: s.parameters.find(p => p.name === "Wsymb2").values[0],
       }));
@@ -79,28 +95,30 @@ export function selectTemperature(state) {
   };
 }
 
-/** getRelevantHour - returns beggining of hour corresponding to supplied stamp, or if stamp is
- * in the future, its previous hour.
- * @param {number} stamp - stamp in hour to find
- * @return {number} stamp pointing to beggining of relevant hour
- */
-function getRelevantHour(stamp) {
-  if (beginningOfHour() <= stamp) {
-    return beginningOfHour(new Date(Date.now() - 1000 * 60 * 60));
-  }
-  return beginningOfHour(new Date(stamp));
-}
-
 export function selectParameter(
-  { timeSelection: { stamp }, pointAnalysis: { data } },
+  { timeSelection: { stamp }, pointAnalysis: { data, forecastData } },
   parameter
 ) {
   if (!parameters.includes(parameter)) {
     console.warn("parameters must be one of: ", parameters);
+    return;
   }
-  if (stamp && data && data.timeSeries && data.timeSeries.length > 0) {
-    const relevantHour = getRelevantHour(stamp);
-    const dataForHour = data.timeSeries.find(
+
+  if (!data && !forecastData) {
+    return;
+  }
+
+  let timeSeries = [];
+  if (data.timeSeries && data.timeSeries.length > 0) {
+    timeSeries = [...data.timeSeries];
+  }
+  if (forecastData.timeSeries && forecastData.timeSeries.length > 0) {
+    timeSeries = [...timeSeries, ...forecastData.timeSeries];
+  }
+
+  if (timeSeries && timeSeries.length > 0) {
+    const relevantHour = beginningOfHour(new Date(stamp));
+    const dataForHour = timeSeries.find(
       ({ validTime }) => new Date(validTime).getTime() === relevantHour
     );
     if (

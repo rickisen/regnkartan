@@ -55,17 +55,19 @@ function Overview() {
     visibility,
     humidity,
     precipitation,
+    pmean,
     icon,
     cloudCoverage,
+    cloudCoverageMean,
   } = useSelector(getPointAnalysis);
 
   let disabled = false;
   if (
     visibility == undefined ||
     humidity == undefined ||
-    precipitation == undefined ||
+    (precipitation == undefined && pmean === undefined) ||
     icon == undefined ||
-    cloudCoverage == undefined
+    (cloudCoverage == undefined && cloudCoverageMean === undefined)
   ) {
     disabled = true;
   }
@@ -81,12 +83,12 @@ function Overview() {
           <>
             <Text style={styles.text}>{`Humidity: ${humidity}%`}</Text>
             <Text style={styles.text}>{`Visibility: ${visibility}km`}</Text>
-            <Text
-              style={styles.text}
-            >{`Cloud Coverage: ${cloudCoverage}%`}</Text>
-            <Text
-              style={styles.text}
-            >{`Precipitation: ${precipitation}mm`}</Text>
+            <Text style={styles.text}>{`Cloud Coverage: ${
+              cloudCoverage === undefined ? cloudCoverageMean : cloudCoverage
+            }%`}</Text>
+            <Text style={styles.text}>{`Precipitation: ${
+              precipitation === undefined ? pmean : precipitation
+            }mm`}</Text>
           </>
         )}
       </View>
