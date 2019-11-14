@@ -21,7 +21,7 @@ export function* scanCachedFiles() {
   }
 
   const pngFiles = files
-    .filter(file => file.includes(".png"))
+    .filter(file => file.includes(".png") && file.includes("radar_"))
     .map(f => FileSystem.cacheDirectory + f);
 
   const chunks = chunksFromFiles(pngFiles);
@@ -46,6 +46,7 @@ export function* clearCache({ keepTil }) {
     const file = files[i];
     if (
       file.includes("pack") ||
+      file.includes("pmean") ||
       (file.includes("png") && timeFromFilePath(file) < keepTil)
     ) {
       try {
