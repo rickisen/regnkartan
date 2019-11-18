@@ -1,8 +1,9 @@
-import { call, put, select, fork } from "redux-saga/effects";
+import { call, put, select, fork, take } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
-import { req, beginningOfHour, timeFromFilePath } from "../../../helpers";
+import { beginningOfHour, timeFromFilePath } from "../../../helpers";
+import { REQ } from "../watchedRequests";
 import { apiUrl, packHoursIntoChunks, chunksFromFiles } from "./helpers.js";
 import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
@@ -113,36 +114,36 @@ export function* fetchChunk({ chunkSize }, time) {
   const url = apiUrl(time, chunkSize, true); // (time, chunkSize, false) for old api
 
   let status = null;
-  let data = null;
+
   yield put({ type: T.FETCH_CHUNK, time, url });
-  try {
-    const response = yield call(req, url);
-    status = response.status;
-    data = response.data;
-  } catch (e) {
-    console.warn("Error occured when fetching pack", time, url, e);
-    yield put({ type: T.FETCH_CHUNK_FAIL, error: status, time });
-    return;
-  }
-
-  yield put({ type: T.FETCH_CHUNK_SUCCESS, time });
-
-  yield put({ type: T.UNPACKING_CHUNK, time });
-  try {
-    yield call(unpack, data, time, [
-      T.FETCH_CHUNK_FAIL,
-      T.FETCH_CHUNK_SUCCESS,
-      T.UNPACKING_CHUNK,
-      T.UNPACKING_CHUNK_FAIL,
-      T.UNPACKING_CHUNK_SUCCESS,
-      T.UNPACKING_FILE_FAIL,
-      T.UNPACKING_FILE_SUCCESS,
-    ]);
-  } catch (e) {
-    console.warn("Error occured when unpacking chunk files", e, time);
-    yield put({ type: T.UNPACKING_CHUNK_FAIL, error: e, time });
-    return;
-  }
+  yield put({
+    type: REQ,
+    url,
+    successSaga: function*(data) {
+      yield put({ type: T.FETCH_CHUNK_SUCCESS, url, time });
+      yield put({ type: T.UNPACKING_CHUNK, time });
+      try {
+        yield call(unpack, data, time, [
+          T.FETCH_CHUNK_FAIL,
+          T.FETCH_CHUNK_SUCCESS,
+          T.UNPACKING_CHUNK,
+          T.UNPACKING_CHUNK_FAIL,
+          T.UNPACKING_CHUNK_SUCCESS,
+          T.UNPACKING_FILE_FAIL,
+          T.UNPACKING_FILE_SUCCESS,
+        ]);
+      } catch (e) {
+        console.warn("Error occured when unpacking chunk files", e, time);
+        yield put({ type: T.UNPACKING_CHUNK_FAIL, error: e, time });
+        return;
+      }
+    },
+    failSaga: function*(data) {
+      yield put({ type: T.FETCH_CHUNK_FAIL, url, error: status, time });
+      console.warn("Error occured when fetching pack", time, url, data);
+      return;
+    },
+  });
 }
 
 /** @generator queRequestedHours - saga that puts new chunks into state.pack

@@ -2,7 +2,7 @@ import { PropTypes } from "prop-types";
 import { call, put, select } from "redux-saga/effects";
 
 import { beginningOfHour } from "../../helpers/time.js";
-import { req } from "../../helpers/binaryRequest";
+import { REQ } from "./watchedRequests.js";
 
 const API = "https://opendata-download-lightning.smhi.se";
 
@@ -45,7 +45,7 @@ export const propTypes = {
   ),
 };
 
-/** selectors **/
+/** Selectors **/
 export function selectStrikesAndStamp({
   lightning: { strikes },
   timeSelection: { stamp },
@@ -80,34 +80,37 @@ export function* fetchLightning({ stamp }) {
     1}/day/${day.getUTCDate()}/data.json`;
 
   yield put({ type: GET_LIGHTNING });
-  let res = null;
-  try {
-    res = yield call(req, url);
-  } catch (e) {
-    console.warn(
-      "Something went wrong when trying to fetch lightning strike data",
-      url,
-      day,
-      res
-    );
-    yield put({ type: GET_LIGHTNING_FAIL, error: e });
-    return;
-  }
 
-  let strikes = [];
-  try {
-    strikes = JSON.parse(res.data).values;
-  } catch (e) {
-    console.warn(
-      "Something went wrong when parsing lightning data as json",
-      e,
-      day,
-      res.data
-    );
-    yield put({ type: GET_LIGHTNING_FAIL, error: e });
-    return;
-  }
-  yield put({ type: GET_LIGHTNING_SUCCESS, strikes, stamp: day.getTime() });
+  yield put({
+    type: REQ,
+    url,
+    successSaga: function*(data) {
+      let strikes = [];
+      try {
+        strikes = JSON.parse(data).values;
+      } catch (e) {
+        console.warn(
+          "Something went wrong when parsing lightning data as json",
+          e,
+          day,
+          data
+        );
+        yield put({ type: GET_LIGHTNING_FAIL, error: e });
+        return;
+      }
+      yield put({ type: GET_LIGHTNING_SUCCESS, strikes, stamp: day.getTime() });
+    },
+    failSaga: function*(data, e) {
+      console.warn(
+        "Something went wrong when trying to fetch lightning strike data",
+        url,
+        day,
+        data
+      );
+      yield put({ type: GET_LIGHTNING_FAIL, error: e });
+      return;
+    },
+  });
 }
 
 /** REDUCER **/

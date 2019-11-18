@@ -1,6 +1,10 @@
 import React, { memo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import PropTypes from "prop-types";
+
+/* eslint-disable no-undef */
+const refreshSrc = require("../../../../assets/icons/misc/refresh.png");
+/* eslint-enable no-undef */
 
 const styles = StyleSheet.create({
   container: {
@@ -18,12 +22,17 @@ const styles = StyleSheet.create({
   },
 });
 
-function Header({ title, loading, Icon }) {
+function Header({ title, Icon, onRefresh }) {
   return (
     <View style={styles.container}>
-      <View style={styles.textContainer}>
-        <Text>{loading ? "loading data..." : ""}</Text>
-      </View>
+      <TouchableOpacity onPress={onRefresh} style={styles.textContainer}>
+        <Image
+          style={{ opacity: 0.4 }}
+          width={32}
+          height={32}
+          source={refreshSrc}
+        />
+      </TouchableOpacity>
       <View style={styles.textContainer}>
         <Text style={{ textAlign: "center", fontSize: 20 }}>{title}</Text>
       </View>
@@ -34,13 +43,13 @@ function Header({ title, loading, Icon }) {
 
 Header.propTypes = {
   title: PropTypes.string,
-  loading: PropTypes.bool,
   Icon: PropTypes.any,
+  onRefresh: PropTypes.func,
 };
 
 Header.defaultProps = {
+  onRefresh: () => {},
   title: "",
-  loading: true,
   Icon: () => {},
 };
 

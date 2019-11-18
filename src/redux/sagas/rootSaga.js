@@ -7,6 +7,7 @@ import {
 } from "../modules/permissions";
 import { SELECT_HOUR } from "../modules/timeSelection";
 import { fetchLightningIfNeeded } from "../modules/lightning";
+import { REQ, req } from "../modules/watchedRequests";
 import {
   REFRESH_LATEST,
   CLEAR_CACHE,
@@ -31,6 +32,7 @@ export default function* rootSaga() {
   yield takeEvery(RESET_CHUNK_STATUS, fetchQued);
   yield takeEvery(LOCATION_GRANTED, getLocation);
   yield takeEvery(SET_LAT_LON, fetchPoint);
+  yield takeEvery(REQ, req);
   yield call(Initialize);
 }
 

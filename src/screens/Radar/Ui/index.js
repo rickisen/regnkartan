@@ -6,7 +6,9 @@ import { pad, hourRangeFrom } from "../../../helpers";
 import TimePointPicker from "../../../components/TimePointPicker";
 import BottomSheet from "../../../components/BottomSheet";
 import PlayButton from "../../../components/PlayButton";
+import ProgressLine from "../../../components/ProgressLine";
 import TemperatureView from "./TemperatureView";
+import { selectReqsMeanProgress } from "../../../redux/modules/watchedRequests";
 import WindView from "./WindView";
 import Overview from "./Overview";
 import Header from "./Header";
@@ -16,7 +18,6 @@ import {
 } from "../../../redux/modules/pointAnalysis";
 import {
   allChunks,
-  allChunksDone,
   registerHour,
   registerTime,
   REFRESH_LATEST,
@@ -61,14 +62,12 @@ function useVisibilityCallback() {
 
 function UI() {
   const chunks = useSelector(allChunks);
-  const chunksDone = useSelector(allChunksDone);
   const symbols = useSelector(selectWeatherSymbols);
   const dispatch = useDispatch();
   const [time, setTime] = useState("");
   const timePointRange = useNewRangeEveryMinute();
   const [showExtendedUi, visibilityCallBack] = useVisibilityCallback();
   const [playing, setPlaying] = useState(false);
-
   const onSelectedHour = hourStamp => {
     dispatch(registerHour(hourStamp));
   };
@@ -81,12 +80,17 @@ function UI() {
     dispatch({ type: REFRESH_LATEST });
   };
 
+  let meanProgress = useSelector(selectReqsMeanProgress);
+  if (isNaN(meanProgress)) {
+    meanProgress = 0;
+  }
+
   return (
     <BottomSheet
       visibilityCallBack={visibilityCallBack}
       headerComponent={
         <Header
-          loading={!chunksDone}
+          onRefresh={onRefresh}
           title={time}
           Icon={
             <PlayButton
@@ -98,13 +102,12 @@ function UI() {
       }
     >
       <View style={styles.pickerContainer}>
+        <ProgressLine percent={meanProgress} />
         <TimePointPicker
           chunks={chunks}
           range={timePointRange}
           onSelectedHour={onSelectedHour}
           onSelected={onSelected}
-          onRefresh={onRefresh}
-          refreshing={!chunksDone}
           symbols={symbols}
           setPlaying={setPlaying}
           playing={playing}

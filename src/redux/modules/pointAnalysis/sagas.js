@@ -2,7 +2,7 @@ import { call, put, select, all } from "redux-saga/effects";
 import * as Location from "expo-location";
 
 import * as T from "./types";
-import { req } from "../../../helpers/binaryRequest";
+import { REQ } from "../watchedRequests";
 import { makeUrl } from "./helpers";
 
 export function* getLocation() {
@@ -47,49 +47,54 @@ export function* fetchPoint() {
 }
 
 export function* fetchPointAnalysis(lat, lon) {
-  let res = null;
   yield put({ type: T.POINT_ANALYSIS });
   const url = makeUrl(lat, lon, false);
-  try {
-    res = yield call(req, url);
-  } catch (e) {
-    console.warn("Error when fetching point analysis", url, e);
-    yield put({ type: T.POINT_ANALYSIS_FAIL });
-    return;
-  }
 
-  let data = null;
-  try {
-    data = JSON.parse(res.data);
-  } catch (e) {
-    console.warn("Error when parsing point analysis as json", e);
-    yield put({ type: T.POINT_ANALYSIS_FAIL });
-    return;
-  }
+  yield put({
+    type: REQ,
+    url,
+    successSaga: function*(resData) {
+      let data = null;
+      try {
+        data = JSON.parse(resData);
+      } catch (e) {
+        console.warn("Error when parsing point analysis as json", e);
+        yield put({ type: T.POINT_ANALYSIS_FAIL });
+        return;
+      }
 
-  yield put({ type: T.POINT_ANALYSIS_SUCCESS, data });
+      yield put({ type: T.POINT_ANALYSIS_SUCCESS, data });
+    },
+    failSaga: function*(data, e) {
+      console.warn("Error when fetching point analysis", url, e);
+      yield put({ type: T.POINT_ANALYSIS_FAIL });
+      return;
+    },
+  });
 }
 
 export function* fetchPointForecast(lat, lon) {
-  let res = null;
   yield put({ type: T.FORECAST_POINT_ANALYSIS });
   const url = makeUrl(lat, lon, true);
-  try {
-    res = yield call(req, url);
-  } catch (e) {
-    console.warn("Error when fetching point forecast", url, e);
-    yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
-    return;
-  }
+  yield put({
+    type: REQ,
+    url,
+    successSaga: function*(resData) {
+      let data = null;
+      try {
+        data = JSON.parse(resData);
+      } catch (e) {
+        console.warn("Error when parsing point analysis as json", e);
+        yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
+        return;
+      }
 
-  let data = null;
-  try {
-    data = JSON.parse(res.data);
-  } catch (e) {
-    console.warn("Error when parsing point forecast as json", e);
-    yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
-    return;
-  }
-
-  yield put({ type: T.FORECAST_POINT_ANALYSIS_SUCCESS, data });
+      yield put({ type: T.FORECAST_POINT_ANALYSIS_SUCCESS, data });
+    },
+    failSaga: function*(data, e) {
+      console.warn("Error when fetching point analysis", url, e);
+      yield put({ type: T.FORECAST_POINT_ANALYSIS_FAIL });
+      return;
+    },
+  });
 }
