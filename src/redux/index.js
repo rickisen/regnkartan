@@ -7,7 +7,10 @@ import timeSelection from "./modules/timeSelection";
 import permissions from "./modules/permissions";
 import pointAnalysis from "./modules/pointAnalysis";
 import lightning from "./modules/lightning";
-// import { logger } from "./middleware/logger.js";
+import watchedRequests from "./modules/watchedRequests";
+import { logger } from "./middleware/logger.js";
+
+const LOG = true;
 
 const reducer = combineReducers({
   rainRadar,
@@ -15,15 +18,16 @@ const reducer = combineReducers({
   permissions,
   pointAnalysis,
   lightning,
+  watchedRequests,
 });
 
 const sagaMiddleware = createSagaMiddleware();
-const middleware = applyMiddleware(
-  //
-  sagaMiddleware
-  //
-  // ,logger
-);
+let middleware = null;
+if (LOG) {
+  middleware = applyMiddleware(sagaMiddleware, logger);
+} else {
+  middleware = applyMiddleware(sagaMiddleware);
+}
 
 export default function createAppStore(initialValue = {}) {
   let store;

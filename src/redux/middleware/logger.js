@@ -1,13 +1,14 @@
+/* eslint-disable no-unused-vars */
 import { generateDateCode } from "../../helpers";
+import { SELECT_FILE } from "../modules/timeSelection";
+import { UNPACKING_FILE_SUCCESS } from "../modules/rainRadar";
 
 let oldStringifiedDisplayChunks = "";
-
-export const logger = store => next => action => {
-  console.group(action.type);
-  // console.info("dispatching", Object.keys(action));
-  let result = next(action);
-
-  // show comprehensive overview of chunks
+/**
+ * @param {Object} store
+ * @return {void}
+ */
+function logChunksOverview(store) {
   const {
     rainRadar: { chunks },
   } = store.getState();
@@ -32,6 +33,45 @@ export const logger = store => next => action => {
     console.log("chunks", displayChunks);
   }
   oldStringifiedDisplayChunks = stringifiedChunks;
-  console.groupEnd();
-  return result;
+}
+
+let oldStringifiedWatchedRequests = "";
+/**
+ * @param {Object} store
+ * @return {void}
+ */
+function logWatchedRequestsOverview(store) {
+  const { watchedRequests } = store.getState();
+  const stringifiedWatchedRequests = JSON.stringify(watchedRequests);
+
+  if (stringifiedWatchedRequests !== oldStringifiedWatchedRequests) {
+    console.log("watchedRequests", watchedRequests);
+  }
+
+  oldStringifiedWatchedRequests = stringifiedWatchedRequests;
+}
+
+const ignoreActions = [SELECT_FILE, UNPACKING_FILE_SUCCESS];
+/**
+ * @param {Object} action
+ * @param {Boolean} detailed
+ * @return {void}
+ */
+function logAction(action, detailed = false) {
+  if (!ignoreActions.includes(action.type)) {
+    console.group(action.type);
+  }
+  if (detailed) {
+    console.info("Keys: ", Object.keys(action));
+  }
+  if (!ignoreActions.includes(action.type)) {
+    console.groupEnd();
+  }
+}
+
+export const logger = store => next => action => {
+  logAction(action, false);
+  // logChunksOverview(store);
+  logWatchedRequestsOverview(store);
+  return next(action);
 };
