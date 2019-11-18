@@ -71,7 +71,7 @@ function logAction(action, detailed = false) {
 
 export const logger = store => next => action => {
   logAction(action, false);
-  // logChunksOverview(store);
+  logChunksOverview(store);
   logWatchedRequestsOverview(store);
   return next(action);
 };

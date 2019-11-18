@@ -10,7 +10,7 @@ import lightning from "./modules/lightning";
 import watchedRequests from "./modules/watchedRequests";
 import { logger } from "./middleware/logger.js";
 
-const LOG = true;
+const LOG = false;
 
 const reducer = combineReducers({
   rainRadar,
