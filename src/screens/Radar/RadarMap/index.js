@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import MapView from "react-native-maps";
 
@@ -124,7 +124,9 @@ function RadarMap() {
       {marker && <MapView.Marker coordinate={marker} pinColor="#fff" />}
       <RadarOverlay />
       <StatusBarBg />
-      <LightningStrikes strikes={strikes} stamp={stamp} />
+      {Platform.OS === "ios" && ( //TODO: Find fix for Android crash on adding any markers
+        <LightningStrikes strikes={strikes} stamp={stamp} />
+      )}
     </MapView>
   );
 }
