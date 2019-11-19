@@ -7,6 +7,8 @@ export const propTypes = {
   chunks: PropTypes.shape({
     [PropTypes.string]: PropTypes.shape({
       status: PropTypes.oneOf([
+        "on-hold",
+        "qued",
         "loading",
         "loaded",
         "failed",

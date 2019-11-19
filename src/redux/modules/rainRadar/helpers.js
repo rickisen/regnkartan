@@ -2,92 +2,117 @@ import {
   incrementsOfSixHours,
   generateDateCode,
   beginningOfHour,
+  beginningOfDay,
   timeFromFilePath,
 } from "../../../helpers";
 
-const API_URL = "http://regn.rickisen.com/zip/v1/";
+/**
+ * @param {Number} now - time for now
+ * @param {Object} chunks
+ * @param {[Number]} requestedHours
+ * @return {Object} chunks
+ */
+export function makeChunks(
+  time = Date.now(),
+  chunks = {},
+  requestedHours = [],
+  files = []
+) {
+  const day = beginningOfDay(time);
+  const yesterday = day - 1000 * 60 * 60 * 24;
+  const tomorrow = day + 1000 * 60 * 60 * 24;
+  const dayAfterTomorrow = day + 1000 * 60 * 60 * 24 * 2;
+
+  const chunksForYesterday = generateChunksForDay(yesterday);
+  const chunksForToday = generateChunksForDay(day);
+  const chunksForTomorrow = generateChunksForDay(tomorrow, 1000 * 60 * 60 * 24);
+  const chunksForDayAfterTomorrow = generateChunksForDay(
+    dayAfterTomorrow,
+    1000 * 60 * 60 * 24
+  );
+  const latest = {
+    chunkSize: 1000 * 60 * 60,
+    status: "qued",
+    unpackedFiles: [],
+  };
+
+  const newChunks = {
+    ...chunksForYesterday,
+    ...chunksForToday,
+    ...{ ["" + beginningOfHour(time)]: latest },
+    ...chunksForTomorrow,
+    ...chunksForDayAfterTomorrow,
+    ...chunks,
+  };
+
+  // Register supplied files
+  for (const file of files) {
+    const key = chunkForTime(timeFromFilePath(file), newChunks);
+    if (key) {
+      if (!newChunks[key].unpackedFiles.includes(file)) {
+        newChunks[key].unpackedFiles = [...newChunks[key].unpackedFiles, file];
+        newChunks[key].status = "unpacked";
+        //TODO: this implies that all files are unpacked. might cause bug with partially downloaded cached packs
+      }
+    }
+  }
+
+  // Que requestedHours
+  for (const hour of requestedHours) {
+    const key = chunkForTime(hour, newChunks);
+    if (newChunks[key].status === "on-hold") {
+      newChunks[key].status = "qued";
+    }
+  }
+
+  return newChunks;
+}
 
 /**
  * @param {number} time
- * @param {number} chunkSize
- * @param {boolean} useS3 - use new s3 base api, or old with dynamic chunks
  * @return {string} url
  */
-export function apiUrl(time, chunkSize, useS3 = true) {
-  if (useS3) {
-    const dateCode = generateDateCode(incrementsOfSixHours(time), true);
-    return `https://qwert.fra1.digitaloceanspaces.com/radar_${dateCode}.pack`;
-  } else {
-    const dateCode = generateDateCode(time, true);
-    const chunkSizeQuery = `?end=${generateDateCode(time + chunkSize, true)}`;
-    return `${API_URL}radar_${dateCode}.pack${chunkSizeQuery || ""}`;
+export function apiUrl(time) {
+  const dateCode = generateDateCode(incrementsOfSixHours(time), true);
+  return `https://qwert.fra1.digitaloceanspaces.com/radar_${dateCode}.pack`;
+}
+
+/**
+ * @param {Number} time or "hour"
+ * @param {Object} chunks
+ * @return {string} chunkKey
+ */
+export function chunkForTime(time, chunks = {}) {
+  for (const chunkKey of Object.keys(chunks)) {
+    const beginningOfChunk = parseInt(chunkKey);
+    const endOfChunk = beginningOfChunk + chunks[chunkKey].chunkSize;
+    if (time >= beginningOfChunk && time < endOfChunk) {
+      return chunkKey;
+    }
   }
 }
 
-/** packHoursIntoChunks
- * @param {Array} requestedHours - hours to put in the chunks, (should be an array of timestamps for begining at an hour)
- * @param {Object} chunks - chunks object, with timestamp for key
- * @param {Number} chunkSize - Size in ms of newly created chunks
- * @return {Object} chunks - chunks object, with timestamp for key
+/**
+ * @param {number} startOfDay - timestamp for 00:00 of the day in question
+ * @param {number} chunkSize - size of each chunk
+ * @return {Object} chunks - for that day
  */
-export function packHoursIntoChunks(
-  requestedHours = [],
-  chunks = {},
-  chunkSize = 1000 * 60 * 60 * 6,
-  depth = 0
+export function generateChunksForDay(
+  startOfDay,
+  chunkSize = 1000 * 60 * 60 * 6
 ) {
-  // Find hours not in chunks
-  const hoursNotInAChunk = requestedHours.reduce((acc, hour) => {
-    let found = false;
-    for (var stamp in chunks) {
-      const chunk = chunks[stamp];
-      const chunkBegin = parseInt(stamp);
-      const chunkEnd = chunkBegin + chunk.chunkSize;
-      if (hour >= chunkBegin && hour < chunkEnd) {
-        found = true;
-      }
-    }
-    if (!found) {
-      return [...acc, hour];
-    }
-    return acc;
-  }, []);
-  // if all are covered return chunks, we are done
-  if (hoursNotInAChunk.length === 0 || depth > 10) {
-    return chunks;
-  }
-  const sortedChunkKeys = Object.keys(chunks).sort();
-
-  let chunkKey = null;
-  const lastChunkKey = sortedChunkKeys[sortedChunkKeys.length - 1];
-  if (
-    sortedChunkKeys.length > 0 &&
-    hoursNotInAChunk[0] < parseInt(sortedChunkKeys[0])
-  ) {
-    chunkKey = parseInt(sortedChunkKeys[0]) - chunkSize;
-  } else if (
-    sortedChunkKeys.length > 0 &&
-    hoursNotInAChunk[0] > parseInt(lastChunkKey)
-  ) {
-    chunkKey = parseInt(lastChunkKey) + chunks[lastChunkKey].chunkSize;
-  } else if (sortedChunkKeys.length === 0) {
-    chunkKey = beginningOfHour() - chunkSize;
-  }
-
-  let newChunks = {};
-  if (chunkKey) {
-    newChunks = {
-      ...chunks,
-      ["" + chunkKey]: {
-        status: "qued",
-        unpackedFiles: [],
-        chunkSize,
-      },
+  let chunks = {};
+  let iter = startOfDay;
+  const end = startOfDay + 1000 * 60 * 60 * 24;
+  while (iter < end) {
+    chunks["" + iter] = {
+      chunkSize,
+      status: "on-hold",
+      unpackedFiles: [],
     };
+    iter += chunkSize;
   }
-
-  // recurse
-  return packHoursIntoChunks(hoursNotInAChunk, newChunks, chunkSize, ++depth);
+  return chunks;
 }
 
 /** filterOutChunk - removes one chunk from chunks
@@ -101,35 +126,4 @@ export function filterOutChunk(chunks, key) {
     if (chunk !== key) ret = { ...ret, [chunk]: chunks[chunk] };
   }
   return ret;
-}
-
-/** chunksFromFiles - Used to generate tracked chunks from cached files, has a hardcoded chunkSize of 1 hour
- * @param {array[string]} files, array of filepaths, should only contain .png entries with datecodes in name
- */
-export function chunksFromFiles(files = []) {
-  return files
-    .sort()
-    .map(f => ({
-      key:
-        incrementsOfSixHours(beginningOfHour(new Date(timeFromFilePath(f)))) +
-        "",
-      unpackedFiles: [f],
-    }))
-    .reduce(
-      (acc, next) => ({
-        ...acc,
-        [next.key]: {
-          ...acc[next.key],
-          status: "unpacked",
-          chunkSize: 1000 * 60 * 60 * 6,
-          complete:
-            acc[next.key] && acc[next.key].unpackedFiles.length == 12 * 6 - 1, // since chunkSize is hardcoded we know how many should fit (12/h)
-          unpackedFiles: [
-            ...(acc[next.key] ? acc[next.key].unpackedFiles : []),
-            ...next.unpackedFiles,
-          ],
-        },
-      }),
-      {}
-    );
 }

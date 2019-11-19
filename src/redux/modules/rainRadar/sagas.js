@@ -1,14 +1,12 @@
-import { call, put, select, fork, take } from "redux-saga/effects";
+import { call, put, select, fork } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
 import { beginningOfHour, timeFromFilePath } from "../../../helpers";
 import { REQ } from "../watchedRequests";
-import { apiUrl, packHoursIntoChunks, chunksFromFiles } from "./helpers.js";
+import { apiUrl, makeChunks } from "./helpers.js";
 import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
-
-const DEFAULT_CHUNKSIZE = 1000 * 60 * 60 * 6;
 
 export function* scanCachedFiles() {
   let files = [];
@@ -25,8 +23,9 @@ export function* scanCachedFiles() {
     .filter(file => file.includes(".png") && file.includes("radar_"))
     .map(f => FileSystem.cacheDirectory + f);
 
-  const chunks = chunksFromFiles(pngFiles);
-  yield put({ type: T.REGISTER_CHUNKS, chunks });
+  const chunks = yield select(({ rainRadar: { chunks } }) => chunks);
+  const newChunks = makeChunks(Date.now(), chunks, [], pngFiles);
+  yield put({ type: T.REGISTER_CHUNKS, chunks: newChunks });
 }
 
 /** @generator clearCache - saga that clears all pack and png files in our cache
@@ -111,9 +110,7 @@ export function* fetchChunk({ chunkSize }, time) {
     return;
   }
 
-  const url = apiUrl(time, chunkSize, true); // (time, chunkSize, false) for old api
-
-  let status = null;
+  const url = apiUrl(time, chunkSize);
 
   yield put({ type: T.FETCH_CHUNK, time, url });
   yield put({
@@ -138,8 +135,8 @@ export function* fetchChunk({ chunkSize }, time) {
         return;
       }
     },
-    failSaga: function*(data) {
-      yield put({ type: T.FETCH_CHUNK_FAIL, url, error: status, time });
+    failSaga: function*(data, error) {
+      yield put({ type: T.FETCH_CHUNK_FAIL, url, error, time });
       console.warn("Error occured when fetching pack", time, url, data);
       return;
     },
@@ -157,15 +154,12 @@ export function* queRequestedHours() {
       chunks,
     ]
   );
-  const packedChunks = packHoursIntoChunks(
-    requestedHours,
-    chunks,
-    DEFAULT_CHUNKSIZE
-  );
+  const newChunks = makeChunks(Date.now(), chunks, requestedHours, []);
 
-  yield put({ type: T.REGISTER_CHUNKS, chunks: packedChunks });
+  yield put({ type: T.REGISTER_CHUNKS, chunks: newChunks });
 }
 
+// TODO: rewrite this to work with newer s3 api
 export function* refreshLatest() {
   // change the size of the last chunk to be at the begining of its last image hour.
   try {

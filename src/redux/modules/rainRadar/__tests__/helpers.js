@@ -1,25 +1,13 @@
 import {
   apiUrl,
-  packHoursIntoChunks,
   filterOutChunk,
-  chunksFromFiles,
+  makeChunks,
+  generateChunksForDay,
+  chunkForTime,
 } from "../helpers";
 
+import { beginningOfDay } from "../../../../helpers";
 /* eslint-disable no-undef */
-
-describe(apiUrl, () => {
-  it("should round to closest hour increment, and make valid s3 url", () => {
-    expect(apiUrl(1573573421000, 1000 * 60 * 60 * 6)).toBe(
-      "https://qwert.fra1.digitaloceanspaces.com/radar_19111212.pack"
-    );
-  });
-
-  it("make a valid dynamic chunk api url", () => {
-    expect(apiUrl(1573573421000, 1000 * 60 * 60 * 6, false)).toBe(
-      "http://regn.rickisen.com/zip/v1/radar_19111215.pack?end=19111221"
-    );
-  });
-});
 
 const testChunks = {
   "1906211000": {
@@ -30,15 +18,93 @@ const testChunks = {
   },
 };
 
-// jest
-//   .spyOn(global.Date, "constructor")
-//   .mockImplementationOnce(() => new Date("2019-06-19T00:07:19.309Z"));
+const chunksForADay = {
+  "1546300800000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546322400000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546344000000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546365600000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+};
 
-describe(packHoursIntoChunks, () => {
-  it("pack an hour into a chunk", () => {});
-  // it("pack an hour into a chunk", () => {
-  //   expect(packHoursIntoChunks([testStamp], {})).toBe(10);
-  // });
+const fullChunksForFirstJan = {
+  "1546214400000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546236000000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546257600000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546279200000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546300800000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546322400000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546344000000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546351200000": {
+    chunkSize: 3600000,
+    status: "qued",
+    unpackedFiles: [],
+  },
+  "1546365600000": {
+    chunkSize: 21600000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546387200000": {
+    chunkSize: 86400000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+  "1546473600000": {
+    chunkSize: 86400000,
+    status: "on-hold",
+    unpackedFiles: [],
+  },
+};
+
+describe(apiUrl, () => {
+  it("should round to closest hour increment, and make valid s3 url", () => {
+    expect(apiUrl(1573573421000)).toBe(
+      "https://qwert.fra1.digitaloceanspaces.com/radar_19111212.pack"
+    );
+  });
 });
 
 describe(filterOutChunk, () => {
@@ -49,132 +115,89 @@ describe(filterOutChunk, () => {
   });
 });
 
-const files1 = [
-  "file/path/radar_1906210600.png",
-  "file/path/radar_1906210605.png",
-  "file/path/radar_1906210610.png",
-  "file/path/radar_1906210615.png",
-  "file/path/radar_1906210620.png",
-  "file/path/radar_1906210625.png",
-  "file/path/radar_1906210630.png",
-  "file/path/radar_1906210635.png",
-  "file/path/radar_1906210640.png",
-  "file/path/radar_1906210645.png",
-  "file/path/radar_1906210650.png",
-  "file/path/radar_1906210655.png",
+describe(generateChunksForDay, () => {
+  it("can generate correct chunks for 2019-01-01", () => {
+    expect(generateChunksForDay(beginningOfDay(1546300800000))).toStrictEqual(
+      chunksForADay
+    );
+  });
+});
 
-  "file/path/radar_1906210700.png",
-  "file/path/radar_1906210705.png",
-  "file/path/radar_1906210710.png",
-  "file/path/radar_1906210715.png",
-  "file/path/radar_1906210720.png",
-  "file/path/radar_1906210725.png",
-  "file/path/radar_1906210730.png",
-  "file/path/radar_1906210735.png",
-  "file/path/radar_1906210740.png",
-  "file/path/radar_1906210745.png",
-  "file/path/radar_1906210750.png",
-  "file/path/radar_1906210755.png",
-
-  "file/path/radar_1906210800.png",
-  "file/path/radar_1906210805.png",
-  "file/path/radar_1906210810.png",
-  "file/path/radar_1906210815.png",
-  "file/path/radar_1906210820.png",
-  "file/path/radar_1906210825.png",
-  "file/path/radar_1906210830.png",
-  "file/path/radar_1906210835.png",
-  "file/path/radar_1906210840.png",
-  "file/path/radar_1906210845.png",
-  "file/path/radar_1906210850.png",
-  "file/path/radar_1906210855.png",
-
-  "file/path/radar_1906210900.png",
-  "file/path/radar_1906210905.png",
-  "file/path/radar_1906210910.png",
-  "file/path/radar_1906210915.png",
-  "file/path/radar_1906210920.png",
-  "file/path/radar_1906210925.png",
-  "file/path/radar_1906210930.png",
-  "file/path/radar_1906210935.png",
-  "file/path/radar_1906210940.png",
-  "file/path/radar_1906210945.png",
-  "file/path/radar_1906210950.png",
-  "file/path/radar_1906210955.png",
-
-  "file/path/radar_1906211000.png",
-  "file/path/radar_1906211005.png",
-  "file/path/radar_1906211010.png",
-  "file/path/radar_1906211015.png",
-  "file/path/radar_1906211020.png",
-  "file/path/radar_1906211025.png",
-  "file/path/radar_1906211030.png",
-  "file/path/radar_1906211035.png",
-  "file/path/radar_1906211040.png",
-  "file/path/radar_1906211045.png",
-  "file/path/radar_1906211050.png",
-  "file/path/radar_1906211055.png",
-
-  "file/path/radar_1906211100.png",
-  "file/path/radar_1906211105.png",
-  "file/path/radar_1906211110.png",
-  "file/path/radar_1906211115.png",
-  "file/path/radar_1906211120.png",
-  "file/path/radar_1906211125.png",
-  "file/path/radar_1906211130.png",
-  "file/path/radar_1906211135.png",
-  "file/path/radar_1906211140.png",
-  "file/path/radar_1906211145.png",
-  "file/path/radar_1906211150.png",
-  "file/path/radar_1906211155.png",
-];
-
-const files2 = [
-  "file/path/radar_1906212000.png",
-  "file/path/radar_1906212005.png",
-];
-
-describe(chunksFromFiles, () => {
-  it("Should create empty chunks object with no files", () => {
-    expect(chunksFromFiles([])).toStrictEqual({});
+describe(chunkForTime, () => {
+  it("can find the correct chunk, when time is === to key", () => {
+    expect(chunkForTime(1546365600000, fullChunksForFirstJan)).toStrictEqual(
+      "1546365600000"
+    );
   });
 
-  it("Should create viable chunks object from complete hour", () => {
-    expect(chunksFromFiles(files1)).toStrictEqual({
-      1561096800000: {
-        chunkSize: 1000 * 60 * 60 * 6,
-        status: "unpacked",
-        unpackedFiles: files1,
-        complete: true,
-      },
-    });
+  it("can find the correct chunk, when time is somewhere in chunk", () => {
+    expect(chunkForTime(1546365900000, fullChunksForFirstJan)).toStrictEqual(
+      "1546365600000"
+    );
+  });
+});
+
+describe(makeChunks, () => {
+  it("can generate correct default static chunks for 2019-01-01", () => {
+    expect(makeChunks(1546351200000)).toStrictEqual(fullChunksForFirstJan);
   });
 
-  it("Should create viable chunks object from incomplete hour", () => {
-    expect(chunksFromFiles(files2)).toStrictEqual({
-      1561140000000: {
-        chunkSize: 1000 * 60 * 60 * 6,
-        status: "unpacked",
-        unpackedFiles: files2,
-        complete: false,
-      },
-    });
+  const chunksWithPreviousData = {
+    "1546214400000": {
+      chunkSize: 21600000,
+      status: "loaded",
+      unpackedFiles: [],
+    },
+  };
+
+  const chunksWithPreviousDataIntact = {
+    ...fullChunksForFirstJan,
+  };
+  chunksWithPreviousDataIntact["1546214400000"] =
+    chunksWithPreviousData["1546214400000"];
+
+  it("can generate correct default static chunks for 2019-01-01, with previous data present", () => {
+    expect(makeChunks(1546351200000, chunksWithPreviousData)).toStrictEqual(
+      chunksWithPreviousDataIntact
+    );
   });
 
-  it("Should create viable chunks object with mixed sizes", () => {
-    expect(chunksFromFiles([...files1, ...files2])).toStrictEqual({
-      1561096800000: {
-        chunkSize: 1000 * 60 * 60 * 6,
-        status: "unpacked",
-        unpackedFiles: files1,
-        complete: true,
+  it("can generate correct default static chunks with qued hours", () => {
+    const last = 1546473600000;
+    const chunksWithLastQued = {
+      ...fullChunksForFirstJan,
+      ["" + last]: {
+        ...fullChunksForFirstJan["" + last],
+        status: "qued",
       },
-      1561140000000: {
-        chunkSize: 1000 * 60 * 60 * 6,
+    };
+    expect(makeChunks(1546351200000, {}, [last])).toStrictEqual(
+      chunksWithLastQued
+    );
+  });
+
+  it("can add cached/downloaded files into the correct chunk", () => {
+    const chunksWithFile = {
+      ...fullChunksForFirstJan,
+      ["1546344000000"]: {
+        ...fullChunksForFirstJan["1546344000000"],
         status: "unpacked",
-        unpackedFiles: files2,
-        complete: false,
+        unpackedFiles: [
+          "/path/to/cache/radar_1901011335.png",
+          "/path/to/cache/radar_1901011340.png",
+        ],
       },
-    });
+    };
+    expect(
+      makeChunks(
+        1546351200000,
+        {},
+        [],
+        [
+          "/path/to/cache/radar_1901011335.png",
+          "/path/to/cache/radar_1901011340.png",
+        ]
+      )
+    ).toStrictEqual(chunksWithFile);
   });
 });
