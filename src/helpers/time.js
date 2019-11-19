@@ -38,13 +38,24 @@ export function hourRangeFrom(
   return range;
 }
 
-/** @function beginningOfHour
- * @param {Date} date - Date object representing the time we will find an hour for
+/**
+ * @param {Date||Number} date - Date/stamp representing the time we will find an hour for
  * @return {number} timestamp for that dates begining hour
  */
-// TODO: fix spelling of "beginning"
+export function beginningOfDay(d = new Date()) {
+  const date = new Date(beginningOfHour(d));
+
+  date.setUTCHours(0);
+
+  return date.getTime();
+}
+
+/** @function beginningOfHour
+ * @param {Date||Number} date - Date/stamp representing the time we will find an hour for
+ * @return {number} timestamp for that dates begining hour
+ */
 export function beginningOfHour(d = new Date()) {
-  const date = new Date(d.getTime());
+  const date = new Date(d);
 
   date.setUTCMinutes(0);
   date.setUTCSeconds(0);
