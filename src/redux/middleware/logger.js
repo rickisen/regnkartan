@@ -2,13 +2,16 @@
 import { generateDateCode } from "../../helpers";
 import { SELECT_FILE } from "../modules/timeSelection";
 import { UNPACKING_FILE_SUCCESS } from "../modules/rainRadar";
+import { REQ_PROGRESS } from "../modules/watchedRequests";
+import { diff } from "deep-object-diff";
 
-let oldStringifiedDisplayChunks = "";
+let oldDisplayChunks = "";
 /**
  * @param {Object} store
+ * @param {Boolean} displayDiff
  * @return {void}
  */
-function logChunksOverview(store) {
+function logChunksOverview(store, displayDiff = true) {
   const {
     rainRadar: { chunks },
   } = store.getState();
@@ -28,30 +31,44 @@ function logChunksOverview(store) {
     }),
     {}
   );
-  const stringifiedChunks = JSON.stringify(displayChunks);
-  if (stringifiedChunks !== oldStringifiedDisplayChunks) {
-    console.log("chunks", displayChunks);
+  const diffed = diff(displayChunks, oldDisplayChunks);
+  if (Object.keys(diffed).length !== 0) {
+    console.log("chunks", displayDiff ? diffed : displayChunks);
   }
-  oldStringifiedDisplayChunks = stringifiedChunks;
+  oldDisplayChunks = displayChunks;
 }
 
-let oldStringifiedWatchedRequests = "";
+let oldDisplayReqs = "";
 /**
  * @param {Object} store
+ * @param {Boolean} displayDiff
  * @return {void}
  */
-function logWatchedRequestsOverview(store) {
+function logWatchedRequestsOverview(store, displayDiff = true) {
   const { watchedRequests } = store.getState();
-  const stringifiedWatchedRequests = JSON.stringify(watchedRequests);
 
-  if (stringifiedWatchedRequests !== oldStringifiedWatchedRequests) {
-    console.log("watchedRequests", watchedRequests);
+  const displayReqs = Object.keys(watchedRequests).reduce(
+    (acc, next) => ({
+      ...acc,
+      ...{
+        [next]: {
+          ...watchedRequests[next],
+          progress: "ignored",
+        },
+      },
+    }),
+    {}
+  );
+
+  const diffed = diff(oldDisplayReqs, displayReqs);
+  if (Object.keys(diffed).length !== 0) {
+    console.log("watchedRequests: ", displayDiff ? diffed : displayReqs);
   }
 
-  oldStringifiedWatchedRequests = stringifiedWatchedRequests;
+  oldDisplayReqs = displayReqs;
 }
 
-const ignoreActions = [SELECT_FILE, UNPACKING_FILE_SUCCESS];
+const ignoreActions = [SELECT_FILE, UNPACKING_FILE_SUCCESS, REQ_PROGRESS];
 /**
  * @param {Object} action
  * @param {Boolean} detailed
@@ -60,18 +77,24 @@ const ignoreActions = [SELECT_FILE, UNPACKING_FILE_SUCCESS];
 function logAction(action, detailed = false) {
   if (!ignoreActions.includes(action.type)) {
     console.group(action.type);
-  }
-  if (detailed) {
-    console.info("Keys: ", Object.keys(action));
-  }
-  if (!ignoreActions.includes(action.type)) {
-    console.groupEnd();
+    if (detailed) {
+      console.info("Keys: ", Object.keys(action));
+    }
   }
 }
 
 export const logger = store => next => action => {
-  logAction(action, false);
-  logChunksOverview(store);
-  logWatchedRequestsOverview(store);
-  return next(action);
+  const ret = next(action);
+
+  if (!ignoreActions.includes(action.type)) {
+    setTimeout(() => {
+      logAction(action);
+      logChunksOverview(store);
+      logWatchedRequestsOverview(store);
+      console.groupEnd();
+      console.log("====================");
+    }, 0);
+  }
+
+  return ret;
 };
