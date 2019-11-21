@@ -1,7 +1,6 @@
 import {
   incrementsOfSixHours,
   generateDateCode,
-  beginningOfHour,
   beginningOfDay,
   timeFromFilePath,
 } from "../../../helpers";
@@ -66,9 +65,10 @@ export function makeChunks(
  * @param {number} time
  * @return {string} url
  */
-export function apiUrl(time) {
+export function apiUrl(time, latest = false) {
   const dateCode = generateDateCode(incrementsOfSixHours(time), true);
-  return `https://qwert.fra1.digitaloceanspaces.com/radar_${dateCode}.pack`;
+  const base = "https://qwert.fra1.digitaloceanspaces.com";
+  return latest ? `${base}/latest.pack` : `${base}/radar_${dateCode}.pack`;
 }
 
 /**

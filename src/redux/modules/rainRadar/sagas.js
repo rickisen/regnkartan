@@ -2,10 +2,9 @@ import { call, put, select, fork } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
-import { beginningOfHour, timeFromFilePath } from "../../../helpers";
+import { incrementsOfSixHours, timeFromFilePath } from "../../../helpers";
 import { REQ } from "../watchedRequests";
 import { apiUrl, makeChunks } from "./helpers.js";
-import { SELECT_HOUR } from "../timeSelection";
 import * as T from "./types";
 
 export function* scanCachedFiles() {
@@ -101,7 +100,7 @@ export function* fetchQued() {
  * @param {object} Chunk - Qued 'chunk' object that implements chunkSize
  * @param {number} time - key for the chunk
  */
-export function* fetchChunk({ chunkSize }, time) {
+export function* fetchChunk(chunk, time) {
   if (!time || typeof time !== "number") {
     console.error(
       "fetch chunk needs a valid chunk with a time prop got: ",
@@ -110,7 +109,7 @@ export function* fetchChunk({ chunkSize }, time) {
     return;
   }
 
-  const url = apiUrl(time, chunkSize);
+  const url = apiUrl(time);
 
   yield put({ type: T.FETCH_CHUNK, time, url });
   yield put({
@@ -159,47 +158,36 @@ export function* queRequestedHours() {
   yield put({ type: T.REGISTER_CHUNKS, chunks: newChunks });
 }
 
-// TODO: rewrite this to work with newer s3 api
 export function* refreshLatest() {
-  // change the size of the last chunk to be at the begining of its last image hour.
-  try {
-    const chunks = yield select(({ rainRadar: { chunks } }) => chunks);
-    const keys = Object.keys(chunks).sort();
-    const lastChunkKey = keys[keys.length - 1];
-    const lastChunk = chunks[lastChunkKey];
-    if (
-      !lastChunk.unpackedFiles ||
-      lastChunk.unpackedFiles.length === 0 ||
-      lastChunk.complete === false
-    ) {
-      yield put({ type: T.RESET_CHUNK_STATUS, time: lastChunkKey });
+  const url = apiUrl(0, true);
+  const time = incrementsOfSixHours();
+
+  yield put({
+    type: REQ,
+    url,
+    successSaga: function*(data) {
+      yield put({ type: T.FETCH_CHUNK_SUCCESS, url, time });
+      yield put({ type: T.UNPACKING_CHUNK, time });
+      try {
+        yield call(unpack, data, time, [
+          T.FETCH_CHUNK_FAIL,
+          T.FETCH_CHUNK_SUCCESS,
+          T.UNPACKING_CHUNK,
+          T.UNPACKING_CHUNK_FAIL,
+          T.UNPACKING_CHUNK_SUCCESS,
+          T.UNPACKING_FILE_FAIL,
+          T.UNPACKING_FILE_SUCCESS,
+        ]);
+      } catch (e) {
+        console.warn("Error occured when unpacking chunk files", e, time);
+        yield put({ type: T.UNPACKING_CHUNK_FAIL, error: e, time });
+        return;
+      }
+    },
+    failSaga: function*(data, error) {
+      yield put({ type: T.FETCH_CHUNK_FAIL, url, error, time });
+      console.warn("Error occured when fetching latest pack", time, url, data);
       return;
-    }
-
-    const lastFileName = lastChunk.unpackedFiles.sort()[
-      lastChunk.unpackedFiles.length - 1
-    ];
-    const lastFileStamp = timeFromFilePath(lastFileName);
-    const beginingOfHourOfLastFile = beginningOfHour(new Date(lastFileStamp));
-    const lastChunksNewSize = beginingOfHourOfLastFile - parseInt(lastChunkKey);
-
-    const newChunks = {
-      ...chunks,
-      [lastChunkKey]: {
-        ...lastChunk,
-        chunkSize: lastChunksNewSize,
-      },
-    };
-
-    yield put({ type: T.REGISTER_CHUNKS, chunks: newChunks });
-    // add a new requestedHour (this hour)
-
-    yield put({ type: SELECT_HOUR, hourStamp: beginingOfHourOfLastFile });
-  } catch (e) {
-    console.warn(
-      "Something went wrong when trying to figure out where to refresh from"
-    );
-    yield put({ type: T.REFRESH_LATEST_FAIL });
-    return;
-  }
+    },
+  });
 }

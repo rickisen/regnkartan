@@ -1,9 +1,9 @@
 import { beginningOfHour } from "./time.js";
 /** incrementsOfSixHours - round hour to earliest increment of six hours starting at 00:00
- * @param {number} time - number to be scaled
+ * @param {number} time - hour to be scaled
  * @return {nubmer} closest increment
  */
-export function incrementsOfSixHours(time) {
+export function incrementsOfSixHours(time = new Date()) {
   const d = new Date(time);
   d.setUTCHours(0);
   const beginningOfDay = beginningOfHour(d);
