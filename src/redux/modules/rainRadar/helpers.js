@@ -30,16 +30,10 @@ export function makeChunks(
     dayAfterTomorrow,
     1000 * 60 * 60 * 24
   );
-  const latest = {
-    chunkSize: 1000 * 60 * 60,
-    status: "qued",
-    unpackedFiles: [],
-  };
 
   const newChunks = {
     ...chunksForYesterday,
     ...chunksForToday,
-    ...{ ["" + beginningOfHour(time)]: latest },
     ...chunksForTomorrow,
     ...chunksForDayAfterTomorrow,
     ...chunks,
@@ -60,7 +54,7 @@ export function makeChunks(
   // Que requestedHours
   for (const hour of requestedHours) {
     const key = chunkForTime(hour, newChunks);
-    if (newChunks[key].status === "on-hold") {
+    if (key && newChunks[key].status === "on-hold") {
       newChunks[key].status = "qued";
     }
   }
