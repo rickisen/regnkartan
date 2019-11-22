@@ -161,7 +161,6 @@ function* pollOutdatedReqs() {
       failSaga,
     });
   }
-  console.log("\n\n\n outdatedUrls", outdatedUrls);
 
   yield delay(1000 * 60);
 }
