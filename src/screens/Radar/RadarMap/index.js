@@ -99,8 +99,13 @@ const styles = StyleSheet.create({
 
 // Also gets a navigation prop
 function RadarMap() {
-  const mapRef = useReZoomOnExtendedData();
-  const onRegionChangeComplete = useBounceBackMap(mapRef);
+  //TODO: Find fix for Android crash on adding any markers
+  let mapRef = null;
+  let onRegionChangeComplete = () => {};
+  if (Platform.OS === "ios") {
+    mapRef = useReZoomOnExtendedData();
+    onRegionChangeComplete = useBounceBackMap(mapRef);
+  }
   const [marker, handlePress, handleLongPress] = useMarker();
   const locationGranted = useSelector(selectLocationGranted);
   const [strikes, stamp] = useSelector(selectStrikesAndStamp);
