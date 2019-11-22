@@ -1,6 +1,6 @@
 import { PropTypes } from "prop-types";
 import { eventChannel, END } from "redux-saga";
-import { call, put, take } from "redux-saga/effects";
+import { call, put, take, race, select, delay } from "redux-saga/effects";
 
 /** ACTION TYPES **/
 export const NAME = "regnkartan/smhi/watchedRequests";
@@ -8,6 +8,8 @@ export const REQ = `${NAME}/REQ`;
 export const REQ_FAIL = `${NAME}/REQ_FAIL`;
 export const REQ_PROGRESS = `${NAME}/REQ_PROGRESS`;
 export const REQ_SUCCESS = `${NAME}/REQ_SUCCESS`;
+export const START_POLLING = `${NAME}/START_POLLING`;
+export const STOP_POLLING = `${NAME}/STOP_POLLING`;
 
 /** SAGAS **/
 export function* req({
@@ -22,7 +24,11 @@ export function* req({
   try {
     while (true) {
       update = yield take(chan);
-      yield put(update);
+      yield put(
+        update.type === REQ_SUCCESS
+          ? { ...update, data: null, successSaga, failSaga } // data might be too big for redux..
+          : update
+      );
     }
   } catch (e) {
     console.warn("Error occurred when requesting a url", e);
@@ -116,6 +122,56 @@ function reqChannel(url, responseType = "text", method = "GET") {
   });
 }
 
+function* pollOutdatedReqs() {
+  const watchedRequests = yield select(
+    ({ watchedRequests }) => watchedRequests
+  );
+  const outdatedUrls = Object.keys(watchedRequests).filter(url => {
+    let ret = false;
+    try {
+      const {
+        cacheStatus: { cacheControl, lastRequested },
+      } = watchedRequests[url];
+      // const modified = new Date(lastModified);
+      const requested = new Date(lastRequested);
+      if (cacheControl.includes("max-age")) {
+        const cacheControlParsed =
+          parseInt(
+            [...cacheControl].filter(c => !isNaN(parseInt(c))).join("")
+          ) * 1000;
+        if (cacheControlParsed > 0) {
+          const outdatedAt = requested.getTime() + cacheControlParsed; // should technically check modified by
+          if (!isNaN(outdatedAt) && !isNaN(requested.getTime())) {
+            ret = Date.now() >= outdatedAt;
+          }
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+    return ret;
+  });
+
+  for (const url of outdatedUrls) {
+    const { successSaga, failSaga } = watchedRequests[url];
+    yield put({
+      type: REQ,
+      url,
+      successSaga,
+      failSaga,
+    });
+  }
+  console.log("\n\n\n outdatedUrls", outdatedUrls);
+
+  yield delay(1000 * 60);
+}
+
+export function* pollTaskWatcher() {
+  while (true) {
+    yield race([call(pollOutdatedReqs), take(STOP_POLLING)]);
+  }
+}
+
 /** PropTypes **/
 export const propTypes = PropTypes.shape({
   [PropTypes.string]: PropTypes.shape({
@@ -175,6 +231,8 @@ export default function reducer(state = initialState, action) {
           status: null,
           cacheStatus: null,
           error: null,
+          successSaga: function*() {},
+          failSaga: function*() {},
         },
       };
     case REQ_PROGRESS:
@@ -197,6 +255,8 @@ export default function reducer(state = initialState, action) {
           readyState: action.readyState,
           status: action.status,
           cacheStatus: action.cacheStatus,
+          successSaga: action.successSaga,
+          failSaga: action.failSaga,
         },
       };
     case REQ_FAIL:

@@ -7,7 +7,12 @@ import {
 } from "../modules/permissions";
 import { SELECT_HOUR } from "../modules/timeSelection";
 import { fetchLightningIfNeeded } from "../modules/lightning";
-import { REQ, req } from "../modules/watchedRequests";
+import {
+  REQ,
+  req,
+  pollTaskWatcher,
+  START_POLLING,
+} from "../modules/watchedRequests";
 import {
   REFRESH_LATEST,
   CLEAR_CACHE,
@@ -21,6 +26,7 @@ import {
   queRequestedHours,
 } from "../modules/rainRadar";
 
+// TODO: Re-evaluate this design for root saga (performance)
 export default function* rootSaga() {
   yield takeEvery(REGISTER_CHUNKS, fetchQued);
   yield takeEvery(CLEAR_CACHE, clearCache);
@@ -33,6 +39,7 @@ export default function* rootSaga() {
   yield takeEvery(LOCATION_GRANTED, getLocation);
   yield takeEvery(SET_LAT_LON, fetchPoint);
   yield takeEvery(REQ, req);
+  yield takeEvery(START_POLLING, pollTaskWatcher);
   yield call(Initialize);
 }
 
@@ -43,5 +50,6 @@ function* Initialize() {
   });
   yield call(scanCachedFiles);
   yield call(assertLocationPermission);
+  yield put({ type: START_POLLING });
   yield put({ type: REFRESH_LATEST });
 }
