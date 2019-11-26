@@ -14,13 +14,14 @@ const useAnimation = ({ percent, duration }) => {
       toValue: percent,
       duration,
       useNativeDriver: true,
+      isInteraction: false,
     }).start();
   }, [percent]);
 
   return animation;
 };
 
-function ProgressLine({ percent }) {
+function ProgressLine({ percent, color, height, style }) {
   const [width, setWidth] = useState(300);
   const onLayout = ({
     nativeEvent: {
@@ -35,11 +36,11 @@ function ProgressLine({ percent }) {
   });
 
   return (
-    <View onLayout={onLayout} style={styles.container}>
+    <View onLayout={onLayout} style={[styles.container, style]}>
       <Animated.View
         style={{
-          backgroundColor: "rgb(50,80,120)",
-          height: 1,
+          backgroundColor: color,
+          height,
           width: 2,
           transform: [
             {
@@ -61,9 +62,13 @@ function ProgressLine({ percent }) {
 
 ProgressLine.propTypes = {
   percent: PropTypes.number,
+  height: PropTypes.number,
+  color: PropTypes.string,
 };
 ProgressLine.defaultProps = {
   percent: 0,
+  color: "rgb(50,80,120)",
+  height: 1,
 };
 
 export default memo(ProgressLine);
