@@ -22,12 +22,21 @@ export function makeChunks(
   const tomorrow = day + 1000 * 60 * 60 * 24;
   const dayAfterTomorrow = day + 1000 * 60 * 60 * 24 * 2;
 
-  const chunksForYesterday = generateChunksForDay(yesterday);
-  const chunksForToday = generateChunksForDay(day);
-  const chunksForTomorrow = generateChunksForDay(tomorrow, 1000 * 60 * 60 * 24);
+  const chunksForYesterday = generateChunksForDay(
+    yesterday,
+    1000 * 60 * 60 * 6,
+    "qued"
+  );
+  const chunksForToday = generateChunksForDay(day, 1000 * 60 * 60 * 6, "qued");
+  const chunksForTomorrow = generateChunksForDay(
+    tomorrow,
+    1000 * 60 * 60 * 24,
+    "qued"
+  );
   const chunksForDayAfterTomorrow = generateChunksForDay(
     dayAfterTomorrow,
-    1000 * 60 * 60 * 24
+    1000 * 60 * 60 * 24,
+    "qued"
   );
 
   const newChunks = {
@@ -93,7 +102,8 @@ export function chunkForTime(time, chunks = {}) {
  */
 export function generateChunksForDay(
   startOfDay,
-  chunkSize = 1000 * 60 * 60 * 6
+  chunkSize = 1000 * 60 * 60 * 6,
+  status = "on-hold"
 ) {
   let chunks = {};
   let iter = startOfDay;
@@ -101,7 +111,7 @@ export function generateChunksForDay(
   while (iter < end) {
     chunks["" + iter] = {
       chunkSize,
-      status: "on-hold",
+      status,
       unpackedFiles: [],
     };
     iter += chunkSize;
