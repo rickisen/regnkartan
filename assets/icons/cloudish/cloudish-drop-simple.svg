@@ -1,0 +1,9 @@
+<svg version="1.1" viewBox="0 0 375 45" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="linearGradient1834" x1="-97.5" x2="-97.5" y1="-130.67" y2="147.67" gradientTransform="rotate(-45 61.895 -328.53)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#65C8D6" offset="0"/>
+      <stop stop-color="#2676B0" offset="1"/>
+    </linearGradient>
+  </defs>
+  <path id="drop" d="m0 22.5c-2e-5-12.426 10.074-22.5 22.5-22.5l330 .00014c12.426 0 22.5 10.074 22.5 22.5s-10.074 22.5-22.5 22.5l-330-.00014c-12.426 0-22.5-10.074-22.5-22.5z" fill="url(#linearGradient1834)"/>
+</svg>
