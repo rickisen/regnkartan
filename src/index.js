@@ -1,20 +1,19 @@
 import React from "react";
 import { Provider } from "react-redux";
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
+import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import createAppStore from "./redux"; // pun intended
 
 import Radar from "./screens/Radar";
-import About from "./screens/About";
+import Loading from "./screens/Loading";
 
 const RootNavigator = createAppContainer(
-  createStackNavigator(
+  createSwitchNavigator(
     {
-      Home: Radar,
-      About: About,
+      Loading,
+      Radar,
     },
     {
-      initialRouteName: "Home",
+      initialRouteName: "Loading",
     }
   )
 );
