@@ -130,7 +130,7 @@ export default class BottomSheet extends Component {
               intensity={80}
               style={[
                 StyleSheet.absoluteFillObject,
-                { margin: 10, borderRadius: 10, backgroundColor: "#fafafa" },
+                { borderRadius: 10, backgroundColor: "#fafafa" },
               ]}
             >
               <PanGestureHandler
