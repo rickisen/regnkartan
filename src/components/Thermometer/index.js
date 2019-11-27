@@ -20,7 +20,8 @@ function useCropAnimation({ degrees, duration }) {
     Animated.timing(offset, {
       toValue: d10 - 100,
       duration,
-      useNativeDriver: true,
+      useNativeDriver: false,
+      isInteraction: false,
     }).start();
   }, [d10]);
 
