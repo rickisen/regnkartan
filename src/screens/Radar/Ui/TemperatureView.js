@@ -23,6 +23,10 @@ function TemperatureView() {
   const { temperature, wetBulb } = useSelector(selectTemperature);
   const showFluid = typeof temperature === "number";
 
+  if (!showFluid) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <Thermometer degrees={temperature} showFluid={showFluid} />

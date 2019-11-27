@@ -23,6 +23,10 @@ function WindView() {
   const { degrees, speed, gust } = useSelector(selectWindDirection);
   const disabled = typeof degrees !== "number";
 
+  if (disabled) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <WindDirection size={75} degrees={degrees} disabled={disabled} />

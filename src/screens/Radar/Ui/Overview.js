@@ -17,6 +17,18 @@ const styles = StyleSheet.create({
   text: {
     paddingHorizontal: 10,
   },
+  errorTopic: {
+    fontSize: 20,
+    margin: 10,
+    color: "#333",
+    textAlign: "center",
+  },
+  errorPara: {
+    fontSize: 16,
+    margin: 10,
+    color: "#666",
+    textAlign: "center",
+  },
 });
 
 const Wsymb2Desc = [
@@ -70,6 +82,18 @@ function Overview() {
     (cloudCoverage == undefined && cloudCoverageMean === undefined)
   ) {
     disabled = true;
+  }
+
+  if (disabled) {
+    return (
+      <View>
+        <Text style={styles.errorTopic}>Extended Data Not Available</Text>
+        <Text style={styles.errorPara}>
+          SMHI only offers historical point based wheather data for a limited
+          time.
+        </Text>
+      </View>
+    );
   }
 
   return (
