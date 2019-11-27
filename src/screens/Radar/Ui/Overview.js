@@ -89,7 +89,7 @@ function Overview() {
       <View>
         <Text style={styles.errorTopic}>Extended Data Not Available</Text>
         <Text style={styles.errorPara}>
-          SMHI only offers historical point based wheather data for a limited
+          SMHI only offers historical point based weather data for a limited
           time.
         </Text>
       </View>
