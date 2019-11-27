@@ -6,9 +6,11 @@ import { Svg, Path, Text, G, Line } from "react-native-svg";
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 function animationListener(animation) {
-  this.ref.current.setNativeProps({
-    matrix: [1, 0, 0, 1, 1, animation.value],
-  });
+  if (this.ref && this.ref.current && this.ref.current.setNativeProps) {
+    this.ref.current.setNativeProps({
+      matrix: [1, 0, 0, 1, 1, animation.value],
+    });
+  }
 }
 
 function useCropAnimation({ degrees, duration }) {
