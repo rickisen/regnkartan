@@ -35,10 +35,8 @@ function TemperatureView() {
         {showFluid && (
           <>
             <Text style={styles.text}>{`Temperature: ${temperature}°C`}</Text>
-            {wetBulb ? (
+            {wetBulb && (
               <Text style={styles.text}>{`Wet Bulb: ${wetBulb}°C`}</Text>
-            ) : (
-              <Text style={styles.text}>Unavailable</Text>
             )}
           </>
         )}
