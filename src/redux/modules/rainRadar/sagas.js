@@ -1,4 +1,4 @@
-import { call, put, select, fork } from "redux-saga/effects";
+import { call, put, select, delay, all, take, race } from "redux-saga/effects";
 import * as FileSystem from "expo-file-system";
 
 import unpack from "../../sagas/unpack";
@@ -64,28 +64,56 @@ export function* clearCache({ keepTil }) {
  * qued, designed to be run from a takeAll triggered by REGISTER_CHUNKS
  */
 export function* fetchQued() {
-  const registeredChunks = yield select(({ rainRadar: { chunks } }) => chunks);
+  const chunks = yield select(({ rainRadar: { chunks } }) => chunks);
 
-  const quedChunks = Object.keys(registeredChunks).reduce(
+  const quedChunks = Object.keys(chunks).reduce(
     (acc, chunkKey) =>
-      registeredChunks[chunkKey].status === "qued"
-        ? {
-            ...acc,
-            [chunkKey]: registeredChunks[chunkKey],
-          }
-        : acc,
-    {}
+      chunks[chunkKey].status === "qued" ? [...acc, chunkKey] : acc,
+    []
   );
 
   if (quedChunks.length === 0) {
     return;
   }
 
-  // TODO: Add ability to cancel whilst fetching
-  // TODO: fetch in order?
+  // Following code is written so we dont try to fetch more than 3 chunks at a
+  // time, which should be avoided in most react-native enviorments, at least
+  // when dealing with "big" files.
+
+  // first make a two dimensional array with a maximum of 3 entries on the
+  // first dimension. like so: [["1", "2", "3"], ["4", "5"]]
+  const bunchOfChunks = quedChunks.reduce(
+    (acc, next) => {
+      if (acc[acc.length - 1].length > 2) {
+        acc.push([next]);
+      } else {
+        acc[acc.length - 1].push(next);
+      }
+      return acc;
+    },
+    [[]]
+  );
+
+  // Runs fetchChunk for every "bunch" of chunks, and waits until the whole bunch
+  // is fetched (or failed) until scheduling the next bunch. (or until 10
+  // seconds have passed, in the case of network weirdness happening)
   try {
-    for (var chunkKey in quedChunks) {
-      yield fork(fetchChunk, quedChunks[chunkKey], parseInt(chunkKey));
+    for (var i = 0, len = bunchOfChunks.length; i < len; i++) {
+      const concurrentReqs = bunchOfChunks[i];
+      yield all(
+        concurrentReqs.map(key => call(fetchChunk, chunks[key], parseInt(key)))
+      );
+      if (i !== len - 1) {
+        let count = 0;
+        yield race([
+          delay(10000),
+          take(
+            ({ type }) =>
+              type === (T.FETCH_CHUNK_SUCCESS || T.FETCH_CHUNK_FAIL) &&
+              concurrentReqs.length === ++count
+          ),
+        ]);
+      }
     }
   } catch (e) {
     console.error("Something went wrong when fetching all qued chunks", e);
